@@ -1,8 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import walmartLogo from "../assets/images/walmart.jpg";
+import { Link } from "react-router-dom";
 
 const GenderEnum = z.enum(["Male", "Female"]);
 
@@ -14,7 +16,15 @@ const formSchema = z.object({
   phoneNumber: z
     .string()
     .regex(/^\d{9}$/, "Please enter a valid phone number."),
-  password: z.string().min(8, "Password must be at least 8 characters long."),
+  password: z.string().min(8, "Password must be at least 8 characters long.").refine(
+    (val) => {
+      const hasUpper = /[A-Z]/.test(val);
+      const hasLower = /[a-z]/.test(val);
+      const hasNumber = /[0-9]/.test(val);
+      return hasUpper && hasLower && hasNumber;
+    },
+    "Password must have at least one uppercase letter, one lowercase letter and one number."
+  ),
   date: z.string(),
   month: z.string(),
   year: z.string(),
@@ -44,17 +54,24 @@ const RegisterForm = ({ onSave, isLoading }) => {
       agreeTerms: false,
     },
   });
+
   const agreeTerms = useWatch({
     name: "agreeTerms",
     defaultValue: false,
     control: control,
   });
+
   return (
-    <div className="h-fit w-screen md:max-w-[500px] p-2 md:p-12 md:border rounded-xl">
+    <div className="h-fit w-screen md:max-w-[500px] p-4 md:p-12 md:border rounded-xl">
       <div className=" flex flex-col gap-3 ">
-        <img src={walmartLogo} alt="" className="w-[280px] h-[74px] " />
+        <AspectRatio ratio={16 / 3}>
+          <img src={walmartLogo} alt="" className="w-fit h-fit " />
+        </AspectRatio>
         <h1 className=" text-3xl">Create new account</h1>
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSave)}>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={handleSubmit(onSave)}
+        >
           <h3>Title</h3>
           <div className="flex justify-between">
             <div className="flex gap-1">
@@ -221,7 +238,7 @@ const RegisterForm = ({ onSave, isLoading }) => {
             </span>
           </div>
           <button
-            disabled={isLoading || !agreeTerms}
+            disabled={isLoading}
             type="submit"
             className="bg-[#194A34] text-white p-3 w-full rounded-3xl cursor-pointer transition-colors duration-200 hover:bg-[#1F4F38]"
           >
@@ -232,9 +249,11 @@ const RegisterForm = ({ onSave, isLoading }) => {
             <div className="text-[#1E4E38]">Already have an Account?</div>
             <div className="flex-1 ml-5 border-t border-[#1E4E38]"></div>
           </div>
-          <div class="cursor-pointer border-[1px] text-center p-3 text-[#194A34] border-[#194A34] transition duration-300 ease-in-out transform hover:scale-105 hover:border-[#194A45]">
-            LOG IN
-          </div>
+          <Link to={"/sign-in"}>
+            <div className="cursor-pointer border-[1px] text-center p-3 text-[#194A34] border-[#194A34] transition duration-300 ease-in-out transform hover:scale-105 hover:border-[#194A45]">
+              LOG IN
+            </div>
+          </Link>
         </form>
       </div>
     </div>
