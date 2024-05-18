@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import walmartLogo from "../assets/images/walmart.jpg";
+import walmartLogo from "../assets/images/quickmart.png";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { Link } from "react-router-dom";
 
@@ -19,7 +19,7 @@ const LoginForm = ({ onSave, isLoading }) => {
     resolver: zodResolver(formSchema),
   });
   return (
-    <div className="h-fit w-screen md:max-w-[500px] p-4 md:p-12 md:border rounded-xl">
+    <div className="bg-white h-fit w-screen md:max-w-[500px] p-4 md:p-12 md:border rounded-xl">
       <div className=" flex flex-col gap-3 ">
         <AspectRatio ratio={16 / 3}>
           <img src={walmartLogo} alt="" className="w-fit h-fit " />

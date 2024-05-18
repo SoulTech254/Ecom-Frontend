@@ -1,10 +1,11 @@
-import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import walmartLogo from "../assets/images/walmart.jpg";
+import walmartLogo from "../assets/images/quickmart.png";
 import { Link } from "react-router-dom";
+import { months } from "@/utils/utils";
+import Loader from "@/components/Loader";
 
 const GenderEnum = z.enum(["Male", "Female"]);
 
@@ -16,20 +17,23 @@ const formSchema = z.object({
   phoneNumber: z
     .string()
     .regex(/^\d{9}$/, "Please enter a valid phone number."),
-  password: z.string().min(8, "Password must be at least 8 characters long.").refine(
-    (val) => {
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters long.")
+    .refine((val) => {
       const hasUpper = /[A-Z]/.test(val);
       const hasLower = /[a-z]/.test(val);
       const hasNumber = /[0-9]/.test(val);
       return hasUpper && hasLower && hasNumber;
-    },
-    "Password must have at least one uppercase letter, one lowercase letter and one number."
-  ),
-  date: z.string(),
-  month: z.string(),
-  year: z.string(),
+    }, "Password must have at least one uppercase letter, one lowercase letter, and one number."),
+  date: z.string().optional(),
+  month: z.string().optional(),
+  year: z.string().optional(),
   toReceiveOffers: z.boolean(),
-  agreeTerms: z.boolean(),
+  agreeTerms: z.boolean().refine((value) => value === true, {
+    message: "You must agree to the terms and conditions.",
+    path: ["agreeTerms"],
+  }),
 });
 
 const RegisterForm = ({ onSave, isLoading }) => {
@@ -62,16 +66,13 @@ const RegisterForm = ({ onSave, isLoading }) => {
   });
 
   return (
-    <div className="h-fit w-screen md:max-w-[500px] p-4 md:p-12 md:border rounded-xl">
+    <div className=" h-fit md:max-w-[500px] w-full p-6 md:p-12 md:border rounded-xl bg-white">
       <div className=" flex flex-col gap-3 ">
         <AspectRatio ratio={16 / 3}>
           <img src={walmartLogo} alt="" className="w-fit h-fit " />
         </AspectRatio>
         <h1 className=" text-3xl">Create new account</h1>
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={handleSubmit(onSave)}
-        >
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSave)}>
           <h3>Title</h3>
           <div className="flex justify-between">
             <div className="flex gap-1">
@@ -101,7 +102,7 @@ const RegisterForm = ({ onSave, isLoading }) => {
                 value="Female"
                 className="outline-none focus:outline-none"
               />
-              <label>Miss</label>
+              <label>Ms</label>
             </div>
           </div>
           <input
@@ -173,46 +174,50 @@ const RegisterForm = ({ onSave, isLoading }) => {
           {errors.password && (
             <p className="text-[#E71926]">{errors.password.message}</p>
           )}
-          <div className="flex gap-8">
-            <select
-              {...register("date")}
-              className="outline-none focus:outline-none border border-black w-full"
-            >
-              <option value="" hidden>
-                Day
-              </option>
-              {Array.from({ length: 31 }, (_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  {i + 1}
+          <div className="flex flex-col gap-2">
+            <h3>Date of Birth (optional)</h3>
+            <div className="flex justify-between items-center gap-5">
+              <select
+                {...register("date")}
+                className="outline-none focus:outline-none border border-black w-full py-3"
+              >
+                <option value="" hidden>
+                  Day
                 </option>
-              ))}
-            </select>
-            <select
-              {...register("month")}
-              className="outline-none focus:outline-none border border-black w-full"
-            >
-              <option value="" hidden>
-                Month
-              </option>
-              {Array.from({ length: 12 }, (_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  {i + 1}
+                {Array.from({ length: 31 }, (_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    {i + 1}
+                  </option>
+                ))}
+              </select>
+              <select
+                {...register("month")}
+                className="outline-none focus:outline-none border border-black w-full py-3 "
+              >
+                <option value="" hidden>
+                  Month
                 </option>
-              ))}
-            </select>
-            <select
-              {...register("year")}
-              className="outline-none focus:outline-none border border-black p-3 w-full"
-            >
-              <option value="" hidden>
-                Year
-              </option>
-              {Array.from({ length: 100 }, (_, i) => (
-                <option key={2024 - i} value={2024 - i}>
-                  {2024 - i}
+                {Object.entries(months).map(([monthName, monthNumber]) => (
+                  <option key={monthNumber} value={monthNumber}>
+                    {monthName}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                {...register("year")}
+                className="outline-none focus:outline-none border border-black py-3 w-full"
+              >
+                <option value="" hidden>
+                  Year
                 </option>
-              ))}
-            </select>
+                {Array.from({ length: 100 }, (_, i) => (
+                  <option key={2024 - i} value={2024 - i}>
+                    {2024 - i}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="flex gap-2">
             <input
@@ -225,7 +230,12 @@ const RegisterForm = ({ onSave, isLoading }) => {
             </span>
           </div>
           <div className="flex gap-2">
-            <input {...register("agreeTerms")} type="checkbox" />
+            <div className="flex justify-center items-center gap-1">
+              {errors.agreeTerms && (
+                <span className="text-[#E71926] bold">*</span>
+              )}
+              <input {...register("agreeTerms")} type="checkbox" />
+            </div>
             <span className="ml-2">
               I agree to the{" "}
               <span style={{ color: "#E71926", opacity: "0.91" }}>
@@ -240,9 +250,11 @@ const RegisterForm = ({ onSave, isLoading }) => {
           <button
             disabled={isLoading}
             type="submit"
-            className="bg-[#194A34] text-white p-3 w-full rounded-3xl cursor-pointer transition-colors duration-200 hover:bg-[#1F4F38]"
+            className={`bg-[#194A34] flex justify-center items-center text-white p-3 w-full rounded-3xl transition-colors duration-200 hover:bg-[#1F4F38] ${
+              isLoading ? "opacity-60 cursor-default" : "cursor-pointer "
+            }`}
           >
-            {isLoading ? "Creating Account..." : "Create Account"}
+            {isLoading ? <Loader /> : "Create Account"}
           </button>
           <div className="flex items-center">
             <div className="flex-1 mr-5 border-t border-[#1E4E38]"></div>
