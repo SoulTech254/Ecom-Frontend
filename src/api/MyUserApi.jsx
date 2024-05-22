@@ -12,9 +12,11 @@ export const useCreateMyUser = () => {
       },
       body: JSON.stringify(userFormData),
     });
+    const data = await response.json();
     if (!response.ok) {
-      throw new Error(response.statusText);
+      throw new Error(data.message);
     }
+    return data;
   };
 
   const {
@@ -41,9 +43,11 @@ export const useUpdateUser = () => {
       },
       body: JSON.stringify(userFormData),
     });
+    const data = await response.json();
     if (!response.ok) {
-      throw new Error("Failed to update user");
+      throw new Error(data.message);
     }
+    return data;
   };
   const { mutateAsync: updateUser, isLoading: isUpdatingLoading } = useMutation(
     updateUserRequest,

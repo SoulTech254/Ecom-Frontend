@@ -1,16 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import walmartLogo from "../assets/images/quickmart.png";
+import walmartLogo from "../../assets/images/quickmart.png";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { Link } from "react-router-dom";
+import Loader from "@/components/Loader";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
   password: z.string().min(8, "Password must be at least 8 characters long."),
 });
 
-const LoginForm = ({ onSave, isLoading }) => {
+const LoginForm = ({ onSave, isLoading, onButtonClick }) => {
   const {
     register,
     handleSubmit,
@@ -53,9 +54,11 @@ const LoginForm = ({ onSave, isLoading }) => {
           <button
             disabled={isLoading}
             type="submit"
-            className="bg-[#194A34] text-white p-3 w-full rounded-3xl cursor-pointer transition-colors duration-200 hover:bg-[#1F4F38]"
+            className={`bg-[#194A34] flex justify-center items-center text-white p-3 w-full rounded-3xl transition-colors duration-200 hover:bg-[#1F4F38] ${
+              isLoading ? "opacity-60 cursor-default" : "cursor-pointer "
+            }`}
           >
-            {isLoading ? "Logging in..." : "Continue"}
+            {isLoading ? <Loader /> : "Continue"}
           </button>
           <div className="flex items-center">
             <div className="flex-1 mr-5 border-t border-[#1E4E38]"></div>
@@ -67,6 +70,15 @@ const LoginForm = ({ onSave, isLoading }) => {
               Register
             </div>
           </Link>
+          <div className="flex w-full justify-end">
+            <button
+              type="button"
+              onClick={onButtonClick}
+              className="hover:text-[#194A34] cursor-pointer"
+            >
+              Forgot Password?
+            </button>
+          </div>
         </form>
       </div>
     </div>

@@ -1,11 +1,12 @@
-import RegisterForm from "@/forms/register-form";
+import RegisterForm from "@/forms/authForms/RegisterForm";
 import React, { useState } from "react";
 import { useCreateMyUser, useUpdateUser } from "@/api/MyUserApi";
-import OTPVerificationForm from "@/forms/otpVerification-form";
-import ChangeNumberForm from "@/forms/changeNumber-form";
-import { useVerification } from "@/api/AuthApi";
+import OTPVerificationForm from "@/forms/authForms/OtpVerificationForm";
+import ChangeNumberForm from "@/forms/authForms/UpdateNumberForm";
+import { useResendOtp, useVerification } from "@/api/AuthApi";
 import QuickmartCart from "../assets/images/BG.jpg";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Handles saving user data by refining its date and calling the createUser function.
@@ -18,6 +19,7 @@ const RegistrationPage = () => {
   const { createUser, isLoading, isSuccess } = useCreateMyUser();
   const { verifyPhoneNumber, isVerifying } = useVerification();
   const { updateUser, isUpdating } = useUpdateUser();
+  const { resendOtp } = useResendOtp();
 
   //State
   const [showVerificationForm, setShowVerificationForm] = useState(false);
@@ -25,19 +27,7 @@ const RegistrationPage = () => {
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
-  const styles = {
-    container: {
-      // Default styles for all screen sizes
-    },
-    // Define styles for large screens using a media query
-    "@media (min-width: 768px)": {
-      container: {
-        backgroundImage: `url(${QuickmartCart})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      },
-    },
-  };
+  const navigate = useNavigate()
 
   const handleRegisterSave = async (userData) => {
     const { date, month, year, fName, phoneNumber, ...restUserData } = userData;
@@ -64,14 +54,15 @@ const RegistrationPage = () => {
     }
   };
 
-  const handleVerifySave = async (otp) => {
+  const handleVerifySave = async (data) => {
+    const { otp } = data;
     const verifyData = {
       phoneNumber,
       otp,
     };
     try {
       await verifyPhoneNumber(verifyData);
-      setShowVerificationForm(false);
+      navigate("/")
     } catch (error) {
       toast.error("Failed to Verify phone Number");
     }
@@ -107,6 +98,7 @@ const RegistrationPage = () => {
             setShowUpdateNumberForm(true);
           }}
           onXButtonClick={() => setShowVerificationForm(false)}
+          onResendOtpClick={() => resendOtp({ phoneNumber })}
         />
       ) : showUpdateNumberForm ? (
         <ChangeNumberForm

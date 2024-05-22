@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import walmartLogo from "../assets/images/quickmart.png";
+import walmartLogo from "../../assets/images/quickmart.png";
 import { Link } from "react-router-dom";
 import { months } from "@/utils/utils";
 import Loader from "@/components/Loader";
@@ -45,7 +45,7 @@ const RegisterForm = ({ onSave, isLoading }) => {
   } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      gender: "Male",
+      gender: "",
       email: "",
       fName: "",
       lName: "",
