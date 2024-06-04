@@ -5,6 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 console.log(API_BASE_URL);
 export const useCreateMyUser = () => {
   const createMyUserRequest = async (userFormData) => {
+    console.log(userFormData)
     const response = await fetch(`${API_BASE_URL}/api/v1/auth/sign-up`, {
       method: "POST",
       headers: {

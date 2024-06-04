@@ -27,7 +27,7 @@ const RegistrationPage = () => {
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleRegisterSave = async (userData) => {
     const { date, month, year, fName, phoneNumber, ...restUserData } = userData;
@@ -62,7 +62,7 @@ const RegistrationPage = () => {
     };
     try {
       await verifyPhoneNumber(verifyData);
-      navigate("/")
+      navigate("/sign-in");
     } catch (error) {
       toast.error("Failed to Verify phone Number");
     }

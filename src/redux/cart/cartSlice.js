@@ -1,0 +1,149 @@
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+
+// Initial state
+const initialState = {
+  products: JSON.parse(localStorage.getItem("cartItems")) || [],
+  totalQuantity: 0,
+  totalAmount: 0,
+  status: "idle",
+  error: null,
+};
+
+// Utility function to save cart to local storage
+const saveCartToLocalStorage = (products) => {
+  localStorage.setItem("cartItems", JSON.stringify(products));
+};
+
+// Async thunk for adding product to cart (authenticated users)
+// Async thunk for adding product to cart (authenticated users)
+export const addProductToCart = createAsyncThunk(
+  "cart/addProductToCart",
+  async ({ productID, quantity }, { getState, rejectWithValue }) => {
+    const user = getState().user.user;
+    if (!user) {
+      // User not authenticated, handle the error
+      return rejectWithValue({ error: "User not authenticated" });
+    }
+    const { cart: id } = user;
+    console.log(productID);
+
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/${id}/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ product: productID, quantity: quantity }),
+      }
+    );
+
+    console.log(response);
+
+    if (!response.ok) {
+      throw new Error("Failed to add product to cart");
+    }
+
+    const data = await response.json();
+    console.log(data);
+    return data;
+  }
+);
+
+// Async thunk for merging local cart with backend cart
+export const mergeLocalCart = createAsyncThunk(
+  "cart/mergeLocalCart",
+  async (_, { getState }) => {
+    const user = getState().user.user;
+    console.log(user);
+    const localCartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+    console.log(localCartItems);
+
+    // Create an array of objects with productId and quantity
+    const cartItemsToMerge = localCartItems.map((item) => ({
+      product: item.id,
+      quantity: item.quantity,
+    }));
+
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/merge/${user.cart}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(cartItemsToMerge),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to merge cart");
+    }
+
+    const data = await response.json();
+    return data;
+  }
+);
+
+const cartSlice = createSlice({
+  name: "cart",
+  initialState,
+  reducers: {
+    addToCartLocal: (state, action) => {
+      const item = action.payload;
+      const existingItem = state.products.find(
+        (cartItem) => cartItem.id === item.id
+      );
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        state.products.push({ ...item, quantity: 1 });
+      }
+      saveCartToLocalStorage(state.products);
+      state.totalQuantity += 1;
+      state.totalAmount += parseFloat(item.price);
+    },
+    clearLocalCart: (state) => {
+      state.products = [];
+      localStorage.removeItem("cartItems");
+    },
+    updateCartState: (state, action) => {
+      state.products = action.payload.products;
+      state.totalQuantity = action.payload.totalQuantity;
+      state.totalAmount = action.payload.totalAmount;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(addProductToCart.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(addProductToCart.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.products = action.payload.products;
+        state.totalQuantity = action.payload.totalQuantity;
+        state.totalAmount = action.payload.totalAmount;
+      })
+      .addCase(addProductToCart.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(mergeLocalCart.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(mergeLocalCart.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.products = action.payload.products;
+        state.totalQuantity = action.payload.totalQuantity;
+        state.totalAmount = action.payload.totalAmount;
+        localStorage.removeItem("cartItems");
+      })
+      .addCase(mergeLocalCart.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload.error;
+      });
+  },
+});
+export const { addToCartLocal, clearLocalCart, updateCartState } =
+  cartSlice.actions;
+export default cartSlice.reducer;

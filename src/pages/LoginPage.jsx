@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { saveUser } from "@/redux/user/userSlice";
+import { mergeLocalCart } from "@/redux/cart/cartSlice";
 
 const LoginPage = () => {
   const { login, isLogginIn } = useLogin();
@@ -61,7 +62,9 @@ const LoginPage = () => {
   const handleLoginSave = async (data) => {
     try {
       const response = await login(data);
+      console.log(response);
       dispatch(saveUser(response));
+      dispatch(mergeLocalCart())
       navigate("/");
     } catch (error) {
       console.error("Login failed", error.message);

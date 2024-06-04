@@ -12,7 +12,8 @@ const GenderEnum = z.enum(["Male", "Female"]);
 const formSchema = z.object({
   gender: GenderEnum,
   email: z.string().email("Please enter a valid email address."),
-  fName: z.string().min(1, "First name cannot be empty."),
+  fName: z.string()
+  ,
   lName: z.string().min(1, "Last name cannot be empty."),
   phoneNumber: z
     .string()
