@@ -1,14 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
+const storage = localStorage.getItem("cartItems");
+
 // Initial state
 const initialState = {
-  products: JSON.parse(localStorage.getItem("cartItems")) || [],
+  products: JSON.parse(storage) || [],
   totalQuantity: 0,
   totalAmount: 0,
   status: "idle",
   error: null,
 };
-
 // Utility function to save cart to local storage
 const saveCartToLocalStorage = (products) => {
   localStorage.setItem("cartItems", JSON.stringify(products));
@@ -85,6 +86,37 @@ export const mergeLocalCart = createAsyncThunk(
   }
 );
 
+export const deleteProductFromCart = createAsyncThunk(
+  "cart/deleteProductFromCart",
+  async ({ cartId, productId }, { getState, rejectWithValue }) => {
+    const user = getState().user.user;
+    if (!user) {
+      // User not authenticated, handle the error
+      return rejectWithValue({ error: "User not authenticated" });
+    }
+
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/product/${cartId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ product: productId }),
+      }
+    );
+
+    console.log(productId);
+    if (!response.ok) {
+      throw new Error("Failed to delete product from cart");
+    }
+
+    const data = await response.json();
+    console.log(data);
+    return data;
+  }
+);
+
 const cartSlice = createSlice({
   name: "cart",
   initialState,
@@ -141,9 +173,23 @@ const cartSlice = createSlice({
       .addCase(mergeLocalCart.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload.error;
+      })
+      .addCase(deleteProductFromCart.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(deleteProductFromCart.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.products = action.payload.products;
+        state.totalQuantity = action.payload.totalQuantity;
+        state.totalAmount = action.payload.totalAmount;
+      })
+      .addCase(deleteProductFromCart.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
       });
   },
 });
+
 export const { addToCartLocal, clearLocalCart, updateCartState } =
   cartSlice.actions;
 export default cartSlice.reducer;

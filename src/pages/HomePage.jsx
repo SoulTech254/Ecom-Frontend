@@ -14,7 +14,7 @@ const HomePage = () => {
   console.log(results);
 
   return (
-    <div>
+    <div className="mt-20">
       {results.map((product) => (
         <ProductCard
           key={product._id}

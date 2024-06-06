@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "react-query";
+import { isError, useMutation, useQuery } from "react-query";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -52,7 +52,7 @@ export const useGetCart = (id) => {
     if (!response.ok) {
       throw new Error(data.message);
     }
-    console.log(data)
+    console.log(data);
     return data;
   };
 
@@ -62,4 +62,51 @@ export const useGetCart = (id) => {
   );
 
   return { cart, isCartLoading };
+};
+
+export const useUpdateCart = async (id, productId, quantity) => {
+  const updateCartRequest = async () => {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/${id}/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ product: productId, quantity: quantity }),
+      }
+    );
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+    return data;
+  };
+
+  const {
+    data: cart,
+    isLoading: isCartLoading,
+    isSuccess,
+    error,
+  } = useMutation(updateCartRequest);
+
+  return { cart, isCartLoading, isSuccess, error };
+};
+
+export const useDeleteCartProduct = () => {
+  const deleteProductRequest = async (id, productId) => {
+    const response = await fetch(`${API_BASE_URL}/api/v1/cart/product/${id}`, {
+      method: "DELETE",
+      body: JSON.stringify({ product: productId}),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+    return data;
+  };
+  const { mutateAsync: deleteProduct, isLoading: isDeleting } =
+    useMutation(deleteProductRequest);
+
+  return { deleteProduct, isDeleting };
 };
