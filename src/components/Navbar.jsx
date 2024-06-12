@@ -8,7 +8,7 @@ import Cart from "./Cart";
 const Navbar = () => {
   const { user } = useSelector((state) => state.user);
   return (
-    <div className=" fixed w-full flex items-center gap-10 border-b px-16 my-3 pb-6 pt-3 bg-white  bg">
+    <div className=" fixed w-full flex items-center gap-10 border-b px-16 mb-3 pb-6 pt-3 bg-white  bg">
       <Link to={"/"} className="w-[20%]">
         <img src={Logo} alt="quickmart Logo" />
       </Link>

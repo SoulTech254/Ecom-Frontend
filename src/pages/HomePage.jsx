@@ -1,4 +1,5 @@
 import { useGetProducts } from "@/api/ProductApi";
+import MapComponent from "@/components/Map";
 import ProductCard from "@/components/ProductCard";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -15,6 +16,7 @@ const HomePage = () => {
 
   return (
     <div className="mt-20">
+      <MapComponent />
       {results.map((product) => (
         <ProductCard
           key={product._id}

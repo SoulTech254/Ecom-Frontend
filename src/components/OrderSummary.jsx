@@ -5,7 +5,7 @@ import visa from "../assets/Visa.jpg";
 
 const OrderSummary = ({ subtotal, savings, shippingFee }) => {
   return (
-    <div className="mt-8 bg-white p-8 w-[400px] border rounded-lg">
+    <div className=" bg-white p-8 w-[400px] border rounded-lg">
       <h2 className="font-bold mb-4 text-2xl">Order Summary</h2>
       <div className="flex justify-between mb-2">
         <span className="text-left">Subtotal</span>

@@ -1,11 +1,3 @@
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import React, { useEffect, useState } from "react";
 import { useGetCart } from "@/api/ProductApi";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,6 +9,8 @@ import {
 } from "@/redux/cart/cartSlice";
 import OrderSummary from "@/components/OrderSummary";
 import { Trash2 } from "lucide-react";
+import Stepper from "@/components/Stepper";
+import { links, steps } from "@/config/cartConfig";
 
 const CartPage = () => {
   const user = useSelector((state) => state.user.user);
@@ -73,27 +67,22 @@ const CartPage = () => {
       });
   };
 
+  const activeStep = 0;
+
   return (
     <div className="mt-20">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Cart</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      <div className="mx-auto ">
+      <Stepper
+        steps={steps}
+        activeStep={activeStep}
+        to={links}
+        heading={"Checkout Process"}
+      />
+      <div className="mx-auto mt-8 ">
         {isCartLoading || updateStatus === "loading" ? (
           <div>Loading...</div>
         ) : (
-          <div className="flex bg-transparent gap-10">
+          <div className="flex bg-transparent gap-10 ">
             <div className="flex-1">
-              <h1 className="text-3xl font-semibold mb-4 w-full">Cart</h1>
               <table className=" w-[100%] border-separate border-spacing-y-2">
                 <thead>
                   <tr className="bg-white">
