@@ -9,8 +9,8 @@ const Cart = () => {
   return (
     <div className="relative">
       <Link to="/cart" className="flex items-center">
-        <ShoppingCart className="mr-1" />
-        <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+        <ShoppingCart size={40} color="#b12e26" strokeWidth={1.75} />
+        <span className="absolute bottom-5 right-0 left-6 bg-[#194A34] text-white rounded-full w-8 h-8 flex items-center justify-center ">
           {totalQuantity}
         </span>
       </Link>

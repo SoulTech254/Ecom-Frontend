@@ -18,6 +18,7 @@ const ProductCard = ({ img, description, price, id, name }) => {
   const handleAddToCart = () => {
     if (user) {
       setIsCartLoading(true);
+      console.log(id);
       dispatch(addProductToCart({ productID: id, quantity: 1 }))
         .unwrap()
         .then((data) => {

@@ -5,7 +5,8 @@ import HomePage from "./pages/HomePage";
 import Navbar from "./components/Navbar";
 import Layout from "./layout/Layout";
 import ProductPage from "./pages/ProductPage";
-import CartPage from "./pages/CartPage";
+import CartPage from "./pages/Cart/CartPage";
+import AddressPage from "./pages/Cart/AddressPage";
 
 const AppRoutes = () => {
   return (
@@ -41,6 +42,14 @@ const AppRoutes = () => {
         element={
           <Layout>
             <CartPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/address"
+        element={
+          <Layout>
+            <AddressPage />
           </Layout>
         }
       />

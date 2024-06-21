@@ -7,10 +7,5 @@
 
 body{
   font: Lato, sans-serif;
-}
-  
-@media (min-width: 1024px) {
-  .lg\:bg-image {
-    background-image: url("./assets/images/BG.jpg");
-  }
+  background-image: linear-gradient(to bottom, #ffffff, #d1d5db);
 }

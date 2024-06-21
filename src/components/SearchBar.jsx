@@ -10,9 +10,16 @@ const SearchBar = ({ onSave }) => {
     resolver: zodResolver(formSchema),
   });
   return (
-    <div className="w-full border rounded-full px-4 py-4">
-      <form className="flex justify-between items-center" onSubmit={handleSubmit(onSave)}>
-        <input className="w-full focus:outline-none" {...register("searchQuery")} type="text" />
+    <div className="w-full border rounded-full px-4 py-4 bg-white">
+      <form
+        className="flex justify-between items-center"
+        onSubmit={handleSubmit(onSave)}
+      >
+        <input
+          className="w-full focus:outline-none"
+          {...register("searchQuery")}
+          type="text"
+        />
         <button type="submit">
           <Search />
         </button>
