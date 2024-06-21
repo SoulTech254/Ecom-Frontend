@@ -1,8 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
+
+
+body{
   font: Lato, sans-serif;
   background-image: linear-gradient(to bottom, #ffffff, #d1d5db);
 }

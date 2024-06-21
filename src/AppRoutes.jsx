@@ -12,7 +12,7 @@ import CheckoutPage from "./pages/Cart/CheckoutPage";
 
 const AppRoutes = () => {
   return (
-    <Routes>
+    <Routes  >
       <Route path="/sign-up" element={<RegistrationPage />} />
       <Route path="/sign-in" element={<LoginPage />} />
       <Route
