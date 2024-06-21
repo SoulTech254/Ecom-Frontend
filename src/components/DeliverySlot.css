@@ -1,0 +1,20 @@
+.delivery-slots {
+  padding: 10px;
+  overflow: hidden; /* Ensures smooth animation overflow handling */
+}
+
+.delivery-slots ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.slot-item {
+  cursor: pointer;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.slot-item:hover {
+  background-color: #f0f0f0;
+}

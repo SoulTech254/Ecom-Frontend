@@ -16,7 +16,6 @@ const HomePage = () => {
 
   return (
     <div className="mt-20">
-      <MapComponent />
       {results.map((product) => (
         <ProductCard
           key={product._id}

@@ -78,7 +78,7 @@ const CartPage = () => {
         heading={"Checkout Process"}
       />
       <div className="mx-auto mt-8 ">
-        {isCartLoading || updateStatus === "loading" ? (
+        {isCartLoading === "loading" ? (
           <div>Loading...</div>
         ) : (
           <div className="flex bg-transparent gap-10 ">
