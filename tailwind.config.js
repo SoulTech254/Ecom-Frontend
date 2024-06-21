@@ -31,6 +31,14 @@ module.exports = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      colors:{
+        primary: "#2e5b47",
+        secondary: "#e61927" ,
+        background: '#d8d9d8',
+      },
+      fontFamily: {
+        'lato': ['Lato', 'sans-serif'],
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
