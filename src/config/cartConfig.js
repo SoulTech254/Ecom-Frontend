@@ -5,4 +5,4 @@ export const steps = [
   { label: "Checkout" },
 ];
 
-export const links = ["/cart", "/address", "/step3", "/step4"];
+export const links = ["/cart", "/address", "/payment", "/checkout"];

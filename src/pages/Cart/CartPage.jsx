@@ -11,6 +11,7 @@ import OrderSummary from "@/components/OrderSummary";
 import { Trash2 } from "lucide-react";
 import Stepper from "@/components/Stepper";
 import { links, steps } from "@/config/cartConfig";
+import { useNavigate } from "react-router-dom";
 
 const CartPage = () => {
   const user = useSelector((state) => state.user.user);
@@ -18,9 +19,11 @@ const CartPage = () => {
   const [updatedCart, setUpdatedCart] = useState({
     products: [],
     totalQuantity: 0,
+    totalSavings:0,
     totalAmount: 0,
   });
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   console.log(updatedCart);
 
   useEffect(() => {
@@ -70,18 +73,18 @@ const CartPage = () => {
   const activeStep = 0;
 
   return (
-    <div className="mt-20">
+    <div className="mt-2">
       <Stepper
         steps={steps}
         activeStep={activeStep}
         to={links}
         heading={"Checkout Process"}
       />
-      <div className="mx-auto mt-8 ">
-        {isCartLoading || updateStatus === "loading" ? (
+      <div className="mx-auto mt-2 flex w-[100%] ">
+        {isCartLoading === "loading" ? (
           <div>Loading...</div>
         ) : (
-          <div className="flex bg-transparent gap-10 ">
+          <div className="flex w-[100%] bg-transparent gap-10 align-center">
             <div className="flex-1">
               <table className=" w-[100%] border-separate border-spacing-y-2">
                 <thead>
@@ -104,7 +107,7 @@ const CartPage = () => {
                     <tr key={item.product._id} className="bg-white">
                       <td className="py-2 px-4 ">
                         <img
-                          className="h-[100px] w-[100px] object-cover"
+                          className="h-[70px] w-[70px] object-cover"
                           src={item.product.images[0]}
                           alt="product image"
                         />
@@ -132,6 +135,8 @@ const CartPage = () => {
                           Ksh {(item.quantity * item.product.price).toFixed(2)}
                         </span>
                         <Trash2
+                          color="#B12E26"
+                          size={16}
                           onClick={() => handleDeleteProduct(item.product._id)}
                           className="cursor-pointer absolute bottom-0 right-0 mb-2 mr-2"
                         />
@@ -144,9 +149,17 @@ const CartPage = () => {
             <div className="">
               <OrderSummary
                 subtotal={updatedCart.totalAmount}
-                savings={50}
+                savings={updatedCart.totalSavings}
                 shippingFee={100}
               />
+              <div className="flex justify-center">
+                <button
+                  onClick={()=>navigate("/address")}
+                  className="bg-[#194A34] text-white px-4 py-2 rounded-full mt-4"
+                >
+                  Continue
+                </button>
+              </div>
             </div>
           </div>
         )}

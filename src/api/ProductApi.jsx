@@ -4,20 +4,29 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const useGetProducts = () => {
   const getProductsRequest = async () => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/products`, {
-      method: "GET",
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/products`, {
+        method: "GET",
+      });
+      const data = await response.json();
+      console.log('Products data:', data);
+      if (!response.ok) {
+        throw new Error(data.message);
+      }
+      return data;
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      throw error;
     }
-    return data;
   };
 
   const { data: products, isLoading: isProductsLoading } = useQuery(
     "products",
     getProductsRequest
   );
+
+  console.log('Products data from useQuery:', products);
+  console.log('Is products loading:', isProductsLoading);
 
   return { products, isProductsLoading };
 };

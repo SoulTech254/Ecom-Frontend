@@ -11,7 +11,7 @@ const Counter = ({ onPlusClick, onMinusClick, itemCount }) => {
       </div>
       <button type="button" onClick={onPlusClick}>
         <Plus />
-      </button>
+      </button> 
     </div>
   );
 };

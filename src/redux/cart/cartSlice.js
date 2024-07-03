@@ -7,6 +7,7 @@ const initialState = {
   products: JSON.parse(storage) || [],
   totalQuantity: 0,
   totalAmount: 0,
+  savings:0,
   status: "idle",
   error: null,
 };
@@ -55,16 +56,18 @@ export const addProductToCart = createAsyncThunk(
 export const mergeLocalCart = createAsyncThunk(
   "cart/mergeLocalCart",
   async (_, { getState }) => {
+    console.log("Starting mergeLocalCart async thunk");
     const user = getState().user.user;
-    console.log(user);
+    console.log("User:", user);
     const localCartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-    console.log(localCartItems);
+    console.log("Local cart items:", localCartItems);
 
     // Create an array of objects with productId and quantity
     const cartItemsToMerge = localCartItems.map((item) => ({
       product: item.id,
       quantity: item.quantity,
     }));
+    console.log("Cart items to merge:", cartItemsToMerge);
 
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/merge/${user.cart}`,
@@ -77,11 +80,14 @@ export const mergeLocalCart = createAsyncThunk(
       }
     );
 
+    console.log("Response:", response);
+
     if (!response.ok) {
       throw new Error("Failed to merge cart");
     }
 
     const data = await response.json();
+    console.log("Data:", data);
     return data;
   }
 );
@@ -134,6 +140,7 @@ const cartSlice = createSlice({
       saveCartToLocalStorage(state.products);
       state.totalQuantity += 1;
       state.totalAmount += parseFloat(item.price);
+      state.savings += parseFloat(item.savings);
     },
     clearLocalCart: (state) => {
       state.products = [];
@@ -141,6 +148,7 @@ const cartSlice = createSlice({
     },
     updateCartState: (state, action) => {
       state.products = action.payload.products;
+      state.savings = action.payload.savings;
       state.totalQuantity = action.payload.totalQuantity;
       state.totalAmount = action.payload.totalAmount;
     },
@@ -153,6 +161,7 @@ const cartSlice = createSlice({
       .addCase(addProductToCart.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.products = action.payload.products;
+        state.savings = action.payload.savings;
         state.totalQuantity = action.payload.totalQuantity;
         state.totalAmount = action.payload.totalAmount;
       })
@@ -166,7 +175,11 @@ const cartSlice = createSlice({
       .addCase(mergeLocalCart.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.products = action.payload.products;
-        state.totalQuantity = action.payload.totalQuantity;
+        state.totalQuantity = state.products.reduce(
+          (acc, curr) => acc + curr.quantity,
+          0
+        );
+        state.savings = action.payload.savings;
         state.totalAmount = action.payload.totalAmount;
         localStorage.removeItem("cartItems");
       })

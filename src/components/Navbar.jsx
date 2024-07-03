@@ -8,35 +8,44 @@ import Cart from "./Cart";
 const Navbar = () => {
   const { user } = useSelector((state) => state.user);
   return (
-<<<<<<< HEAD
-    <div className="flex items-center gap-10 px-12 py-5  bg-white">
-      <Link to={"/"} className="w-[20%] hidden">
-=======
-    <div className=" fixed w-full flex items-center gap-10 border-b px-16 mb-3 pb-6 pt-3 bg-white  bg">
-      <Link to={"/"} className="w-[20%]">
->>>>>>> d28772213a9c6ea847a5ce1d74c6aa901a31e1fc
-        <img src={Logo} alt="quickmart Logo" />
-      </Link>
-      <div className="flex flex-1">
-        <SearchBar />
-      </div>
-      <div className="flex items-center gap-16">
-        <div className="flex gap-2 items-center">
-          <Store color="#b12e26" />
-          <Link to="/">Select store</Link>
+    <div className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 px-16 mb-3 py-3 z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 gap-3 ">
+          {/* Logo */}
+          <Link to="/" className="flex-shrink-0">
+            <img className="h-12" src={Logo} alt="quickmart Logo" />
+          </Link>
+
+          {/* Search Bar */}
+          <div className="flex-1 flex justify-center">
+            <SearchBar />
+          </div>
+
+          {/* Navigation Links */}
+          <div className="flex items-center gap-8">
+            {/* Select Store */}
+            <div className="flex items-center gap-2">
+              <Store color="#b12e26" size="24" />
+              <Link to="/">Select store</Link>
+            </div>
+
+            {/* User Info or Login/Register */}
+            {user ? (
+              <div className="flex items-center gap-2">
+                <CircleUserRound color="#b12e26" size="24" />
+                Hello {user.fName}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <LogInIcon size="24" />
+                <Link to="/">Login & Register</Link>
+              </div>
+            )}
+
+            {/* Cart */}
+            <Cart />
+          </div>
         </div>
-        {user ? (
-          <div className="flex gap-2 items-center">
-            <CircleUserRound color="#b12e26" />
-            Hello {user.fName}
-          </div>
-        ) : (
-          <div className="flex gap-2 items-center">
-            <LogInIcon />
-            <Link to="/">Login & Register</Link>
-          </div>
-        )}
-        <Cart />
       </div>
     </div>
   );

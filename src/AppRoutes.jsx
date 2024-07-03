@@ -7,10 +7,13 @@ import Layout from "./layout/Layout";
 import ProductPage from "./pages/ProductPage";
 import CartPage from "./pages/Cart/CartPage";
 import AddressPage from "./pages/Cart/AddressPage";
+import PaymentPage from "./pages/Cart/PaymentPage";
+import CheckoutPage from "./pages/Cart/CheckoutPage";
+import CheckingPaymentPage from "./pages/Cart/CheckingPaymentPage";
 
 const AppRoutes = () => {
   return (
-    <Routes  >
+    <Routes>
       <Route path="/sign-up" element={<RegistrationPage />} />
       <Route path="/sign-in" element={<LoginPage />} />
       <Route
@@ -50,6 +53,30 @@ const AppRoutes = () => {
         element={
           <Layout>
             <AddressPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/payment"
+        element={
+          <Layout>
+            <PaymentPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/checkout"
+        element={
+          <Layout>
+            <CheckoutPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/checking-payment/:id"
+        element={
+          <Layout>
+            <CheckingPaymentPage />
           </Layout>
         }
       />

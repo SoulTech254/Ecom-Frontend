@@ -3,10 +3,9 @@ import Footer from "@/components/Footer";
 
 const Layout = ({ children }) => {
   return (
-    <div className="flex flex-col min-h-screen bg-background font-lato">
+    <div className="flex flex-col bg-gradient-to-b from-white to-gray-300 min-h-screen font-lato">
       <Navbar />
-      <div className="container flex-1 p-0 mt-3">{children}</div>
-      <Footer />
+      <div className="mt-20 lg:px-20">{children}</div>
     </div>
   );
 };
