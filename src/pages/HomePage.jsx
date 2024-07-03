@@ -15,7 +15,7 @@ const HomePage = () => {
   console.log(results);
 
   return (
-    <div className="flex flex-row gap-1 flex-wrap px-4">
+    <div className="mt-2 flex flex-row gap-1 ">
       {results.map((product) => (
         <ProductCard
           key={product._id}
@@ -26,17 +26,6 @@ const HomePage = () => {
           price={product.price}
         />
       ))}
-       {results.map((product) => (
-        <ProductCard
-          key={product._id}
-          id={product._id}
-          name={product.productName}
-          img={product.images[0]}
-          description={product.description}
-          price={product.price}
-        />
-      ))}
-      
     </div>
   );
 };

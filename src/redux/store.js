@@ -3,18 +3,16 @@ import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import userReducer from "./user/userSlice.js";
 import cartReducer from "./cart/cartSlice.js";
-import orderReducer from "./order/orderSlice.js";
 
 const rootReducer = combineReducers({
   user: userReducer,
   cart: cartReducer,
-  order: orderReducer,
 });
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["user", "cart", "order"],
+  whitelist: ["user", "cart"],
   version: 1,
 };
 

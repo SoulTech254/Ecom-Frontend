@@ -7,8 +7,6 @@ import Layout from "./layout/Layout";
 import ProductPage from "./pages/ProductPage";
 import CartPage from "./pages/Cart/CartPage";
 import AddressPage from "./pages/Cart/AddressPage";
-import PaymentPage from "./pages/Cart/PaymentPage";
-import CheckoutPage from "./pages/Cart/CheckoutPage";
 
 const AppRoutes = () => {
   return (
@@ -52,22 +50,6 @@ const AppRoutes = () => {
         element={
           <Layout>
             <AddressPage />
-          </Layout>
-        }
-      />
-      <Route
-        path="/payment"
-        element={
-          <Layout>
-            <PaymentPage />
-          </Layout>
-        }
-      />
-      <Route
-        path="/checkout"
-        element={
-          <Layout>
-            <CheckoutPage />
           </Layout>
         }
       />
