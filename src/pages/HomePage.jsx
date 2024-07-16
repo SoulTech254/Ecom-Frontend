@@ -2,21 +2,19 @@ import { useGetProducts } from "@/api/ProductApi";
 import MapComponent from "@/components/Map";
 import ProductCard from "@/components/ProductCard";
 import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const HomePage = () => {
-  const { products, isProductsLoading } = useGetProducts();
+  const { selectedBranch } = useSelector((state) => state.branch);
+  const branch = selectedBranch.id;
+  const { products, isProductsLoading } = useGetProducts(branch);
 
   if (isProductsLoading || !products) {
     return <div>Loading...</div>;
   }
-
-  const { results } = products;
-  console.log(results);
-
   return (
     <div className="mt-2 flex flex-row gap-1 ">
-      {results.map((product) => (
+      {products.map((product) => (
         <ProductCard
           key={product._id}
           id={product._id}
@@ -24,6 +22,7 @@ const HomePage = () => {
           img={product.images[0]}
           description={product.description}
           price={product.price}
+          stockLevel={product.stockLevel}
         />
       ))}
     </div>

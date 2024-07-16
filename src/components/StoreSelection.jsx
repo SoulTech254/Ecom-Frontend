@@ -1,56 +1,85 @@
-import React, { useState, useEffect } from "react";
+import * as React from "react";
+import {
+  Check,
+  ChevronDownIcon,
+  ChevronsDown,
+  ChevronsUpDown,
+  StoreIcon,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { useSelector } from "react-redux";
 
-const StoreSelection = ({ onStoreSelect }) => {
-  const [map, setMap] = useState(null);
-  const [selectedStore, setSelectedStore] = useState(null);
+const StoreSelection = ({ branches, onSelectBranch }) => {
+  const [open, setOpen] = React.useState(false);
+  const { selectedBranch: initialSelectedBranch } = useSelector(
+    (state) => state.branch
+  );
+  const [selectedBranch, setSelectedBranch] = React.useState(
+    initialSelectedBranch || null
+  );
 
-  useEffect(() => {
-    // Load the Google Maps API script
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY`;
-    script.onload = () => initializeMap();
-    document.body.appendChild(script);
-  }, []);
-
-  const initializeMap = () => {
-    const mapOptions = {
-      center: { lat: 0, lng: 0 },
-      zoom: 10,
-    };
-    const map = new window.google.maps.Map(
-      document.getElementById("map"),
-      mapOptions
-    );
-    setMap(map);
-
-    // Add click event listener to the map
-    map.addListener("click", (event) => {
-      setSelectedStore({ lat: event.latLng.lat(), lng: event.latLng.lng() });
-    });
-  };
-
-  const handleStoreSelect = () => {
-    // Pass the selected store to the parent component
-    if (selectedStore) {
-      onStoreSelect(selectedStore);
-    } else {
-      alert("Please select a store before proceeding.");
-    }
+  const handleSelect = (branch) => {
+    setSelectedBranch(branch);
+    onSelectBranch(branch); // Pass selected branch to parent component
+    setOpen(false);
   };
 
   return (
-    <div className="flex flex-col items-center">
-      <div
-        id="map"
-        className="w-full h-64 sm:h-80 md:h-96 lg:h-[400px] mb-4"
-      ></div>
-      <button
-        onClick={handleStoreSelect}
-        className="bg-blue-500 text-white px-4 py-2 mt-4 rounded hover:bg-blue-600 transition duration-200"
-      >
-        Select Store
-      </button>
-    </div>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-[130px] hover:text-[#b12e26] justify-between border-none hover:bg-white p-0 "
+        >
+          {selectedBranch ? selectedBranch.label : "Select Branch"}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0">
+        <Command>
+          <CommandInput placeholder="Select Branch" />
+          <CommandList>
+            {branches.length === 0 && (
+              <CommandEmpty>No branches found.</CommandEmpty>
+            )}
+            <CommandGroup>
+              {branches.map((branch) => (
+                <CommandItem
+                  key={branch.value}
+                  value={branch.value}
+                  onSelect={() => handleSelect(branch)}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      selectedBranch && selectedBranch.value === branch.value
+                        ? "opacity-100"
+                        : "opacity-0"
+                    )}
+                  />
+                  <p className="text-sm">{branch.label}</p>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 };
 

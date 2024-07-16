@@ -10,25 +10,50 @@ import { useState } from "react";
 import Loader from "./Loader";
 import { Plus } from "lucide-react";
 
-const ProductCard = ({ img, description, price, id, name }) => {
+const ProductCard = ({ img, description, price, id, name, stockLevel }) => {
   const dispatch = useDispatch(); // Get dispatch function from Redux
   const user = useSelector((state) => state.user.user);
   const [isCartLoading, setIsCartLoading] = useState(false);
+
+  const cart = useSelector((state) => state.cart);
 
   const handleAddToCart = () => {
     if (user) {
       setIsCartLoading(true);
       console.log(id);
-      dispatch(addProductToCart({ productID: id, quantity: 1 }))
-        .unwrap()
-        .then((data) => {
+      console.log(stockLevel);
+
+      // Check if stock level is sufficient
+      if (stockLevel > 0) {
+        // Calculate total quantity already in cart
+        const existingCartItem = cart.products.find((item) => item.id === id);
+        const currentQuantityInCart = existingCartItem
+          ? existingCartItem.quantity
+          : 0;
+
+        // Calculate total quantity after adding
+        const totalQuantityAfterAdding = currentQuantityInCart + 1;
+
+        // Check if total quantity exceeds stock level
+        if (totalQuantityAfterAdding <= stockLevel) {
+          dispatch(addProductToCart({ productID: id, quantity: 1 }))
+            .unwrap()
+            .then((data) => {
+              setIsCartLoading(false);
+            })
+            .catch((error) => {
+              toast.error("Failed to add product to cart.");
+              console.error("Failed to add product to cart:", error);
+              setIsCartLoading(false);
+            });
+        } else {
+          toast.error("Cannot add more than available stock.");
           setIsCartLoading(false);
-        })
-        .catch((error) => {
-          toast.error("Failed to add product to cart.");
-          console.error("Failed to add product to cart:", error);
-          setIsCartLoading(false);
-        });
+        }
+      } else {
+        toast.error("Product is out of stock.");
+        setIsCartLoading(false);
+      }
     } else {
       dispatch(addToCartLocal({ img, price, id, name }));
     }
@@ -45,7 +70,7 @@ const ProductCard = ({ img, description, price, id, name }) => {
               className="w-full h-full object-cover"
             />
           </div>
-          <h2 className="font-medium p-2 text-2xl">${price}</h2>
+          <h2 className="font-medium p-2 text-2xl">Ksh {price}</h2>
           <div className="flex-1 p-2">
             {/*<p className="text-lg font-semibold">{description}</p> */}
             <p className="text-black text-md ">{name}</p>

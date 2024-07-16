@@ -12,6 +12,8 @@ const CheckoutPage = () => {
   const { cart } = user;
   const { deliveryInfo } = useSelector((state) => state.order);
   const { paymentInfo } = useSelector((state) => state.order);
+  const {selectedBranch} = useSelector((state) => state.branch);
+  console.log(selectedBranch)
 
   const { getOrderSummaryData, isLoadingOrderSummary } = useGetOrderSummary();
   const [orderSummary, setOrderSummary] = useState(null);
@@ -34,6 +36,7 @@ const CheckoutPage = () => {
           delivery: deliveryInfo,
           payment: paymentInfo,
           cart: cart,
+          branch: selectedBranch.id,
         };
 
         const orderSummaryData = await getOrderSummaryData(data);

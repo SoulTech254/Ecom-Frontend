@@ -2,40 +2,46 @@ import { isError, useMutation, useQuery } from "react-query";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export const useGetProducts = () => {
+export const useGetProducts = (branchId) => {
   const getProductsRequest = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/products`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/products?branchId=${branchId}`, {
         method: "GET",
       });
       const data = await response.json();
-      console.log('Products data:', data);
+      console.log("Products data:", data);
       if (!response.ok) {
         throw new Error(data.message);
       }
       return data;
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error("Error fetching products:", error);
       throw error;
     }
   };
 
   const { data: products, isLoading: isProductsLoading } = useQuery(
-    "products",
-    getProductsRequest
+    ["productss", branchId],
+    getProductsRequest,
+    {
+      enabled: !!branchId, // Only run the query if branchId is provided
+    }
   );
 
-  console.log('Products data from useQuery:', products);
-  console.log('Is products loading:', isProductsLoading);
+  console.log("Products data from useQuery:", products);
+  console.log("Is products loading:", isProductsLoading);
 
   return { products, isProductsLoading };
 };
 
-export const useGetAProduct = (id) => {
+export const useGetAProduct = (id, branchName) => {
   const getProductsRequest = async () => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/products/${id}`, {
-      method: "GET",
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/products/${id}?branchName=${branchName}`,
+      {
+        method: "GET",
+      }
+    );
     const data = await response.json();
     if (!response.ok) {
       throw new Error(data.message);
@@ -44,7 +50,7 @@ export const useGetAProduct = (id) => {
   };
 
   const { data: product, isLoading: isProductLoading } = useQuery(
-    ["product", id],
+    ["product", id, branchName],
     getProductsRequest
   );
 
@@ -106,7 +112,7 @@ export const useDeleteCartProduct = () => {
   const deleteProductRequest = async (id, productId) => {
     const response = await fetch(`${API_BASE_URL}/api/v1/cart/product/${id}`, {
       method: "DELETE",
-      body: JSON.stringify({ product: productId}),
+      body: JSON.stringify({ product: productId }),
     });
     const data = await response.json();
     if (!response.ok) {

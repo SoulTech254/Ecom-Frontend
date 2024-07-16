@@ -19,7 +19,7 @@ const CartPage = () => {
   const [updatedCart, setUpdatedCart] = useState({
     products: [],
     totalQuantity: 0,
-    totalSavings:0,
+    totalSavings: 0,
     totalAmount: 0,
   });
   const dispatch = useDispatch();
@@ -116,7 +116,6 @@ const CartPage = () => {
                         <div className="capitalize">
                           {item.product.productName}
                         </div>
-                        <div>{item.product.SKU}</div>
                       </td>
                       <td className="py-2 px-4 border-b ">
                         <Counter
@@ -154,7 +153,7 @@ const CartPage = () => {
               />
               <div className="flex justify-center">
                 <button
-                  onClick={()=>navigate("/address")}
+                  onClick={() => navigate("/address")}
                   className="bg-[#194A34] text-white px-4 py-2 rounded-full mt-4"
                 >
                   Continue

@@ -15,25 +15,39 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { saveUser } from "@/redux/user/userSlice";
 import { mergeLocalCart } from "@/redux/cart/cartSlice";
+import StoreBranchModal from "@/components/StoreSelection";
+import { useGetBranches } from "@/api/HomeApi";
+import { setBranch } from "@/redux/branch/branchSlice";
+import { SelectBranchModal } from "@/components/SelectBranchModal";
 
 const LoginPage = () => {
   const { login, isLogginIn } = useLogin();
   const dispatch = useDispatch();
 
-  //API Hooks
+  // API Hooks
   const { verifyPhoneNumber, isVerifying } = useVerification();
   const { checkNumber, isChecking } = useCheckPhoneNumber();
   const { updatePassword, isUpdatingPassword } = useUpdatePassword();
   const { resendOtp } = useResendOtp();
+  const { branches: apiBranches, isLoadingBranches } = useGetBranches();
 
-  //States
+  // States
   const [resetPassword, setResetPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showVerificationForm, setShowVerificationForm] = useState(false);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [showStoreBranchModal, setShowStoreBranchModal] = useState(false); // State to control StoreBranchModal visibility
   const navigate = useNavigate();
+  const [branches, setBranches] = useState([]); // Local state to store branches
 
-  //OnSave Functions
+  useEffect(() => {
+    // Update local state with API branches once they are loaded
+    if (!isLoadingBranches && apiBranches.length > 0) {
+      setBranches(apiBranches);
+    }
+  }, [apiBranches, isLoadingBranches]);
+
+  // OnSave Functions
   const handleResetPasswordSave = async (data) => {
     const { phoneNumber } = data;
     try {
@@ -45,6 +59,7 @@ const LoginPage = () => {
       console.log("Error");
     }
   };
+
   const handleVerificationSave = async (data) => {
     const { otp } = data;
     const verifyData = {
@@ -59,17 +74,19 @@ const LoginPage = () => {
       console.log("Error");
     }
   };
+
   const handleLoginSave = async (data) => {
     try {
       const response = await login(data);
       console.log(response);
       dispatch(saveUser(response));
-      dispatch(mergeLocalCart())
-      navigate("/");
+      dispatch(mergeLocalCart());
+      setShowStoreBranchModal(true); // Show StoreBranchModal after successful login
     } catch (error) {
       console.error("Login failed", error.message);
     }
   };
+
   const handleUpdateSave = async (data) => {
     const password = data.password;
     const updateData = {
@@ -83,6 +100,17 @@ const LoginPage = () => {
     } catch (error) {
       console.log("Error");
     }
+  };
+
+  const handleBranchSave = (branch) => {
+    dispatch(setBranch(branch));
+    setShowStoreBranchModal(false);
+    navigate("/");
+  };
+
+  //modal function
+  const handleClose = () => {
+    setShowStoreBranchModal(false);
   };
   return (
     <div
@@ -115,6 +143,7 @@ const LoginPage = () => {
           onButtonClick={() => setResetPassword(true)}
         />
       )}
+      {showStoreBranchModal && <SelectBranchModal onSave={handleBranchSave} />}
     </div>
   );
 };

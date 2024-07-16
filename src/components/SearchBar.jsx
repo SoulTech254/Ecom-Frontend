@@ -10,7 +10,7 @@ const SearchBar = ({ onSave }) => {
     resolver: zodResolver(formSchema),
   });
   return (
-    <div className="w-full border rounded-full px-4 py-1 bg-gray-200">
+    <div className="w-full border h-8 rounded-full px-4 py-1 bg-gray-200">
       <form
         className="flex justify-between items-center"
         onSubmit={handleSubmit(onSave)}

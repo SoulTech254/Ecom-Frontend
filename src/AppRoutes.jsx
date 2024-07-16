@@ -10,6 +10,7 @@ import AddressPage from "./pages/Cart/AddressPage";
 import PaymentPage from "./pages/Cart/PaymentPage";
 import CheckoutPage from "./pages/Cart/CheckoutPage";
 import CheckingPaymentPage from "./pages/Cart/CheckingPaymentPage";
+import OrdersPage from "./pages/OrdersPage";
 
 const AppRoutes = () => {
   return (
@@ -77,6 +78,14 @@ const AppRoutes = () => {
         element={
           <Layout>
             <CheckingPaymentPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/orders"
+        element={
+          <Layout>
+            <OrdersPage />
           </Layout>
         }
       />
