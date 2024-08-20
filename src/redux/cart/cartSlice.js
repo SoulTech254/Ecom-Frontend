@@ -7,7 +7,7 @@ const initialState = {
   products: JSON.parse(storage) || [],
   totalQuantity: 0,
   totalAmount: 0,
-  savings:0,
+  savings: 0,
   status: "idle",
   error: null,
 };
@@ -20,14 +20,31 @@ const saveCartToLocalStorage = (products) => {
 // Async thunk for adding product to cart (authenticated users)
 export const addProductToCart = createAsyncThunk(
   "cart/addProductToCart",
-  async ({ productID, quantity }, { getState, rejectWithValue }) => {
+  async ({ productID, quantity, method }, { getState, rejectWithValue }) => {
+    console.log("Starting addProductToCart async thunk");
+
     const user = getState().user.user;
+    console.log("User:", user);
+
     if (!user) {
+      console.log("User not authenticated");
       // User not authenticated, handle the error
       return rejectWithValue({ error: "User not authenticated" });
     }
+
     const { cart: id } = user;
-    console.log(productID);
+    console.log("Cart ID:", id);
+
+    console.log("Product ID:", productID);
+    console.log("Quantity:", quantity);
+    console.log("Method:", method);
+
+    // Construct the request body with method
+    const requestBody = {
+      product: productID,
+      quantity: quantity,
+      method: method, // Include method in the request body
+    };
 
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/${id}/`,
@@ -36,18 +53,22 @@ export const addProductToCart = createAsyncThunk(
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ product: productID, quantity: quantity }),
+        body: JSON.stringify(requestBody),
       }
     );
 
-    console.log(response);
+    console.log("Response:", response);
 
     if (!response.ok) {
-      throw new Error("Failed to add product to cart");
+      console.log("Failed to add product to cart");
+      const errorData = await response.json();
+      return rejectWithValue({
+        error: errorData.message || "Failed to add product to cart",
+      });
     }
 
     const data = await response.json();
-    console.log(data);
+    console.log("Data:", data);
     return data;
   }
 );

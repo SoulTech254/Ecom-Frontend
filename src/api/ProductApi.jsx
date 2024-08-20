@@ -5,9 +5,12 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export const useGetProducts = (branchId) => {
   const getProductsRequest = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/products?branchId=${branchId}`, {
-        method: "GET",
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/products?branchId=${branchId}`,
+        {
+          method: "GET",
+        }
+      );
       const data = await response.json();
       console.log("Products data:", data);
       if (!response.ok) {
@@ -21,7 +24,7 @@ export const useGetProducts = (branchId) => {
   };
 
   const { data: products, isLoading: isProductsLoading } = useQuery(
-    ["productss", branchId],
+    ["products", branchId],
     getProductsRequest,
     {
       enabled: !!branchId, // Only run the query if branchId is provided
@@ -32,6 +35,41 @@ export const useGetProducts = (branchId) => {
   console.log("Is products loading:", isProductsLoading);
 
   return { products, isProductsLoading };
+};
+
+export const useGetBestSellers = (branchId) => {
+  const getBestSellersRequest = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/products?branchId=${branchId}`,
+        {
+          method: "GET",
+        }
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message);
+      }
+      return data;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      throw error;
+    }
+  };
+
+  const {
+    data: bestSellers,
+    isLoading,
+    error,
+  } = useQuery(["bestSellers", branchId], getBestSellersRequest, {
+    onError: (error) => {
+      // Handle error here, e.g., show error message to user
+      console.error("Error fetching best sellers:", error);
+    },
+  });
+
+  return { bestSellers, isLoading, error };
 };
 
 export const useGetAProduct = (id, branchName) => {

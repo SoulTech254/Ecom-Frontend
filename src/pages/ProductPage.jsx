@@ -1,6 +1,6 @@
-import React from "react";
-import { useGetAProduct } from "@/api/ProductApi";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useGetAProduct, useGetBestSellers } from "@/api/ProductApi";
+import { useParams, useNavigate } from "react-router-dom";
 import Autoplay from "embla-carousel-autoplay";
 import {
   Carousel,
@@ -9,13 +9,37 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Plus } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import ShareButton from "@/components/ShareButton";
+import QuantityDropdown from "@/components/QuantityDropdown";
+import { addProductToCart } from "@/redux/cart/cartSlice";
+import Loader from "@/components/Loader";
+import ProductCard from "@/components/ProductCard";
+import { chunkArray } from "@/utils/utils";
+import ProductGroup from "@/components/ProductGroup";
 
 const ProductPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { selectedBranch } = useSelector((state) => state.branch);
+  const { bestSellers, isBestSellersLoading } = useGetBestSellers(
+    selectedBranch.id
+  );
+  const [products, setProducts] = useState([]);
   const { product, isProductLoading } = useGetAProduct(id, selectedBranch.id);
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const cart = useSelector((state) => state.cart);
+
+  // State to hold the chunked best sellers
+  const [bestSellersChunks, setBestSellersChunks] = useState([]);
+
+  useEffect(() => {
+    if (!isBestSellersLoading && bestSellers) {
+      setProducts(bestSellers);
+    }
+  }, [bestSellers, isBestSellersLoading]);
 
   if (isProductLoading) {
     return <div>Loading...</div>;
@@ -24,31 +48,107 @@ const ProductPage = () => {
   if (!product) {
     return <div>No product found</div>;
   }
-  console.log(product);
 
-  const { category, productName, brand, SKU, price, description, images } =
-    product;
+  const {
+    category,
+    productName,
+    brand,
+    SKU,
+    price,
+    description,
+    images,
+    size,
+    discountPrice,
+    stockLevel,
+  } = product;
 
-  // Generate an array of numbers from 1 to SKU
   const options = Array.from({ length: SKU }, (_, i) => i + 1);
+  const breadcrumbs = category
+    ? [
+        { name: "Home", path: "/" },
+        ...category.path.map((cat) => ({
+          name: cat.name,
+          path: `/category/${cat._id}`,
+        })),
+        { name: productName, path: "#" },
+      ]
+    : [];
+
+  const productUrl = window.location.href;
+
+  const handleQuantityChange = (quantity) => {
+    setSelectedQuantity(quantity);
+  };
+
+  const existingCartItem = cart.products.find(
+    (item) => item.product._id === id
+  );
+  const currentQuantityInCart = existingCartItem
+    ? existingCartItem.quantity
+    : 0;
+
+  const handleAddToCart = async (quantity) => {
+    if (stockLevel > 0) {
+      const totalQuantityAfterAdding = currentQuantityInCart + quantity;
+
+      if (
+        totalQuantityAfterAdding <= stockLevel &&
+        totalQuantityAfterAdding >= 0
+      ) {
+        setIsAddingToCart(true);
+
+        try {
+          await dispatch(
+            addProductToCart({
+              productID: id,
+              quantity: quantity,
+              method: "setQuantity",
+            })
+          ).unwrap();
+        } catch (error) {
+          console.error("Failed to update product in cart:", error);
+        } finally {
+          setIsAddingToCart(false);
+        }
+      } else {
+        console.error(
+          "Cannot add more than available stock or have negative quantity."
+        );
+      }
+    } else {
+      console.error("Product is out of stock.");
+    }
+  };
 
   return (
-    <div>
-      {/*  <div>{description}</div> */}
+    <div className="">
+      <div className="mx-[100px]">
+        {/* Breadcrumbs */}
+        <div className="py-4">
+          {breadcrumbs.length > 0 && (
+            <nav aria-label="breadcrumb">
+              <ol className="flex space-x-2 text-sm text-gray-500">
+                {breadcrumbs.map((crumb, index) => (
+                  <li key={index} className="flex items-center">
+                    {index < breadcrumbs.length - 1 ? (
+                      <>
+                        <a href={crumb.path} className="hover:underline">
+                          {crumb.name}
+                        </a>
+                        <span className="mx-2">/</span>
+                      </>
+                    ) : (
+                      <span className="text-primary">{crumb.name}</span>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )}
+        </div>
 
-      <div className=" ">
-        {category && (
-          <p className="category-path capitalize py-2 pl-8">
-            <span className="level-1">{category.level_1_name}</span>
-            {"> "}
-            <span className="level-2">{category.level_2_name}</span>
-            {"> "}
-            <span className="level-3">{category.level_3_name}</span>
-          </p>
-        )}
-
-        <div className="flex gap-16 ">
-          <div className="w-[30%]">
+        <div className="flex w-fit gap-16">
+          <div className="w-[50%]">
             <Carousel
               plugins={[
                 Autoplay({
@@ -59,57 +159,75 @@ const ProductPage = () => {
               <CarouselContent>
                 {images.map((image) => (
                   <CarouselItem key={image}>
-                    <img src={image} alt="Product" />{" "}
-                    {/* Assuming image is a URL */}
+                    <img
+                      src={image}
+                      alt="Product"
+                      className="w-[400px] h-fit object-cover"
+                    />
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
+              {images.length > 1 && <CarouselPrevious />}
+              {images.length > 1 && <CarouselNext />}
             </Carousel>
           </div>
 
-          <div className="flex flex-col gap-2 ">
-            <h2 className="text-3xl capitalize">{productName}</h2>
-            <p className="text-sm ">
-              Brand:<span className="capitalize text-primary">{brand}</span>{" "}
+          <div className="flex flex-col gap-2">
+            <h2 className="text-2xl capitalize font-semibold">{productName}</h2>
+            <p className="text-sm">
+              More from <span className="capitalize text-primary">{brand}</span>
             </p>
-            <h2 className=" capitalize">{productName}</h2>
-            <p className="text-3xl capitalize">Price: KES {price}</p>
+            <p className="text-">Size: {size}</p>
 
-            <label htmlFor="quantity" className="text-sm capitalize">
-              Quantity
-            </label>
-            <select
-              className="h-10 w-40 flex justify-center items-center bg-slate-200"
-              id="quantity"
-              name="quantity"
-            >
-              {options.map((option) => (
-                <option className="text-center " key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+            <QuantityDropdown
+              stockLevel={stockLevel}
+              price={discountPrice}
+              onQuantityChange={handleQuantityChange}
+              initialQuantity={currentQuantityInCart}
+            />
 
-            <div className="flex gap-10">
+            <div className="flex gap-10 mt-4">
               <button
                 type="button"
-                className="flex items-center justify-center bg-primary text-white rounded-3xl py-2 px-4"
+                className={`flex text-white items-center justify-center rounded-3xl py-2 px-4 ${
+                  isAddingToCart
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-primary"
+                }`}
+                onClick={() => handleAddToCart(selectedQuantity)}
+                disabled={isAddingToCart}
               >
-                buy now
+                Add To Cart
               </button>
               <button
                 type="button"
-                className="flex items-center justify-center bg-primary text-white rounded-3xl py-2 px-4"
+                className={`flex text-white items-center justify-center rounded-3xl py-2 px-4 ${
+                  isAddingToCart
+                    ? "bg-gray-400 cursor-default"
+                    : "bg-primary text-white"
+                }`}
+                onClick={async () => {
+                  await handleAddToCart(selectedQuantity);
+                  navigate("/cart");
+                }}
+                disabled={isAddingToCart}
               >
-                Add to Cart
+                Buy Now
               </button>
             </div>
+            <div className="mt-4">
+              <ShareButton url={productUrl} title={productName} />
+            </div>
           </div>
+
+          {description && <p className="mt-4">{description}</p>}
         </div>
 
-        {/* <p>SKU: {SKU}</p> */}
+        {/* Best Sellers Carousel */}
+        <div className="mt-8 h-fit">
+          <h2 className="text-xl mb-4">Best Sellers</h2>
+          <ProductGroup products={products} />
+        </div>
       </div>
     </div>
   );

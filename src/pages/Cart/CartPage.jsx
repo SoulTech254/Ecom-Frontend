@@ -3,15 +3,13 @@ import { useGetCart } from "@/api/ProductApi";
 import { useDispatch, useSelector } from "react-redux";
 import Counter from "@/components/Counter";
 import { toast } from "sonner";
-import {
-  addProductToCart,
-  deleteProductFromCart,
-} from "@/redux/cart/cartSlice";
+import { addProductToCart, deleteProductFromCart } from "@/redux/cart/cartSlice";
 import OrderSummary from "@/components/OrderSummary";
 import { Trash2 } from "lucide-react";
 import Stepper from "@/components/Stepper";
 import { links, steps } from "@/config/cartConfig";
 import { useNavigate } from "react-router-dom";
+import EmptyCartMessage from "@/components/EmptyCartMessage";
 
 const CartPage = () => {
   const user = useSelector((state) => state.user.user);
@@ -24,7 +22,6 @@ const CartPage = () => {
   });
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  console.log(updatedCart);
 
   useEffect(() => {
     if (cart) {
@@ -33,10 +30,11 @@ const CartPage = () => {
   }, [cart]);
 
   const updateStatus = useSelector((state) => state.cart.status);
-  console.log(updateStatus);
 
   const handleMinusClick = (productId) => {
-    dispatch(addProductToCart({ productID: productId, quantity: -1 }))
+    dispatch(
+      addProductToCart({ productID: productId, quantity: -1, method: "update" })
+    )
       .unwrap()
       .then((newCart) => {
         setUpdatedCart(newCart);
@@ -47,7 +45,9 @@ const CartPage = () => {
   };
 
   const handlePlusClick = (productId) => {
-    dispatch(addProductToCart({ productID: productId, quantity: 1 }))
+    dispatch(
+      addProductToCart({ productID: productId, quantity: 1, method: "update" })
+    )
       .unwrap()
       .then((newCart) => {
         setUpdatedCart(newCart);
@@ -61,12 +61,10 @@ const CartPage = () => {
     dispatch(deleteProductFromCart({ cartId: user.cart, productId: productID }))
       .unwrap()
       .then((newCart) => {
-        console.log(newCart);
         setUpdatedCart(newCart);
       })
       .catch((error) => {
         toast.error("Failed to delete product from cart.");
-        console.error("Failed to delete product from cart:", error);
       });
   };
 
@@ -80,19 +78,21 @@ const CartPage = () => {
         to={links}
         heading={"Checkout Process"}
       />
-      <div className="mx-auto mt-2 flex w-[100%] ">
+      <div className="mx-auto mt-2 flex w-[100%]">
         {isCartLoading === "loading" ? (
           <div>Loading...</div>
+        ) : updatedCart.products.length === 0 ? (
+          <EmptyCartMessage />  
         ) : (
           <div className="flex w-[100%] bg-transparent gap-10 align-center">
             <div className="flex-1">
-              <table className=" w-[100%] border-separate border-spacing-y-2">
+              <table className="w-[100%] border-separate border-spacing-y-2">
                 <thead>
                   <tr className="bg-white">
-                    <th className="py-2 px-4 font-semibold  text-left">
+                    <th className="py-2 px-4 font-semibold text-left">
                       Product Details
                     </th>
-                    <th className="py-2 px-4 "></th>
+                    <th className="py-2 px-4"></th>
                     <th className="py-2 px-4 font-semibold text-left">
                       Quantity
                     </th>
@@ -103,30 +103,28 @@ const CartPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {updatedCart?.products?.map((item) => (
+                  {updatedCart.products.map((item) => (
                     <tr key={item.product._id} className="bg-white">
-                      <td className="py-2 px-4 ">
+                      <td className="py-2 px-4">
                         <img
                           className="h-[70px] w-[70px] object-cover"
                           src={item.product.images[0]}
                           alt="product image"
                         />
                       </td>
-                      <td className="py-2 px-4  ">
+                      <td className="py-2 px-4">
                         <div className="capitalize">
                           {item.product.productName}
                         </div>
                       </td>
-                      <td className="py-2 px-4 border-b ">
+                      <td className="py-2 px-4 border-b">
                         <Counter
                           itemCount={item.quantity}
-                          onMinusClick={() =>
-                            handleMinusClick(item.product._id)
-                          }
+                          onMinusClick={() => handleMinusClick(item.product._id)}
                           onPlusClick={() => handlePlusClick(item.product._id)}
                         />
                       </td>
-                      <td className="py-2 px-4 border-b ">
+                      <td className="py-2 px-4 border-b">
                         Ksh {item.product.price}
                       </td>
                       <td className="py-2 px-4 border-b flex-col relative">

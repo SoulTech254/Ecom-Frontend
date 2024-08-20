@@ -6,23 +6,21 @@ import { useDispatch, useSelector } from "react-redux";
 import Cart from "./Cart";
 import StoreSelection from "./StoreSelection";
 import { useGetBranches } from "@/api/HomeApi";
-import { useState, useCallback, useEffect } from "react"; // Import useState and useEffect
+import { useState, useEffect } from "react";
 import { setBranch } from "@/redux/branch/branchSlice";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import SubcategoryWindow from "@/components/SubcategoryWindow"; // Import SubcategoryWindow
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { categories } from "@/utils/utils";
 
 const Navbar = () => {
   const { user } = useSelector((state) => state.user);
   const { branches: apiBranches, isLoadingBranches } = useGetBranches();
-  const [branches, setBranches] = useState([]); // Local state to store branches
+  const [branches, setBranches] = useState([]);
+  const [hoveredCategory, setHoveredCategory] = useState(null);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Update local state with API branches once they are loaded
     if (!isLoadingBranches && apiBranches.length > 0) {
       setBranches(apiBranches);
     }
@@ -33,8 +31,8 @@ const Navbar = () => {
   };
 
   return (
-    <div className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 px-2 mb-3 py-1 z-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 box-border h-[90px]- mb-3 z-10">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 ">
         <div className="flex items-center justify-between h-14 gap-3">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0">
@@ -51,7 +49,7 @@ const Navbar = () => {
             {/* Select Store */}
             <div className="flex items-center gap-1">
               {isLoadingBranches ? (
-                <p>Loading...</p> // Handle loading state here
+                <p>Loading...</p>
               ) : (
                 <>
                   <StoreIcon color="#b12e26" size={20} />
@@ -91,6 +89,22 @@ const Navbar = () => {
             <Cart />
           </div>
         </div>
+      </div>
+      <div className="relative flex justify-center gap-12 text-secondary font-bold box-border">
+        {categories.map((category) => (
+          <span
+            key={category.id}
+            className="relative cursor-pointer p-1 group"
+            onMouseEnter={() => setHoveredCategory(category.id)}
+            onMouseLeave={() => setHoveredCategory(null)}
+          >
+            {category.name}
+            <span className="absolute bottom-0 left-0 h-[2px] bg-secondary  transition-all duration-300 origin-left scale-x-0 group-hover:scale-x-100 w-full"></span>
+            {hoveredCategory === category.id && (
+              <SubcategoryWindow groups={category.groups} />
+            )}
+          </span>
+        ))}
       </div>
     </div>
   );

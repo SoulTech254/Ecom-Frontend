@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import OrderCard from "@/components/OrderCard";
 import {
   Breadcrumb,
-  BreadcrumbEllipsis,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
@@ -19,7 +18,11 @@ const OrdersPage = () => {
   const [orders, setOrders] = useState(null);
 
   // Fetch orders using custom hook
-  const { orders: apiOrders, isLoading } = useGetOrders(user._id, status);
+  const {
+    orders: apiOrders,
+    isLoading,
+    refetch: refetchOrders,
+  } = useGetOrders(user._id, status);
 
   // Handle tab change event
   const handleTabChange = (newStatus) => {
@@ -32,6 +35,12 @@ const OrdersPage = () => {
       setOrders(apiOrders);
     }
   }, [apiOrders]);
+
+  // Effect to refetch orders when status changes
+  useEffect(() => {
+    // Call the refetchOrders function when status changes
+    refetchOrders(user._id, status);
+  }, [status]);
 
   // Conditional rendering of loading state
   if (isLoading) {

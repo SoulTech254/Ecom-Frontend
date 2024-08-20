@@ -22,6 +22,7 @@ const SearchBar = ({ onSave }) => {
         />
         <button type="submit">
           <Search />
+          <span className="sr-only">Search</span>
         </button>
       </form>
     </div>

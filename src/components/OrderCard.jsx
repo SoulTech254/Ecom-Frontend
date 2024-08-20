@@ -18,7 +18,7 @@ const OrderCard = ({ order }) => {
   return (
     <div className="border bg-white px-6 mt-1 py-2">
       <div className="px-4 py-3 bg-white">
-        <h4 className="text-sm font-semibold"> ID: {order._id}</h4>
+        <h4 className="text-sm font-semibold"> ID: {order.orderId}</h4>
         <div className="flex justify-between gap-1 w-full">
           <div className="flex items-center h-7 gap-2 w-fit py-2 bg-gray-100 rounded-full px-2">
             <Store color="#b12e26" size={14} />

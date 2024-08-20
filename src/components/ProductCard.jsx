@@ -8,46 +8,63 @@ import {
 import { toast } from "sonner";
 import { useState } from "react";
 import Loader from "./Loader";
-import { Plus } from "lucide-react";
+import { Plus, ShoppingBagIcon } from "lucide-react";
+import Counter from "./Counter";
 
-const ProductCard = ({ img, description, price, id, name, stockLevel }) => {
-  const dispatch = useDispatch(); // Get dispatch function from Redux
+const ProductCard = ({
+  img,
+  description,
+  price,
+  discountPrice,
+  id,
+  name,
+  brand = "Unknown Brand", // Fallback value
+  stockLevel,
+}) => {
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
   const [isCartLoading, setIsCartLoading] = useState(false);
 
   const cart = useSelector((state) => state.cart);
+  const existingCartItem = cart.products.find(
+    (item) => item.product._id === id
+  );
+  const currentQuantityInCart = existingCartItem
+    ? existingCartItem.quantity
+    : 0;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (quantity) => {
     if (user) {
       setIsCartLoading(true);
-      console.log(id);
-      console.log(stockLevel);
 
       // Check if stock level is sufficient
       if (stockLevel > 0) {
-        // Calculate total quantity already in cart
-        const existingCartItem = cart.products.find((item) => item.id === id);
-        const currentQuantityInCart = existingCartItem
-          ? existingCartItem.quantity
-          : 0;
-
-        // Calculate total quantity after adding
-        const totalQuantityAfterAdding = currentQuantityInCart + 1;
+        const totalQuantityAfterAdding = currentQuantityInCart + quantity;
 
         // Check if total quantity exceeds stock level
-        if (totalQuantityAfterAdding <= stockLevel) {
-          dispatch(addProductToCart({ productID: id, quantity: 1 }))
+        if (
+          totalQuantityAfterAdding <= stockLevel &&
+          totalQuantityAfterAdding >= 0
+        ) {
+          dispatch(
+            addProductToCart({
+              productID: id,
+              quantity: quantity,
+              method: "update",
+            })
+          )
             .unwrap()
-            .then((data) => {
+            .then(() => {
               setIsCartLoading(false);
             })
             .catch((error) => {
-              toast.error("Failed to add product to cart.");
-              console.error("Failed to add product to cart:", error);
+              toast.error("Failed to update product in cart.");
               setIsCartLoading(false);
             });
         } else {
-          toast.error("Cannot add more than available stock.");
+          toast.error(
+            "Cannot add more than available stock or have negative quantity."
+          );
           setIsCartLoading(false);
         }
       } else {
@@ -55,12 +72,17 @@ const ProductCard = ({ img, description, price, id, name, stockLevel }) => {
         setIsCartLoading(false);
       }
     } else {
-      dispatch(addToCartLocal({ img, price, id, name }));
+      dispatch(addToCartLocal({ img, price, id, name, quantity }));
     }
   };
 
+  // Calculate discount percentage
+  const discountPercentage = discountPrice
+    ? ((price - discountPrice) / price) * 100
+    : 0;
+
   return (
-    <div className="bg-white rounded-xl m-1  overflow-hidden flex flex-col justify-between w-52 h-fit pb-6  ">
+    <div className="bg-white rounded-xl m-1 overflow-hidden flex flex-col justify-between w-48 h-[330px] p-2">
       <div className="flex-1 flex flex-col">
         <Link to={`/products/${id}`} className="flex flex-col justify-between">
           <div className="h-[150px]">
@@ -70,27 +92,59 @@ const ProductCard = ({ img, description, price, id, name, stockLevel }) => {
               className="w-full h-full object-cover"
             />
           </div>
-          <h2 className="font-medium p-2 text-2xl">Ksh {price}</h2>
-          <div className="flex-1 p-2">
-            {/*<p className="text-lg font-semibold">{description}</p> */}
-            <p className="text-black text-md ">{name}</p>
+          <div className="py-1 mt-2 font-bold ">
+            <p className="text-black text-sm line-clamp-2 h-[37px] ">{name}</p>
+          </div>
+          <div className="py-1 flex items-start justify-start">
+            <p className="text-black text-xs truncate">
+              By <span className="text-primary">{brand}</span>
+            </p>
+          </div>
+          {discountPrice && (
+            <div className="">
+              <p>
+                <span className="text-xs line-through text-gray-500">
+                  KES {price}
+                </span>{" "}
+                <span className="text-secondary text-xs">
+                  {Math.round(discountPercentage)}% Off
+                </span>
+              </p>
+            </div>
+          )}
+          <div className="">
+            {discountPrice ? (
+              <>
+                <h2 className="text-md black font-bold">KES {discountPrice}</h2>
+              </>
+            ) : (
+              <h2 className="text-md font-bold">KES {price}</h2>
+            )}
           </div>
         </Link>
       </div>
-      <div className="flex flex-row justify-center items-center mt-2">
-        <button
-          className="bg-primary text-white px-4 py-2 rounded-3xl hover:bg-primary/90 active:scale-95 flex items-center"
-          onClick={() => handleAddToCart()}
-        >
-          {isCartLoading ? (
+      <div className="flex flex-row justify-center items-center mt-1">
+        {isCartLoading ? (
+          <div className="flex items-center justify-center bg-secondary bg-opacity-45 text-white py-[2px] px-[44px] rounded-sm">
             <Loader />
-          ) : (
-            <div className="flex items-center justify-center">
-              <Plus className="mr-1 h-5" />
-              Add to Cart
-            </div>
-          )}
-        </button>
+          </div>
+        ) : currentQuantityInCart > 0 ? (
+          <div className="flex items-center justify-center bg-secondary bg-opacity-70 text-white py-[4px] px-[6px] rounded-sm">
+            <Counter
+              onPlusClick={() => handleAddToCart(1)}
+              onMinusClick={() => handleAddToCart(-1)}
+              itemCount={currentQuantityInCart}
+            />
+          </div>
+        ) : (
+          <button
+            onClick={() => handleAddToCart(1)}
+            className="flex gap-1 items-center justify-center w-32  bg-secondary text-secondary font-bold bg-opacity-40 px-1 py-1 rounded-sm active:scale-95"
+          >
+            <ShoppingBagIcon size={16} />
+            <p className="text-sm"> Cart</p>
+          </button>
+        )}
       </div>
     </div>
   );
