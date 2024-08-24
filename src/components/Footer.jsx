@@ -4,7 +4,7 @@ import { Instagram, Facebook, X, Youtube } from "lucide-react";
 
 export default function Footer() {
   return (
-    <div className="bg-secondary w-full p-8 flex flex-col md:flex-row gap-4 mt-12 text-white">
+    <div className="bg-primary w-full p-8 flex flex-col md:flex-row gap-4 mt-12 text-white">
       <div className="w-full md:w-1/5 flex flex-col text-white">
         <AspectRatio ratio={4 / 3} className="m-4">
           <img src={walmartLogo} alt="Walmart Logo" className="w-fit h-fit" />

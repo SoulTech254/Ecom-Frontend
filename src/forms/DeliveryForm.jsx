@@ -1,41 +1,110 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
+import {
+  GoogleMap,
+  LoadScript,
+  Marker,
+  Autocomplete,
+} from "@react-google-maps/api";
 
 const DeliveryForm = ({ onSubmit }) => {
+  const [selectedPlace, setSelectedPlace] = useState("");
+  const [markerPosition, setMarkerPosition] = useState(null);
+  const [map, setMap] = useState(null);
+
+  const autocompleteRef = useRef(null);
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm();
 
+  const handlePlaceChanged = () => {
+    if (autocompleteRef.current) {
+      const place = autocompleteRef.current.getPlace();
+      if (place.geometry) {
+        const formattedAddress = place.formatted_address;
+        const location = place.geometry.location;
+
+        setSelectedPlace(formattedAddress);
+        setMarkerPosition({ lat: location.lat(), lng: location.lng() });
+        setValue("address", formattedAddress);
+        setValue("latitude", location.lat()); // Store latitude
+        setValue("longitude", location.lng()); // Store longitude
+
+        // Extracting city from the address components
+        const addressComponents = place.address_components;
+        const cityComponent = addressComponents.find((component) =>
+          component.types.includes("locality")
+        );
+
+        if (cityComponent) {
+          setValue("city", cityComponent.long_name); // Autofill city
+        }
+
+        if (map) {
+          map.panTo(location);
+        }
+      } else {
+        console.error("Place has no geometry:", place);
+      }
+    }
+  };
+
+  const libraries = ["places"];
+
   return (
-    <div>
-      <div>
-        <h1>Delivery Information</h1>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="mb-2">
-            <div>
-              <h3 className="mb-1 text-black">Enter your Address</h3>
+    <div className="z-20">
+      <h1>Delivery Information</h1>
+      <LoadScript
+        googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+        libraries={libraries}
+      >
+        <div className="mb-2 mt-4">
+          <div>
+            <h3 className="mb-1 text-black">Search for your Address</h3>
+            <Autocomplete
+              onLoad={(autocomplete) =>
+                (autocompleteRef.current = autocomplete)
+              }
+              onPlaceChanged={handlePlaceChanged}
+            >
               <input
                 type="text"
                 id="address"
-                placeholder="Enter your Address"
+                value={selectedPlace}
+                onChange={(e) => setSelectedPlace(e.target.value)}
+                placeholder="Search for your address"
                 className="w-full bg-[#D9D9D9] rounded-full px-4 py-2 focus:outline-none"
               />
-            </div>
+            </Autocomplete>
           </div>
+        </div>
 
+        <GoogleMap
+          id="map"
+          mapContainerStyle={{ height: "400px", width: "100%" }}
+          zoom={12}
+          center={markerPosition || { lat: -34.397, lng: 150.644 }}
+          onLoad={(mapInstance) => setMap(mapInstance)}
+        >
+          {markerPosition && <Marker position={markerPosition} />}
+        </GoogleMap>
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+          {/* Form fields */}
+          <input {...register("latitude")} type="hidden" />
+          <input {...register("longitude")} type="hidden" />
           <div className="mb-2">
-            <div>
-              <h3 className="mb-1 text-black">Building</h3>
-              <input
-                {...register("building")}
-                type="text"
-                id="building"
-                placeholder="Building"
-                className="w-full bg-[#D9D9D9] rounded-full px-4 py-2 focus:outline-none"
-              />
-            </div>
+            <h3 className="mb-1 text-black">Building</h3>
+            <input
+              {...register("building")}
+              type="text"
+              id="building"
+              placeholder="Building"
+              className="w-full bg-[#D9D9D9] rounded-full px-4 py-2 focus:outline-none"
+            />
           </div>
 
           <div className="mb-2">
@@ -46,7 +115,8 @@ const DeliveryForm = ({ onSubmit }) => {
                 type="text"
                 id="city"
                 placeholder="City"
-                className="w-full bg-[#D9D9D9] rounded-full px-4 py-2 focus:outline-none"
+                readOnly
+                className="w-full bg-[#D9D9D9] rounded-full px-4 py-2 focus:outline-none text-gray-500 cursor-not-allowed"
               />
             </div>
           </div>
@@ -117,7 +187,6 @@ const DeliveryForm = ({ onSubmit }) => {
                       type="radio"
                       value="work"
                       className="form-radio h-5 w-5 text-[#E61927]"
-                      style={{ color: "#E61927" }}
                     />
                     <span className="ml-2">Work</span>
                   </label>
@@ -138,7 +207,6 @@ const DeliveryForm = ({ onSubmit }) => {
                 )}
               </div>
             </div>
-            {errors.addressType && <p>{errors.addressType.message}</p>}
           </div>
 
           <button
@@ -148,7 +216,7 @@ const DeliveryForm = ({ onSubmit }) => {
             Save Details
           </button>
         </form>
-      </div>
+      </LoadScript>
     </div>
   );
 };

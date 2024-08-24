@@ -2,39 +2,53 @@ import { isError, useMutation, useQuery } from "react-query";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export const useGetProducts = (branchId) => {
+export const useGetProducts = (branchName, brand) => {
+  console.log(branchName);
   const getProductsRequest = async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/v1/products?branchId=${branchId}`,
-        {
-          method: "GET",
-        }
-      );
+      // Create a URLSearchParams instance
+      const params = new URLSearchParams();
+      params.append("branch", branchName);
+
+      if (brand) {
+        params.append("brand", brand);
+      }
+
+      // Construct the full URL with query parameters
+      const url = `${API_BASE_URL}/api/v1/products?${params.toString()}`;
+
+      const response = await fetch(url, {
+        method: "GET",
+      });
+
       const data = await response.json();
       console.log("Products data:", data);
       if (!response.ok) {
         throw new Error(data.message);
       }
-      return data;
+      return data; // Ensure data includes both products and metadata
     } catch (error) {
       console.error("Error fetching products:", error);
       throw error;
     }
   };
 
-  const { data: products, isLoading: isProductsLoading } = useQuery(
-    ["products", branchId],
+  const { data, isLoading: isProductsLoading } = useQuery(
+    ["products", branchName, brand], // Include brand in the query key for caching
     getProductsRequest,
     {
-      enabled: !!branchId, // Only run the query if branchId is provided
+      enabled: !!branchName, // Only run the query if branchName is provided
     }
   );
 
+  const products = data?.products || [];
+  const metadata = data?.metadata || {}; // Assuming metadata is an object
+
   console.log("Products data from useQuery:", products);
+  console.log("Metadata from useQuery:", metadata);
   console.log("Is products loading:", isProductsLoading);
 
-  return { products, isProductsLoading };
+  return { products, metadata, isProductsLoading };
 };
 
 export const useGetBestSellers = (branchId) => {

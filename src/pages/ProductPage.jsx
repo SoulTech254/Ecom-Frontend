@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useGetAProduct, useGetBestSellers } from "@/api/ProductApi";
-import { useParams, useNavigate } from "react-router-dom";
+import {
+  useGetAProduct,
+  useGetBestSellers,
+  useGetProducts,
+} from "@/api/ProductApi";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import Autoplay from "embla-carousel-autoplay";
 import {
   Carousel,
@@ -23,23 +27,13 @@ const ProductPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { selectedBranch } = useSelector((state) => state.branch);
-  const { bestSellers, isBestSellersLoading } = useGetBestSellers(
+  const { products, metadata, isProductsLoading } = useGetProducts(
     selectedBranch.id
   );
-  const [products, setProducts] = useState([]);
   const { product, isProductLoading } = useGetAProduct(id, selectedBranch.id);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const cart = useSelector((state) => state.cart);
-
-  // State to hold the chunked best sellers
-  const [bestSellersChunks, setBestSellersChunks] = useState([]);
-
-  useEffect(() => {
-    if (!isBestSellersLoading && bestSellers) {
-      setProducts(bestSellers);
-    }
-  }, [bestSellers, isBestSellersLoading]);
 
   if (isProductLoading) {
     return <div>Loading...</div>;
@@ -122,7 +116,7 @@ const ProductPage = () => {
 
   return (
     <div className="">
-      <div className="mx-[100px]">
+      <div className="">
         {/* Breadcrumbs */}
         <div className="py-4">
           {breadcrumbs.length > 0 && (
@@ -174,9 +168,9 @@ const ProductPage = () => {
 
           <div className="flex flex-col gap-2">
             <h2 className="text-2xl capitalize font-semibold">{productName}</h2>
-            <p className="text-sm">
-              More from <span className="capitalize text-primary">{brand}</span>
-            </p>
+            <Link to={`/brand/${brand}`} className="capitalize text-primary">
+              {brand}
+            </Link>
             <p className="text-">Size: {size}</p>
 
             <QuantityDropdown
@@ -224,7 +218,7 @@ const ProductPage = () => {
         </div>
 
         {/* Best Sellers Carousel */}
-        <div className="mt-8 h-fit">
+        <div className="mt-8 h-fit ">
           <h2 className="text-xl mb-4">Best Sellers</h2>
           <ProductGroup products={products} />
         </div>

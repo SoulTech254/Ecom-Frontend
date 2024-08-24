@@ -7,13 +7,7 @@ import {
   useCreateAddress,
   useDeleteAddress,
 } from "@/api/AddressApi";
-import {
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+import CustomSheet from "@/components/CustomSheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useDispatch, useSelector } from "react-redux";
 import DeliveryForm from "@/forms/DeliveryForm";
@@ -33,27 +27,26 @@ const AddressPage = () => {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [updatedAddresses, setUpdatedAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
+  console.log(selectedAddress);
   const [selectedMethod, setSelectedMethod] = useState("normal");
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [selectedDeliveryAddress, setSelectedDeliveryAddress] = useState(null); // State to store selected address
-  const { totalAmount } = useSelector((state) => state.cart);
-  const [isOpen, setIsOpen] = useState(false);
+  const [selectedDeliveryAddress, setSelectedDeliveryAddress] = useState(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  const { totalAmount } = useSelector((state) => state.cart);
   const userId = useSelector((state) => state.user.user._id);
-  const order = useSelector((state) => state.order);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { addresses, isAddressesLoading, refetchAddresses } =
-    useGetAddresses(userId);
-
+  const { addresses, isAddressesLoading } = useGetAddresses(userId);
   const { createAddressRequest, isCreatingAddress } = useCreateAddress(userId);
   const { deleteAddressRequest, isDeletingAddress } = useDeleteAddress(userId);
 
   const handleSubmit = (data) => {
     const newData = {
       location: {
-        coordinates: [-122.4194, 37.7749],
+        coordinates: [data.longitude, data.latitude], // Use latitude and longitude from form data
       },
       contactNumber: data.contactNumber,
       building: data.building,
@@ -64,13 +57,14 @@ const AddressPage = () => {
     };
     createAddressRequest(newData).then((updatedAddresses) => {
       setUpdatedAddresses(updatedAddresses);
+      setIsSheetOpen(false);
     });
   };
 
   useEffect(() => {
     if (!isAddressesLoading) {
       setUpdatedAddresses(addresses || []);
-      setSelectedDeliveryAddress(addresses[0]?.address); // Set the first address as selected on initial render
+      setSelectedDeliveryAddress(addresses[0]?.address);
     }
   }, [isAddressesLoading, addresses]);
 
@@ -92,15 +86,15 @@ const AddressPage = () => {
   };
 
   const handleSelectAddress = (address) => {
+    console.log(address);
     setSelectedAddress(address);
-    setSelectedDeliveryAddress(address.address); // Update selected address state
+    setSelectedDeliveryAddress(address.address);
   };
 
   const handleMethodChange = (method) => {
     setSelectedMethod(method);
   };
 
-  console.log(selectedSlot);
   const handleDeliverySubmit = () => {
     const deliveryInfo = {
       address: selectedAddress,
@@ -128,95 +122,93 @@ const AddressPage = () => {
         <div className="w-full">
           <DeliveryMethod onMethodChange={handleMethodChange} />
           <DeliverySlot onSelectSlot={handleSelectSlot} />
-          <Popover open={isOpen} onOpenChange={setIsOpen}>
-            <div className="bg-[#A0D8BF] flex gap-8 px-10 py-3 mt-2">
-              <MapPinned color="#E61927" />
-              <h1>Delivery Details</h1>
+
+          <div className="bg-[#A0D8BF] flex gap-8 px-10 py-3 mt-2">
+            <MapPinned color="#E61927" />
+            <h1>Delivery Details</h1>
+          </div>
+          <div className="bg-white flex justify-between items-center p-4">
+            <h2>Specify Delivery Details</h2>
+            <div className="">
+              {selectedDeliveryAddress ? (
+                <>
+                  <p className="capitalize text-gray-700">
+                    {selectedDeliveryAddress.addressType}
+                  </p>
+                  <p className="capitalize text-gray-700">
+                    {selectedDeliveryAddress.building},{" "}
+                    {selectedDeliveryAddress.city}
+                  </p>
+                  <p>+254 {selectedDeliveryAddress.contactNumber}</p>
+                </>
+              ) : (
+                <p>No address selected</p>
+              )}
             </div>
-            <div className="bg-white flex justify-between items-center p-4">
-              <h2 className="text-lg font-semibold">
-                Specify Delivery Details
-              </h2>
-              <div className="">
-                {selectedDeliveryAddress ? (
-                  <>
-                    <p className="capitalize text-gray-700">
-                      {selectedDeliveryAddress.addressType}
-                    </p>
-                    <p className="capitalize text-gray-700">
-                      {selectedDeliveryAddress.building},{" "}
-                      {selectedDeliveryAddress.city}
-                    </p>
-                    <p>+254 {selectedDeliveryAddress.contactNumber}</p>
-                  </>
-                ) : (
-                  <p>No address selected</p>
-                )}
-              </div>
+            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
               <PopoverTrigger asChild>
                 <button
                   className="border border-5 border-[#194A34] text-[#194A34] rounded-full px-4 py-2 hover:bg-[#194A34] hover:text-white transition duration-300"
-                  onClick={() => setIsOpen(!isOpen)}
+                  onClick={() => setIsPopoverOpen(true)}
                 >
-                  Add Details
+                  View Addresses
                 </button>
               </PopoverTrigger>
               <PopoverContent>
-                <div className="flex">
-                  <div className="w-full">
-                    <Sheet>
-                      <SheetTrigger>
-                        <button className="border border-5 bg-[#194A34] text-white rounded-full px-4 py-2">
-                          Add New Delivery Address
-                        </button>
-                      </SheetTrigger>
-                      <SheetContent
-                        className="w-[100vw] p-8 md:w-fit h-full"
-                        side={isSmallScreen ? "bottom" : "right"}
-                      >
-                        <SheetTitle>Add New Delivery Address</SheetTitle>
-                        <SheetDescription>
-                          <ScrollArea className="h-[90vh] w-full border-none rounded-md border">
-                            <DeliveryForm onSubmit={handleSubmit} />
-                          </ScrollArea>
-                        </SheetDescription>
-                      </SheetContent>
-                    </Sheet>
-                    {isAddressesLoading ||
-                    isDeletingAddress ||
-                    isCreatingAddress ? (
-                      <p>Loading...</p>
-                    ) : updatedAddresses?.length > 0 ? (
-                      updatedAddresses.map((addressData) => (
-                        
-                        <AddressCard
-                          key={addressData._id}
-                          address={addressData.address}
-                          onDeleteAddress={() =>
-                            handleDeleteAddress(addressData._id)
-                          }
-                          onSelectAddress={() =>
-                            handleSelectAddress(addressData)
-                          } // Pass entire address object
-                        />
-                      ))
-                    ) : (
-                      <p>No addresses found.</p>
-                    )}
+                <div className="flex flex-col gap-4 p-4">
+                  <div className="flex justify-between items-center">
+                    <button
+                      className="bg-[#194A34] text-white px-4 py-2 rounded-full"
+                      onClick={() => {
+                        setIsSheetOpen(true), setIsPopoverOpen(false);
+                      }}
+                    >
+                      Create New Address
+                    </button>
                   </div>
+                  {isAddressesLoading ||
+                  isDeletingAddress ||
+                  isCreatingAddress ? (
+                    <p>Loading...</p>
+                  ) : updatedAddresses?.length > 0 ? (
+                    updatedAddresses.map((addressData) => (
+                      <AddressCard
+                        key={addressData._id}
+                        address={addressData.address}
+                        onDeleteAddress={() =>
+                          handleDeleteAddress(addressData._id)
+                        }
+                        onSelectAddress={() => handleSelectAddress(addressData)}
+                      />
+                    ))
+                  ) : (
+                    <p>No addresses found.</p>
+                  )}
                 </div>
               </PopoverContent>
-            </div>
-          </Popover>
+            </Popover>
+          </div>
+          <CustomSheet
+            isOpen={isSheetOpen}
+            onClose={() => setIsSheetOpen(false)}
+          >
+            <ScrollArea className="h-[90vh] w-full border-none rounded-md border">
+              <DeliveryForm onSubmit={handleSubmit} />
+            </ScrollArea>
+          </CustomSheet>
 
           <div className="flex w-full justify-center mt-2">
-            <button className="bg-[#194A34] text-white px-4 py-2 rounded-full" type="button" onClick={handleDeliverySubmit}>
+            <button
+              className="bg-[#194A34] text-white px-4 py-2 rounded-full"
+              type="button"
+              onClick={handleDeliverySubmit}
+            >
               Continue
             </button>
           </div>
         </div>
         <div className="">
-          <OrderSummary subtotal={totalAmount} savings={10} />
+          <OrderSummary subtotal={totalAmount} savings={10} shippingFee={100} />
         </div>
       </div>
     </div>

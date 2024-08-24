@@ -11,6 +11,10 @@ import PaymentPage from "./pages/Cart/PaymentPage";
 import CheckoutPage from "./pages/Cart/CheckoutPage";
 import CheckingPaymentPage from "./pages/Cart/CheckingPaymentPage";
 import OrdersPage from "./pages/OrdersPage";
+import SearchPage from "./pages/SearchPage";
+import CategoryPage from "./pages/CategoryPage";
+import BrandPage from "./pages/BrandPage";
+import DeliveryForm from "./forms/DeliveryForm";
 
 const AppRoutes = () => {
   return (
@@ -58,6 +62,14 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/search/"
+        element={
+          <Layout>
+            <SearchPage />
+          </Layout>
+        }
+      />
+      <Route
         path="/payment"
         element={
           <Layout>
@@ -82,10 +94,34 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/category/:categoryId"
+        element={
+          <Layout>
+            <CategoryPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/brand/:brand"
+        element={
+          <Layout>
+            <BrandPage />
+          </Layout>
+        }
+      />
+      <Route
         path="/orders"
         element={
           <Layout>
             <OrdersPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/google"
+        element={
+          <Layout>
+            <DeliveryForm />
           </Layout>
         }
       />

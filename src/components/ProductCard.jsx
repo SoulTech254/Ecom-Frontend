@@ -82,10 +82,10 @@ const ProductCard = ({
     : 0;
 
   return (
-    <div className="bg-white rounded-xl m-1 overflow-hidden flex flex-col justify-between w-48 h-[330px] p-2">
+    <div className="bg-white rounded-xl ml-1  overflow-hidden flex flex-col justify-between  w-[200px] h-[330px] px-2 py-2">
       <div className="flex-1 flex flex-col">
         <Link to={`/products/${id}`} className="flex flex-col justify-between">
-          <div className="h-[150px]">
+          <div className="h-[150px] w-[185px]">
             <img
               src={img}
               alt="Product Image"
@@ -93,7 +93,7 @@ const ProductCard = ({
             />
           </div>
           <div className="py-1 mt-2 font-bold ">
-            <p className="text-black text-sm line-clamp-2 h-[37px] ">{name}</p>
+            <p className="text-black text-md line-clamp-2 h-[37px] ">{name}</p>
           </div>
           <div className="py-1 flex items-start justify-start">
             <p className="text-black text-xs truncate">
@@ -125,11 +125,11 @@ const ProductCard = ({
       </div>
       <div className="flex flex-row justify-center items-center mt-1">
         {isCartLoading ? (
-          <div className="flex items-center justify-center bg-secondary bg-opacity-45 text-white py-[2px] px-[44px] rounded-sm">
+          <div className="flex items-center justify-center bg-primary bg-opacity-45 text-white py-[2px] px-[44px] rounded-sm">
             <Loader />
           </div>
         ) : currentQuantityInCart > 0 ? (
-          <div className="flex items-center justify-center bg-secondary bg-opacity-70 text-white py-[4px] px-[6px] rounded-sm">
+          <div className="flex items-center justify-center bg-primary bg-opacity-70 text-white py-[4px] px-[6px] rounded-sm">
             <Counter
               onPlusClick={() => handleAddToCart(1)}
               onMinusClick={() => handleAddToCart(-1)}
@@ -139,7 +139,7 @@ const ProductCard = ({
         ) : (
           <button
             onClick={() => handleAddToCart(1)}
-            className="flex gap-1 items-center justify-center w-32  bg-secondary text-secondary font-bold bg-opacity-40 px-1 py-1 rounded-sm active:scale-95"
+            className="flex gap-1 items-center justify-center w-32  bg-primary text-primary font-bold bg-opacity-40 px-1 py-1 rounded-sm active:scale-95"
           >
             <ShoppingBagIcon size={16} />
             <p className="text-sm"> Cart</p>

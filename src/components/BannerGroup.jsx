@@ -9,7 +9,7 @@ import {
 export default function BannerGroup({ banners }) {
   return (
     <div className="relative flex flex-col justify-center items-center">
-      <div className="relative w-[85vw]">
+      <div className="relative w-full">
         <Carousel
           opts={{
             align: "end",

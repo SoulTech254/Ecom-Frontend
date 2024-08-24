@@ -5,10 +5,9 @@ import { useGetBranches } from "@/api/HomeApi";
 import { setBranch } from "@/redux/branch/branchSlice";
 import { useNavigate } from "react-router-dom";
 
-export function SelectBranchModal({onSave}) {
+export function SelectBranchModal({ onSave }) {
   const { branches: apiBranches, isLoadingBranches } = useGetBranches();
   const [branches, setBranches] = useState([]);
-  const navigate = useNavigate();
 
   const handleSelectBranch = (branch) => {
     onSave(branch);

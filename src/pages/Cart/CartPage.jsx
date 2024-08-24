@@ -3,7 +3,10 @@ import { useGetCart } from "@/api/ProductApi";
 import { useDispatch, useSelector } from "react-redux";
 import Counter from "@/components/Counter";
 import { toast } from "sonner";
-import { addProductToCart, deleteProductFromCart } from "@/redux/cart/cartSlice";
+import {
+  addProductToCart,
+  deleteProductFromCart,
+} from "@/redux/cart/cartSlice";
 import OrderSummary from "@/components/OrderSummary";
 import { Trash2 } from "lucide-react";
 import Stepper from "@/components/Stepper";
@@ -82,7 +85,7 @@ const CartPage = () => {
         {isCartLoading === "loading" ? (
           <div>Loading...</div>
         ) : updatedCart.products.length === 0 ? (
-          <EmptyCartMessage />  
+          <EmptyCartMessage />
         ) : (
           <div className="flex w-[100%] bg-transparent gap-10 align-center">
             <div className="flex-1">
@@ -120,7 +123,9 @@ const CartPage = () => {
                       <td className="py-2 px-4 border-b">
                         <Counter
                           itemCount={item.quantity}
-                          onMinusClick={() => handleMinusClick(item.product._id)}
+                          onMinusClick={() =>
+                            handleMinusClick(item.product._id)
+                          }
                           onPlusClick={() => handlePlusClick(item.product._id)}
                         />
                       </td>
