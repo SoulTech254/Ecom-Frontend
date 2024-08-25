@@ -1,14 +1,10 @@
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  addToCartLocal,
-  updateCartState,
-  addProductToCart,
-} from "@/redux/cart/cartSlice";
+import { addToCartLocal, addProductToCart } from "@/redux/cart/cartSlice";
 import { toast } from "sonner";
 import { useState } from "react";
 import Loader from "./Loader";
-import { Plus, ShoppingBagIcon } from "lucide-react";
+import { ShoppingBagIcon } from "lucide-react";
 import Counter from "./Counter";
 
 const ProductCard = ({
@@ -18,7 +14,7 @@ const ProductCard = ({
   discountPrice,
   id,
   name,
-  brand = "Unknown Brand", // Fallback value
+  brand,
   stockLevel,
 }) => {
   const dispatch = useDispatch();
@@ -34,45 +30,54 @@ const ProductCard = ({
     : 0;
 
   const handleAddToCart = (quantity) => {
-    if (user) {
+    const totalQuantityAfterAdding = currentQuantityInCart + quantity;
+
+    if (
+      totalQuantityAfterAdding <= stockLevel &&
+      totalQuantityAfterAdding >= 0
+    ) {
       setIsCartLoading(true);
 
-      // Check if stock level is sufficient
-      if (stockLevel > 0) {
-        const totalQuantityAfterAdding = currentQuantityInCart + quantity;
-
-        // Check if total quantity exceeds stock level
-        if (
-          totalQuantityAfterAdding <= stockLevel &&
-          totalQuantityAfterAdding >= 0
-        ) {
-          dispatch(
-            addProductToCart({
-              productID: id,
-              quantity: quantity,
-              method: "update",
-            })
-          )
-            .unwrap()
-            .then(() => {
-              setIsCartLoading(false);
-            })
-            .catch((error) => {
-              toast.error("Failed to update product in cart.");
-              setIsCartLoading(false);
-            });
-        } else {
-          toast.error(
-            "Cannot add more than available stock or have negative quantity."
-          );
-          setIsCartLoading(false);
-        }
+      if (user) {
+        dispatch(
+          addProductToCart({
+            productID: id,
+            quantity: quantity,
+            method: "update",
+          })
+        )
+          .unwrap()
+          .then(() => {
+            setIsCartLoading(false);
+            toast.success(
+              `Product ${quantity > 0 ? "added to" : "removed from"} cart.`
+            );
+          })
+          .catch(() => {
+            toast.error("Failed to update product in cart.");
+            setIsCartLoading(false);
+          });
       } else {
-        toast.error("Product is out of stock.");
+        dispatch(
+          addToCartLocal({
+            img,
+            price,
+            id,
+            name,
+            quantity,
+            discountPrice,
+          })
+        );
         setIsCartLoading(false);
+        toast.success(
+          `Product ${quantity > 0 ? "added to" : "removed from"} cart.`
+        );
       }
     } else {
-      dispatch(addToCartLocal({ img, price, id, name, quantity }));
+      toast.error(
+        "Invalid quantity. Please check stock level or quantity in cart."
+      );
+      setIsCartLoading(false);
     }
   };
 
@@ -82,7 +87,7 @@ const ProductCard = ({
     : 0;
 
   return (
-    <div className="bg-white rounded-xl ml-1  overflow-hidden flex flex-col justify-between  w-[200px] h-[330px] px-2 py-2">
+    <div className="bg-white rounded-xl ml-1 overflow-hidden flex flex-col justify-between w-[200px] h-[330px] px-2 py-2">
       <div className="flex-1 flex flex-col">
         <Link to={`/products/${id}`} className="flex flex-col justify-between">
           <div className="h-[150px] w-[185px]">
@@ -101,7 +106,7 @@ const ProductCard = ({
             </p>
           </div>
           {discountPrice && (
-            <div className="">
+            <div>
               <p>
                 <span className="text-xs line-through text-gray-500">
                   KES {price}
@@ -112,11 +117,9 @@ const ProductCard = ({
               </p>
             </div>
           )}
-          <div className="">
+          <div>
             {discountPrice ? (
-              <>
-                <h2 className="text-md black font-bold">KES {discountPrice}</h2>
-              </>
+              <h2 className="text-md black font-bold">KES {discountPrice}</h2>
             ) : (
               <h2 className="text-md font-bold">KES {price}</h2>
             )}
@@ -139,7 +142,7 @@ const ProductCard = ({
         ) : (
           <button
             onClick={() => handleAddToCart(1)}
-            className="flex gap-1 items-center justify-center w-32  bg-primary text-primary font-bold bg-opacity-40 px-1 py-1 rounded-sm active:scale-95"
+            className="flex gap-1 items-center justify-center w-32 bg-primary text-primary font-bold bg-opacity-40 px-1 py-1 rounded-sm active:scale-95"
           >
             <ShoppingBagIcon size={16} />
             <p className="text-sm"> Cart</p>

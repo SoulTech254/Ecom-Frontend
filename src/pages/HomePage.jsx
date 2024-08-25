@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, startTransition } from "react";
+import React, { Suspense } from "react";
 import { useGetProducts } from "@/api/ProductApi";
 import { useSelector } from "react-redux";
 import {
@@ -8,9 +8,9 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 
-const ProductGroup = lazy(() => import("@/components/ProductGroup"));
-const BannerGroup = lazy(() => import("@/components/BannerGroup"));
-const CircleLink = lazy(() => import("@/components/CircleLink"));
+import ProductGroup from "@/components/ProductGroup";
+import BannerGroup from "@/components/BannerGroup";
+import CircleLink from "@/components/CircleLink";
 
 const HomePage = () => {
   const { selectedBranch } = useSelector((state) => state.branch);
@@ -53,51 +53,47 @@ const HomePage = () => {
           Ready Set Shop
         </h2>
         <div className="flex flex-wrap justify-center gap-8">
-          <Suspense fallback={<div>Loading Circle Links...</div>}>
-            <CircleLink
-              src="https://cdnprod.mafretailproxy.com/assets/images/4_Meat_and_Poultry_b2ac17efaf.png"
-              alt="Nyama Fresh"
-              title="Nyama Fresh"
-            />
-            <CircleLink
-              src="https://cdnprod.mafretailproxy.com/assets/images/11_Cleaning_and_Household_ad418b1b70.png"
-              alt="Cleaning Supplies"
-              title="Cleaning Supplies"
-            />
-            <CircleLink
-              src="https://imgs.search.brave.com/EOR__1jmbm4yjs1au4L3XUTtYQNCi6nPFmMgSInOzpo/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTY5/MzQ3MjAzL3Bob3Rv/L2JyZWFrZmFzdC1j/ZXJlYWwuanBnP3M9/NjEyeDYxMiZ3PTAm/az0yMCZjPU8yVXdx/dEJfaXBuSUFqSzd5/SV95Um5CN0I4eDhL/cXRHVlc1WkF2QjIy/b1E9"
-              title="Cereals"
-            />
-            <CircleLink
-              src="https://imgs.search.brave.com/uMDuKuUoGtV6Rn6rlqI3NHqoxmeEauBrBn6GmihKtmA/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvNjQ2/MDExMDIxL3Bob3Rv/L2JvdHRsZS1vZi1y/ZWQtd2luZS5qcGc_/cz02MTJ4NjEyJnc9/MCZrPTIwJmM9M05u/VnlxbmVmMlhXeTZC/bWhYejVrMUtxSTM0/cVR1ODBvWW5SRVFF/QXkzaz0"
-              title="Pombe"
-            />
-            <CircleLink
-              src="https://imgs.search.brave.com/e1_a30ZLwQgjAuzB18ZQEg5WU2kRqisQDVAEuIeZGSA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzA0LzkzLzMwLzc1/LzM2MF9GXzQ5MzMw/NzUxMF9SQVpadlRC/ZW1zeE82bGdETWJs/MEZaSDYxT3Y5ZExQ/ci5qcGc"
-              title="Bakery"
-            />
-            <CircleLink
-              src="https://cdnprod.mafretailproxy.com/assets/images/Small_Appliances_28ce5daf1a_f973395a41.jpg"
-              title="Small Appliances"
-            />
-            <CircleLink
-              src="https://cdnprod.mafretailproxy.com/assets/images/19_Large_Appliances_3840ab8ab9_8ac5e15b4f.jpg"
-              title="Electronics"
-            />
-          </Suspense>
+          <CircleLink
+            src="https://cdnprod.mafretailproxy.com/assets/images/4_Meat_and_Poultry_b2ac17efaf.png"
+            alt="Nyama Fresh"
+            title="Nyama Fresh"
+          />
+          <CircleLink
+            src="https://cdnprod.mafretailproxy.com/assets/images/11_Cleaning_and_Household_ad418b1b70.png"
+            alt="Cleaning Supplies"
+            title="Cleaning Supplies"
+          />
+          <CircleLink
+            src="https://imgs.search.brave.com/EOR__1jmbm4yjs1au4L3XUTtYQNCi6nPFmMgSInOzpo/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTY5/MzQ3MjAzL3Bob3Rv/L2JyZWFrZmFzdC1j/ZXJlYWwuanBnP3M9/NjEyeDYxMiZ3PTAm/az0yMCZjPU8yVXdx/dEJfaXBuSUFqSzd5/SV95Um5CN0I4eDhL/cXRHVlc1WkF2QjIy/b1E9"
+            title="Cereals"
+          />
+          <CircleLink
+            src="https://imgs.search.brave.com/uMDuKuUoGtV6Rn6rlqI3NHqoxmeEauBrBn6GmihKtmA/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvNjQ2/MDExMDIxL3Bob3Rv/L2JvdHRsZS1vZi1y/ZWQtd2luZS5qcGc_/cz02MTJ4NjEyJnc9/MCZrPTIwJmM9M05u/VnlxbmVmMlhXeTZC/bWhYejVrMUtxSTM0/cVR1ODBvWW5SRVFF/QXkzaz0"
+            title="Pombe"
+          />
+          <CircleLink
+            src="https://imgs.search.brave.com/e1_a30ZLwQgjAuzB18ZQEg5WU2kRqisQDVAEuIeZGSA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzA0LzkzLzMwLzc1/LzM2MF9GXzQ5MzMw/NzUxMF9SQVpadlRC/ZW1zeE82bGdETWJs/MEZaSDYxT3Y5ZExQ/ci5qcGc"
+            title="Bakery"
+          />
+          <CircleLink
+            src="https://cdnprod.mafretailproxy.com/assets/images/Small_Appliances_28ce5daf1a_f973395a41.jpg"
+            title="Small Appliances"
+          />
+          <CircleLink
+            src="https://cdnprod.mafretailproxy.com/assets/images/19_Large_Appliances_3840ab8ab9_8ac5e15b4f.jpg"
+            title="Electronics"
+          />
         </div>
       </div>
 
       {/* Best Sellers */}
       <div className="mt-8 w-full">
         <h2 className="text-xl mb-4 font-bold">Best Sellers</h2>
-        <Suspense fallback={<div>Loading Best Sellers...</div>}>
-          {isProductsLoading ? (
-            <div>Loading...</div>
-          ) : (
-            <ProductGroup products={products} />
-          )}
-        </Suspense>
+        {isProductsLoading ? (
+          <div>Loading...</div>
+        ) : (
+          <ProductGroup products={products} />
+        )}
       </div>
 
       <img
@@ -126,9 +122,7 @@ const HomePage = () => {
 
       <div className="mt-8">
         <h2 className="text-xl mb-4 font-bold">Electronics</h2>
-        <Suspense fallback={<div>Loading banners...</div>}>
-          <BannerGroup banners={banners} />
-        </Suspense>
+        <BannerGroup banners={banners} />
       </div>
     </div>
   );

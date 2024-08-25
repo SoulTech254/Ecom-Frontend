@@ -3,7 +3,7 @@ import mpesa from "../assets/mpesa.png";
 import mastercard from "../assets/mastercard.jpg";
 import visa from "../assets/Visa.jpg";
 
-const OrderSummary = ({ subtotal, savings, shippingFee=0 }) => {
+const OrderSummary = ({ subtotal, savings = 0, shippingFee = 0 }) => {
   return (
     <div className=" bg-white p-8 w-[400px] border rounded-lg">
       <h2 className="font-bold mb-4 text-2xl">Cart Summary</h2>
@@ -15,10 +15,12 @@ const OrderSummary = ({ subtotal, savings, shippingFee=0 }) => {
         <span className="text-left">Savings</span>
         <span className="text-right">Ksh {savings.toFixed(2)}</span>
       </div>
-      {shippingFee && <div className="flex justify-between mb-2">
-        <span className="text-left">Delivery</span>
-        <span className="text-right">Ksh {shippingFee.toFixed(2)}</span>
-      </div>}
+      {shippingFee && (
+        <div className="flex justify-between mb-2">
+          <span className="text-left">Delivery</span>
+          <span className="text-right">Ksh {shippingFee.toFixed(2)}</span>
+        </div>
+      )}
       <div className="border-y border-gray-300 py-4 flex justify-between font-semibold">
         <span>Total (VAT Inc.)</span>
         <span>Ksh {(subtotal - savings + shippingFee).toFixed(2)}</span>

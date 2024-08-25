@@ -11,39 +11,28 @@ const initialState = {
   status: "idle",
   error: null,
 };
+
 // Utility function to save cart to local storage
 const saveCartToLocalStorage = (products) => {
   localStorage.setItem("cartItems", JSON.stringify(products));
 };
 
 // Async thunk for adding product to cart (authenticated users)
-// Async thunk for adding product to cart (authenticated users)
 export const addProductToCart = createAsyncThunk(
   "cart/addProductToCart",
   async ({ productID, quantity, method }, { getState, rejectWithValue }) => {
-    console.log("Starting addProductToCart async thunk");
-
     const user = getState().user.user;
-    console.log("User:", user);
 
     if (!user) {
-      console.log("User not authenticated");
-      // User not authenticated, handle the error
       return rejectWithValue({ error: "User not authenticated" });
     }
 
     const { cart: id } = user;
-    console.log("Cart ID:", id);
 
-    console.log("Product ID:", productID);
-    console.log("Quantity:", quantity);
-    console.log("Method:", method);
-
-    // Construct the request body with method
     const requestBody = {
       product: productID,
       quantity: quantity,
-      method: method, // Include method in the request body
+      method: method,
     };
 
     const response = await fetch(
@@ -57,10 +46,7 @@ export const addProductToCart = createAsyncThunk(
       }
     );
 
-    console.log("Response:", response);
-
     if (!response.ok) {
-      console.log("Failed to add product to cart");
       const errorData = await response.json();
       return rejectWithValue({
         error: errorData.message || "Failed to add product to cart",
@@ -68,7 +54,6 @@ export const addProductToCart = createAsyncThunk(
     }
 
     const data = await response.json();
-    console.log("Data:", data);
     return data;
   }
 );
@@ -77,18 +62,13 @@ export const addProductToCart = createAsyncThunk(
 export const mergeLocalCart = createAsyncThunk(
   "cart/mergeLocalCart",
   async (_, { getState }) => {
-    console.log("Starting mergeLocalCart async thunk");
     const user = getState().user.user;
-    console.log("User:", user);
     const localCartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-    console.log("Local cart items:", localCartItems);
 
-    // Create an array of objects with productId and quantity
     const cartItemsToMerge = localCartItems.map((item) => ({
-      product: item.id,
+      product: item.product._id,
       quantity: item.quantity,
     }));
-    console.log("Cart items to merge:", cartItemsToMerge);
 
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/merge/${user.cart}`,
@@ -101,14 +81,11 @@ export const mergeLocalCart = createAsyncThunk(
       }
     );
 
-    console.log("Response:", response);
-
     if (!response.ok) {
       throw new Error("Failed to merge cart");
     }
 
     const data = await response.json();
-    console.log("Data:", data);
     return data;
   }
 );
@@ -118,7 +95,6 @@ export const deleteProductFromCart = createAsyncThunk(
   async ({ cartId, productId }, { getState, rejectWithValue }) => {
     const user = getState().user.user;
     if (!user) {
-      // User not authenticated, handle the error
       return rejectWithValue({ error: "User not authenticated" });
     }
 
@@ -133,13 +109,11 @@ export const deleteProductFromCart = createAsyncThunk(
       }
     );
 
-    console.log(productId);
     if (!response.ok) {
       throw new Error("Failed to delete product from cart");
     }
 
     const data = await response.json();
-    console.log(data);
     return data;
   }
 );
@@ -149,20 +123,65 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCartLocal: (state, action) => {
-      const item = action.payload;
+      const { id, img, price, name, discountPrice, quantity } = action.payload;
+
+      console.log("Add to cart local", {
+        id,
+        img,
+        price,
+        name,
+        discountPrice,
+        quantity,
+      });
+
       const existingItem = state.products.find(
-        (cartItem) => cartItem.id === item.id
+        (cartItem) => cartItem.product._id === id
       );
+
       if (existingItem) {
-        existingItem.quantity += 1;
-      } else {
-        state.products.push({ ...item, quantity: 1 });
+        existingItem.quantity += quantity;
+
+        // Update savings if the quantity is updated
+        existingItem.savings =
+          (parseFloat(existingItem.product.price) - parseFloat(discountPrice)) *
+          existingItem.quantity;
+
+        if (existingItem.quantity <= 0) {
+          state.products = state.products.filter(
+            (cartItem) => cartItem.product._id !== id
+          );
+        }
+      } else if (quantity > 0) {
+        state.products.push({
+          product: {
+            _id: id,
+            img: img,
+            discountPrice: discountPrice,
+            price: price,
+            name: name,
+          },
+          quantity: quantity,
+          savings: (parseFloat(price) - parseFloat(discountPrice)) * quantity,
+        });
       }
-      saveCartToLocalStorage(state.products);
-      state.totalQuantity += 1;
-      state.totalAmount += parseFloat(item.price);
-      state.savings += parseFloat(item.savings);
+
+      // Recalculate total quantity, amount, and savings
+      state.totalQuantity = state.products.reduce(
+        (acc, item) => acc + item.quantity,
+        0
+      );
+      state.totalAmount = state.products.reduce(
+        (acc, item) => acc + item.quantity * parseFloat(item.product.price),
+        0
+      );
+      state.totalSavings = state.products.reduce(
+        (acc, item) => acc + item.savings,
+        0
+      );
+
+      saveCartToLocalStorage(state);
     },
+
     clearLocalCart: (state) => {
       state.products = [];
       localStorage.removeItem("cartItems");

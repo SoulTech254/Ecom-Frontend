@@ -16,11 +16,12 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import ShareButton from "@/components/ShareButton";
 import QuantityDropdown from "@/components/QuantityDropdown";
-import { addProductToCart } from "@/redux/cart/cartSlice";
+import { addProductToCart, addToCartLocal } from "@/redux/cart/cartSlice";
 import Loader from "@/components/Loader";
 import ProductCard from "@/components/ProductCard";
 import { chunkArray } from "@/utils/utils";
 import ProductGroup from "@/components/ProductGroup";
+import { toast } from "sonner";
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -34,6 +35,7 @@ const ProductPage = () => {
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const cart = useSelector((state) => state.cart);
+  const user = useSelector((state) => state.user.user); // Add user selector
 
   if (isProductLoading) {
     return <div>Loading...</div>;
@@ -92,25 +94,40 @@ const ProductPage = () => {
         setIsAddingToCart(true);
 
         try {
-          await dispatch(
-            addProductToCart({
-              productID: id,
-              quantity: quantity,
-              method: "setQuantity",
-            })
-          ).unwrap();
+          if (user) {
+            // For logged-in users
+            await dispatch(
+              addProductToCart({
+                productID: id,
+                quantity: quantity,
+                method: "setQuantity",
+              })
+            ).unwrap();
+          } else {
+            // For non-logged-in users, handle local cart
+            dispatch(
+              addToCartLocal({
+                img: product.images[0],
+                price: discountPrice || price,
+                id,
+                name: productName,
+                quantity,
+              })
+            );
+            toast.success("Product added to cart.");
+          }
         } catch (error) {
           console.error("Failed to update product in cart:", error);
         } finally {
           setIsAddingToCart(false);
         }
       } else {
-        console.error(
+        toast.error(
           "Cannot add more than available stock or have negative quantity."
         );
       }
     } else {
-      console.error("Product is out of stock.");
+      toast.error("Product is out of stock.");
     }
   };
 

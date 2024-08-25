@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useGetCart } from "@/api/ProductApi";
 import { useDispatch, useSelector } from "react-redux";
 import Counter from "@/components/Counter";
 import { toast } from "sonner";
 import {
   addProductToCart,
+  addToCartLocal,
   deleteProductFromCart,
 } from "@/redux/cart/cartSlice";
 import OrderSummary from "@/components/OrderSummary";
@@ -16,52 +16,93 @@ import EmptyCartMessage from "@/components/EmptyCartMessage";
 
 const CartPage = () => {
   const user = useSelector((state) => state.user.user);
-  const { cart, isCartLoading } = useGetCart(user.cart);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [updatedCart, setUpdatedCart] = useState({
     products: [],
     totalQuantity: 0,
     totalSavings: 0,
     totalAmount: 0,
   });
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  console.log(updatedCart);
+  const [isCartLoading, setIsCartLoading] = useState(true);
 
   useEffect(() => {
-    if (cart) {
-      setUpdatedCart(cart);
+    const fetchCart = async () => {
+      try {
+        if (user) {
+          const response = await fetch(
+            `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/${user.cart}`
+          );
+          if (!response.ok) throw new Error("Failed to fetch cart");
+          const cart = await response.json();
+          setUpdatedCart(cart);
+        } else {
+          const localCart = JSON.parse(localStorage.getItem("cartItems")) || {
+            products: [],
+            totalQuantity: 0,
+            totalAmount: 0,
+            savings: 0,
+          };
+          setUpdatedCart(localCart);
+        }
+      } catch (error) {
+        toast.error("Failed to load cart.");
+      } finally {
+        setIsCartLoading(false);
+      }
+    };
+
+    fetchCart();
+  }, [user]);
+
+  const handleAddToCart = async (product, quantity) => {
+    if (user) {
+      // For authenticated users
+      const updatedProduct = {
+        productID: product._id,
+        quantity: quantity, // Increase or decrease quantity
+        method: "update", // Always "update" for authenticated users
+      };
+
+      try {
+        await dispatch(addProductToCart(updatedProduct)).unwrap();
+        await fetchCart(); // Refresh the cart after updating
+      } catch (error) {
+        console.error("Error updating cart for authenticated user:", error);
+        toast.error("Failed to update product in cart.");
+      }
+    } else {
+      // For non-authenticated users (local storage)
+      dispatch(
+        addToCartLocal({
+          img: product.img,
+          price: product.price,
+          id: product._id,
+          name: product.name,
+          quantity: quantity, // Increase or decrease quantity
+          discountPrice: product.discountPrice,
+        })
+      );
+      // Refresh the cart from local storage
+      const localCart = JSON.parse(localStorage.getItem("cartItems")) || {
+        products: [],
+        totalQuantity: 0,
+        totalAmount: 0,
+        savings: 0,
+      };
+      setUpdatedCart(localCart);
     }
-  }, [cart]);
-
-  const updateStatus = useSelector((state) => state.cart.status);
-
-  const handleMinusClick = (productId) => {
-    dispatch(
-      addProductToCart({ productID: productId, quantity: -1, method: "update" })
-    )
-      .unwrap()
-      .then((newCart) => {
-        setUpdatedCart(newCart);
-      })
-      .catch((error) => {
-        toast.error("Failed to update product in cart.");
-      });
-  };
-
-  const handlePlusClick = (productId) => {
-    dispatch(
-      addProductToCart({ productID: productId, quantity: 1, method: "update" })
-    )
-      .unwrap()
-      .then((newCart) => {
-        setUpdatedCart(newCart);
-      })
-      .catch((error) => {
-        toast.error("Failed to update product in cart.");
-      });
   };
 
   const handleDeleteProduct = (productID) => {
-    dispatch(deleteProductFromCart({ cartId: user.cart, productId: productID }))
+    const deleteProduct = {
+      cartId: user ? user.cart : null,
+      productId: productID,
+    };
+
+    dispatch(deleteProductFromCart(deleteProduct))
       .unwrap()
       .then((newCart) => {
         setUpdatedCart(newCart);
@@ -82,7 +123,7 @@ const CartPage = () => {
         heading={"Checkout Process"}
       />
       <div className="mx-auto mt-2 flex w-[100%]">
-        {isCartLoading === "loading" ? (
+        {isCartLoading ? (
           <div>Loading...</div>
         ) : updatedCart.products.length === 0 ? (
           <EmptyCartMessage />
@@ -111,7 +152,12 @@ const CartPage = () => {
                       <td className="py-2 px-4">
                         <img
                           className="h-[70px] w-[70px] object-cover"
-                          src={item.product.images[0]}
+                          src={
+                            item.product.images &&
+                            item.product.images.length > 0
+                              ? item.product.images[0]
+                              : item.product.img
+                          }
                           alt="product image"
                         />
                       </td>
@@ -123,10 +169,8 @@ const CartPage = () => {
                       <td className="py-2 px-4 border-b">
                         <Counter
                           itemCount={item.quantity}
-                          onMinusClick={() =>
-                            handleMinusClick(item.product._id)
-                          }
-                          onPlusClick={() => handlePlusClick(item.product._id)}
+                          onMinusClick={() => handleAddToCart(item.product, -1)}
+                          onPlusClick={() => handleAddToCart(item.product, 1)}
                         />
                       </td>
                       <td className="py-2 px-4 border-b">
