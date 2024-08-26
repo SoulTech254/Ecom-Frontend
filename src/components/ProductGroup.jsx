@@ -20,7 +20,10 @@ export default function ProductGroup({ products }) {
         >
           <CarouselContent className="">
             {products.map((product, index) => (
-              <CarouselItem key={index} className="w-full mr-1 md:basis-1/3 lg:basis-1/6">
+              <CarouselItem
+                key={index}
+                className="w-full mr-1 md:basis-1/3 lg:basis-1/6"
+              >
                 <ProductCard
                   key={product._id}
                   discountPrice={product.discountPrice}

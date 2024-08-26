@@ -9,10 +9,9 @@ const CircleLink = ({ src, title, link, width = "w-28", height = "h-28" }) => {
         <img
           src={src}
           className={`${width} ${height} rounded-full object-cover transition-transform duration-300 hover:scale-105`}
+          loading="lazy"
         />
-        <h3 className="text-center font-semibold transform:none ">
-          {title}
-        </h3>
+        <h3 className="text-center font-semibold transform:none ">{title}</h3>
       </div>
     </Link>
   );
