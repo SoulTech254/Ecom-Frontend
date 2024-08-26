@@ -1,61 +1,72 @@
 import React, { useState, useEffect } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { ScrollArea } from "./ui/scroll-area";
-import { AlarmClock, Clock, MapPinned } from "lucide-react";
-import { Button } from "./ui/button";
+import { AlarmClock } from "lucide-react";
 
-const DeliverySlot = ({ onSelectSlot }) => {
+const DeliverySlot = ({ onSelectSlot, method }) => {
   const [deliverySlots, setDeliverySlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const generateDeliverySlots = () => {
-      const times = ["09:00", "12:00", "15:00", "17:00", "19:00"];
+      if (method === "express") {
+        // For express, set slot to 30 minutes from now
+        const now = new Date();
+        const slot = {
+          datetime: new Date(now.getTime() + 30 * 60000).toISOString(),
+          display: `Express (Leaves in 30 minutes)`,
+        };
+        setDeliverySlots([slot]);
+        setSelectedSlot(slot);
+        onSelectSlot(slot.datetime);
+      } else {
+        // Generate slots for normal delivery
+        const times = ["09:00", "12:00", "15:00", "17:00", "19:00"];
+        const today = new Date();
+        const tempDeliverySlots = [];
 
-      const today = new Date();
-      const tempDeliverySlots = [];
+        for (let d = 0; d < 5; d++) {
+          const currentDate = new Date(today);
+          currentDate.setDate(currentDate.getDate() + d);
 
-      for (let d = 0; d < 5; d++) {
-        const currentDate = new Date(today);
-        currentDate.setDate(currentDate.getDate() + d);
+          const filteredTimes = times.filter((time) => {
+            const dateTimeString = `${currentDate.getFullYear()}-${(
+              currentDate.getMonth() + 1
+            )
+              .toString()
+              .padStart(2, "0")}-${currentDate
+              .getDate()
+              .toString()
+              .padStart(2, "0")} ${time}`;
+            const slotDateTime = new Date(dateTimeString);
+            return slotDateTime > today;
+          });
 
-        const filteredTimes = times.filter((time) => {
-          const dateTimeString = `${currentDate.getFullYear()}-${(
-            currentDate.getMonth() + 1
-          )
-            .toString()
-            .padStart(2, "0")}-${currentDate
-            .getDate()
-            .toString()
-            .padStart(2, "0")} ${time}`;
-          const slotDateTime = new Date(dateTimeString);
-          return slotDateTime > today;
-        });
+          filteredTimes.forEach((time) => {
+            const dayOfWeek = getDayOfWeek(currentDate.getDay());
+            const year = currentDate.getFullYear();
+            const month = (currentDate.getMonth() + 1)
+              .toString()
+              .padStart(2, "0");
+            const day = currentDate.getDate().toString().padStart(2, "0");
 
-        filteredTimes.forEach((time) => {
-          const dayOfWeek = getDayOfWeek(currentDate.getDay());
-          const year = currentDate.getFullYear();
-          const month = (currentDate.getMonth() + 1)
-            .toString()
-            .padStart(2, "0");
-          const day = currentDate.getDate().toString().padStart(2, "0");
+            const formattedTime = formatTime(time); // Format time to AM/PM format
 
-          const formattedTime = formatTime(time); // Format time to AM/PM format
+            const slot = {
+              datetime: `${year}-${month}-${day} ${time}`,
+              display: `${dayOfWeek} ${day}${getOrdinalSuffix(
+                day
+              )} ${getMonthName(month)} ${formattedTime}`,
+            };
+            tempDeliverySlots.push(slot);
+          });
+        }
 
-          const slot = {
-            datetime: `${year}-${month}-${day} ${time}`,
-            display: `${dayOfWeek} ${day}${getOrdinalSuffix(
-              day
-            )} ${getMonthName(month)} ${formattedTime}`,
-          };
-          tempDeliverySlots.push(slot);
-        });
+        setDeliverySlots(tempDeliverySlots);
+        setSelectedSlot(tempDeliverySlots[0]);
+        onSelectSlot(tempDeliverySlots[0].datetime);
       }
-
-      setDeliverySlots(tempDeliverySlots);
-      setSelectedSlot(tempDeliverySlots[0]);
-      onSelectSlot(tempDeliverySlots[0].datetime);
     };
 
     const getDayOfWeek = (dayIndex) => {
@@ -112,7 +123,7 @@ const DeliverySlot = ({ onSelectSlot }) => {
     };
 
     generateDeliverySlots();
-  }, []);
+  }, [method]);
 
   const handleSelectSlot = (selectedSlot) => {
     setSelectedSlot(selectedSlot);
@@ -129,7 +140,11 @@ const DeliverySlot = ({ onSelectSlot }) => {
       <div className="bg-white flex justify-between items-center p-4">
         <h2 className="text-lg font-semibold">Select Delivery Time Slot</h2>
         <p className="text-gray-700">
-          {selectedSlot ? selectedSlot.display : ""}
+          {method === "express"
+            ? "Express (Leaves in 30 minutes after payment)"
+            : selectedSlot
+            ? selectedSlot.display
+            : "Select a slot"}
         </p>
         <PopoverContent className="w-50 h-60 bg-white p-4">
           <ScrollArea className="h-full w-full border-none rounded-md border">

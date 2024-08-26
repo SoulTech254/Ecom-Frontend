@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
 import { useGetOrderSummary, usePlaceOrder } from "@/api/CheckoutApi";
-import { useSelector, useDispatch } from "react-redux"; // Import useDispatch
+import { useSelector, useDispatch } from "react-redux";
 import Stepper from "@/components/Stepper";
 import { links, steps } from "@/config/cartConfig";
 import { useNavigate } from "react-router-dom";
 import { mergeLocalCart } from "@/redux/cart/cartSlice";
-// Import clearLocalCart action
 
 const CheckoutPage = () => {
   const { user } = useSelector((state) => state.user);
   const { cart } = user;
   const { deliveryInfo } = useSelector((state) => state.order);
+  console.log(deliveryInfo)
   const { paymentInfo } = useSelector((state) => state.order);
-  const {selectedBranch} = useSelector((state) => state.branch);
-  console.log(selectedBranch)
+  const { selectedBranch } = useSelector((state) => state.branch);
 
   const { getOrderSummaryData, isLoadingOrderSummary } = useGetOrderSummary();
   const [orderSummary, setOrderSummary] = useState(null);
@@ -22,7 +21,7 @@ const CheckoutPage = () => {
   const { placeOrder, isLoadingPlaceOrder } = usePlaceOrder();
   const navigate = useNavigate();
 
-  const dispatch = useDispatch(); // Get the dispatch function from Redux
+  const dispatch = useDispatch();
 
   const toggleShowAll = () => {
     setShowAll(!showAll);
@@ -48,7 +47,14 @@ const CheckoutPage = () => {
     };
 
     fetchData();
-  }, [getOrderSummaryData, user, deliveryInfo, paymentInfo, cart]);
+  }, [
+    getOrderSummaryData,
+    user,
+    deliveryInfo,
+    paymentInfo,
+    cart,
+    selectedBranch,
+  ]);
 
   const handleProceedToPay = async () => {
     try {
@@ -56,8 +62,7 @@ const CheckoutPage = () => {
       console.log(payment);
       navigate(`/checking-payment/${payment._id}`);
 
-      // Clear local cart state after placing order
-      dispatch(mergeLocalCart()); // Dispatch the action to clear local cart
+      dispatch(mergeLocalCart());
     } catch (error) {
       console.error("Error placing order:", error);
       setError(error.message);
@@ -91,22 +96,25 @@ const CheckoutPage = () => {
                   Email: {orderSummary.user.email}
                 </p>
               </div>
-              <div className="mb-4">
-                <p className="font-semibold text-lg mb-2">Delivery Address</p>
-                <p className="text-gray-700">
-                  Building: {orderSummary.deliveryAddress.building}
-                </p>
-                <p className="text-gray-700">
-                  City: {orderSummary.deliveryAddress.city}
-                </p>
-                <p className="text-gray-700">
-                  Contact Number: +254{" "}
-                  {orderSummary.deliveryAddress.contactNumber}
-                </p>
-                <p className="text-gray-700">
-                  Instructions: {orderSummary.deliveryAddress.instructions}
-                </p>
-              </div>
+
+              {orderSummary.deliveryMethod !== "pick-up" && (
+                <div className="mb-4">
+                  <p className="font-semibold text-lg mb-2">Delivery Address</p>
+                  <p className="text-gray-700">
+                    Building: {orderSummary.deliveryAddress.building}
+                  </p>
+                  <p className="text-gray-700">
+                    City: {orderSummary.deliveryAddress.city}
+                  </p>
+                  <p className="text-gray-700">
+                    Contact Number: +254{" "}
+                    {orderSummary.deliveryAddress.contactNumber}
+                  </p>
+                  <p className="text-gray-700">
+                    Instructions: {orderSummary.deliveryAddress.instructions}
+                  </p>
+                </div>
+              )}
             </div>
             <div>
               <div className="mb-4">
@@ -114,9 +122,15 @@ const CheckoutPage = () => {
                 <p className="text-gray-700 capitalize">
                   Method: {orderSummary.deliveryMethod}
                 </p>
-                <p className="text-gray-700">
-                  Delivery Slot: {orderSummary.deliverySlot}
-                </p>
+                {orderSummary.deliveryMethod === "express" ? (
+                  <p className="text-gray-700">
+                    Delivery Slot: 30 minutes after payment
+                  </p>
+                ) : (
+                  <p className="text-gray-700">
+                    Delivery Slot: {orderSummary.deliverySlot}
+                  </p>
+                )}
               </div>
               <div className="mb-4">
                 <p className="font-semibold text-lg mb-2">Payment Details</p>
@@ -124,7 +138,7 @@ const CheckoutPage = () => {
                   Method: {orderSummary.paymentMethod}
                 </p>
                 <p className="text-gray-700">
-                  Account: {orderSummary.paymentMethod == "mpesa" && "+254 "}
+                  Account: {orderSummary.paymentMethod === "mpesa" && "+254 "}
                   {orderSummary.paymentAccount}
                 </p>
               </div>

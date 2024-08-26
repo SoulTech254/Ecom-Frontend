@@ -15,6 +15,7 @@ import SearchPage from "./pages/SearchPage";
 import CategoryPage from "./pages/CategoryPage";
 import BrandPage from "./pages/BrandPage";
 import DeliveryForm from "./forms/DeliveryForm";
+import PrivateRoute from "./layout/PrivateRoute";
 
 const AppRoutes = () => {
   return (
@@ -30,34 +31,10 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/dash"
-        element={
-          <Layout>
-            <Navbar />
-          </Layout>
-        }
-      />
-      <Route
         path="/products/:id"
         element={
           <Layout>
             <ProductPage />
-          </Layout>
-        }
-      />
-      <Route
-        path="/cart"
-        element={
-          <Layout>
-            <CartPage />
-          </Layout>
-        }
-      />
-      <Route
-        path="/address"
-        element={
-          <Layout>
-            <AddressPage />
           </Layout>
         }
       />
@@ -70,26 +47,10 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/payment"
+        path="/brand/:brand"
         element={
           <Layout>
-            <PaymentPage />
-          </Layout>
-        }
-      />
-      <Route
-        path="/checkout"
-        element={
-          <Layout>
-            <CheckoutPage />
-          </Layout>
-        }
-      />
-      <Route
-        path="/checking-payment/:id"
-        element={
-          <Layout>
-            <CheckingPaymentPage />
+            <BrandPage />
           </Layout>
         }
       />
@@ -101,30 +62,56 @@ const AppRoutes = () => {
           </Layout>
         }
       />
-      <Route
-        path="/brand/:brand"
-        element={
-          <Layout>
-            <BrandPage />
-          </Layout>
-        }
-      />
-      <Route
-        path="/orders"
-        element={
-          <Layout>
-            <OrdersPage />
-          </Layout>
-        }
-      />
-      <Route
-        path="/google"
-        element={
-          <Layout>
-            <DeliveryForm />
-          </Layout>
-        }
-      />
+      <Route element={<PrivateRoute />}>
+        <Route
+          path="/cart"
+          element={
+            <Layout>
+              <CartPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/address"
+          element={
+            <Layout>
+              <AddressPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/checking-payment/:id"
+          element={
+            <Layout>
+              <CheckingPaymentPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/payment"
+          element={
+            <Layout>
+              <PaymentPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <Layout>
+              <CheckoutPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <Layout>
+              <OrdersPage />
+            </Layout>
+          }
+        />
+      </Route>
     </Routes>
   );
 };

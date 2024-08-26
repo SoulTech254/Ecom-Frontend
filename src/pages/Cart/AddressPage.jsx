@@ -46,7 +46,8 @@ const AddressPage = () => {
   const handleSubmit = (data) => {
     const newData = {
       location: {
-        coordinates: [data.longitude, data.latitude], // Use latitude and longitude from form data
+        type: "Point",
+        coordinates: [data.longitude, data.latitude],
       },
       contactNumber: data.contactNumber,
       building: data.building,
@@ -121,73 +122,91 @@ const AddressPage = () => {
       <div className="flex mt-2 gap-2 items-center justify-between">
         <div className="w-full">
           <DeliveryMethod onMethodChange={handleMethodChange} />
-          <DeliverySlot onSelectSlot={handleSelectSlot} />
-
-          <div className="bg-[#A0D8BF] flex gap-8 px-10 py-3 mt-2">
-            <MapPinned color="#E61927" />
-            <h1>Delivery Details</h1>
-          </div>
-          <div className="bg-white flex justify-between items-center p-4">
-            <h2>Specify Delivery Details</h2>
-            <div className="">
-              {selectedDeliveryAddress ? (
-                <>
-                  <p className="capitalize text-gray-700">
-                    {selectedDeliveryAddress.addressType}
-                  </p>
-                  <p className="capitalize text-gray-700">
-                    {selectedDeliveryAddress.building},{" "}
-                    {selectedDeliveryAddress.city}
-                  </p>
-                  <p>+254 {selectedDeliveryAddress.contactNumber}</p>
-                </>
-              ) : (
-                <p>No address selected</p>
-              )}
-            </div>
-            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  className="border border-5 border-[#194A34] text-[#194A34] rounded-full px-4 py-2 hover:bg-[#194A34] hover:text-white transition duration-300"
-                  onClick={() => setIsPopoverOpen(true)}
-                >
-                  View Addresses
-                </button>
-              </PopoverTrigger>
-              <PopoverContent>
-                <div className="flex flex-col gap-4 p-4">
-                  <div className="flex justify-between items-center">
-                    <button
-                      className="bg-[#194A34] text-white px-4 py-2 rounded-full"
-                      onClick={() => {
-                        setIsSheetOpen(true), setIsPopoverOpen(false);
-                      }}
-                    >
-                      Create New Address
-                    </button>
-                  </div>
-                  {isAddressesLoading ||
-                  isDeletingAddress ||
-                  isCreatingAddress ? (
-                    <p>Loading...</p>
-                  ) : updatedAddresses?.length > 0 ? (
-                    updatedAddresses.map((addressData) => (
-                      <AddressCard
-                        key={addressData._id}
-                        address={addressData.address}
-                        onDeleteAddress={() =>
-                          handleDeleteAddress(addressData._id)
-                        }
-                        onSelectAddress={() => handleSelectAddress(addressData)}
-                      />
-                    ))
-                  ) : (
-                    <p>No addresses found.</p>
-                  )}
+          <DeliverySlot
+            onSelectSlot={handleSelectSlot}
+            method={selectedMethod}
+          />
+          <div className="">
+            {/* Render delivery details for both "normal" and "express" methods */}
+            {(selectedMethod === "normal" || selectedMethod === "express") && (
+              <>
+                <div className="bg-[#A0D8BF] flex gap-8 px-10 py-3 mt-2">
+                  <MapPinned color="#E61927" />
+                  <h1>Delivery Details</h1>
                 </div>
-              </PopoverContent>
-            </Popover>
+                <div className="bg-white flex justify-between items-center p-4">
+                  <h2>Specify Delivery Details</h2>
+                  <div className="">
+                    {selectedDeliveryAddress ? (
+                      <>
+                        <p className="capitalize text-gray-700">
+                          {selectedDeliveryAddress.addressType}
+                        </p>
+                        <p className="capitalize text-gray-700">
+                          {selectedDeliveryAddress.building},{" "}
+                          {selectedDeliveryAddress.city}
+                        </p>
+                        <p>+254 {selectedDeliveryAddress.contactNumber}</p>
+                      </>
+                    ) : (
+                      <p>No address selected</p>
+                    )}
+                  </div>
+                  <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <button
+                        className="border border-5 border-[#194A34] text-[#194A34] rounded-full px-4 py-2 hover:bg-[#194A34] hover:text-white transition duration-300"
+                        onClick={() => setIsPopoverOpen(true)}
+                      >
+                        View Addresses
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent>
+                      <div className="flex flex-col gap-4 p-4">
+                        <div className="flex justify-between items-center">
+                          <button
+                            className="bg-[#194A34] text-white px-4 py-2 rounded-full"
+                            onClick={() => {
+                              setIsSheetOpen(true);
+                              setIsPopoverOpen(false);
+                            }}
+                          >
+                            Create New Address
+                          </button>
+                        </div>
+                        {isAddressesLoading ||
+                        isDeletingAddress ||
+                        isCreatingAddress ? (
+                          <p>Loading...</p>
+                        ) : updatedAddresses?.length > 0 ? (
+                          updatedAddresses.map((addressData) => (
+                            <AddressCard
+                              key={addressData._id}
+                              address={addressData.address}
+                              onDeleteAddress={() =>
+                                handleDeleteAddress(addressData._id)
+                              }
+                              onSelectAddress={() =>
+                                handleSelectAddress(addressData)
+                              }
+                            />
+                          ))
+                        ) : (
+                          <p>No addresses found.</p>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                {selectedMethod === "express" && (
+                  <p className="text-gray-700 mt-2">
+                    Package leaves in 30 minutes after payment
+                  </p>
+                )}
+              </>
+            )}
           </div>
+
           <CustomSheet
             isOpen={isSheetOpen}
             onClose={() => setIsSheetOpen(false)}

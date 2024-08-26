@@ -23,7 +23,7 @@ const OrderSummary = ({ subtotal, savings = 0, shippingFee = 0 }) => {
       )}
       <div className="border-y border-gray-300 py-4 flex justify-between font-semibold">
         <span>Total (VAT Inc.)</span>
-        <span>Ksh {(subtotal - savings + shippingFee).toFixed(2)}</span>
+        <span>Ksh {(subtotal + shippingFee).toFixed(2)}</span>
       </div>
 
       <div className="mt-8">

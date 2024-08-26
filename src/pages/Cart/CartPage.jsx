@@ -25,35 +25,34 @@ const CartPage = () => {
     totalSavings: 0,
     totalAmount: 0,
   });
-  console.log(updatedCart);
   const [isCartLoading, setIsCartLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        if (user) {
-          const response = await fetch(
-            `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/${user.cart}`
-          );
-          if (!response.ok) throw new Error("Failed to fetch cart");
-          const cart = await response.json();
-          setUpdatedCart(cart);
-        } else {
-          const localCart = JSON.parse(localStorage.getItem("cartItems")) || {
-            products: [],
-            totalQuantity: 0,
-            totalAmount: 0,
-            savings: 0,
-          };
-          setUpdatedCart(localCart);
-        }
-      } catch (error) {
-        toast.error("Failed to load cart.");
-      } finally {
-        setIsCartLoading(false);
+  const fetchCart = async () => {
+    try {
+      if (user) {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/${user.cart}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch cart");
+        const cart = await response.json();
+        setUpdatedCart(cart);
+      } else {
+        const localCart = JSON.parse(localStorage.getItem("cartItems")) || {
+          products: [],
+          totalQuantity: 0,
+          totalAmount: 0,
+          savings: 0,
+        };
+        setUpdatedCart(localCart);
       }
-    };
+    } catch (error) {
+      toast.error("Failed to load cart.");
+    } finally {
+      setIsCartLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchCart();
   }, [user]);
 
@@ -174,11 +173,11 @@ const CartPage = () => {
                         />
                       </td>
                       <td className="py-2 px-4 border-b">
-                        Ksh {item.product.price}
+                        Ksh {item.product.discountPrice} 
                       </td>
                       <td className="py-2 px-4 border-b flex-col relative">
                         <span>
-                          Ksh {(item.quantity * item.product.price).toFixed(2)}
+                          Ksh {item.quantity * item.product.discountPrice}
                         </span>
                         <Trash2
                           color="#B12E26"
