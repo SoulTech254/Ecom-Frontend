@@ -4,18 +4,18 @@ import { Link } from "react-router-dom";
 
 const Stepper = ({ heading, steps, activeStep, doneSteps, to }) => {
   return (
-    <div>
-      <ol className="flex items-center w-full justify-around p-3 space-x-10 text-base font-semibold text-center text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm dark:text-gray-400 sm:text-lg dark:bg-gray-800 dark:border-gray-700 sm:p-5 sm:space-x-6 rtl:space-x-reverse">
+    <div className="w-full">
+      <ol className="flex items-center justify-between p-2 sm:p-3 md:p-4 text-xs font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800 dark:border-gray-700 sm:text-base sm:space-x-8 md:text-lg md:space-x-10 rtl:space-x-reverse">
         {steps.map((step, index) => (
           <li
             key={index}
             className={`flex items-center ${
-              activeStep === index ? "font-bold" : ""
+              activeStep === index ? "font-semibold" : ""
             }`}
           >
-            <Link to={to[index]}>
+            <Link to={to[index]} className="flex items-center">
               <span
-                className={`flex items-center justify-center w-6 h-6 me-2 text-lg border border-gray-500 rounded-full shrink-0 dark:border-gray-400 ${
+                className={`flex items-center justify-center w-4 h-4 sm:w-6 sm:h-6 me-2 text-xs border border-gray-500 rounded-full shrink-0 dark:border-gray-400 ${
                   doneSteps && doneSteps.includes(index)
                     ? "bg-[#194A34] text-white font-bold"
                     : activeStep === index
@@ -25,24 +25,23 @@ const Stepper = ({ heading, steps, activeStep, doneSteps, to }) => {
               >
                 {/* Displaying tick icon if the step is marked as done */}
                 {doneSteps && doneSteps.includes(index) ? (
-                  <Check size={20} color="#ffffff" />
+                  <Check size={14} color="#ffffff" />
                 ) : (
                   index + 1
                 )}
               </span>
-            </Link>
-            <Link to={to[index]}>
               <span
                 className={`${
                   doneSteps && doneSteps.includes(index) ? "text-[#194A34]" : ""
                 }`}
               >
-                {step.label}
+                {/* Conditionally rendering the step label */}
+                {step.label.replace("Details", "")}
               </span>
             </Link>
             {index < steps.length - 1 && (
               <svg
-                className="w-4 h-4 ms-2 sm:ms-4 rtl:rotate-180"
+                className="w-2 h-2 sm:w-4 sm:h-4 ms-2 sm:ms-4 rtl:rotate-180"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

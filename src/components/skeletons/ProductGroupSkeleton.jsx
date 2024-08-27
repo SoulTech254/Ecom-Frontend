@@ -3,7 +3,7 @@ import React from "react";
 
 const ProductGroupSkeleton = () => {
   return (
-    <div className="flex flex-wrap justify-center gap-2">
+    <div className="flex overflow-hidden justify-center gap-2">
       <SkeletonCard />
       <SkeletonCard />
       <SkeletonCard />

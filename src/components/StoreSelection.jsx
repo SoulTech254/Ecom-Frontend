@@ -1,11 +1,5 @@
 import * as React from "react";
-import {
-  Check,
-  ChevronDownIcon,
-  ChevronsDown,
-  ChevronsUpDown,
-  StoreIcon,
-} from "lucide-react";
+import { Check, ChevronDownIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -34,48 +28,51 @@ const StoreSelection = ({ branches, onSelectBranch }) => {
 
   const handleSelect = (branch) => {
     setSelectedBranch(branch);
-    onSelectBranch(branch); // Pass selected branch to parent component
-    setOpen(false);
+    onSelectBranch(branch); // Notify parent component
+    setOpen(false); // Close popover
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} className="z-1000">
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[130px] hover:text-[#b12e26] justify-between border-none hover:bg-white p-0 "
+          className="w-[130px] hover:text-[#b12e26] justify-between border-none hover:bg-white p-0"
         >
           {selectedBranch ? selectedBranch.label : "Select Branch"}
+          <ChevronDownIcon className="ml-2" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[200px] p-0 bg-white shadow-lg rounded">
         <Command>
           <CommandInput placeholder="Select Branch" />
           <CommandList>
-            {branches.length === 0 && (
+            {branches.length === 0 ? (
               <CommandEmpty>No branches found.</CommandEmpty>
+            ) : (
+              <CommandGroup>
+                {branches.map((branch) => (
+                  <CommandItem
+                    key={branch.value}
+                    value={branch.value}
+                    onSelect={() => handleSelect(branch)}
+                    className="cursor-pointer flex items-center"
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        selectedBranch && selectedBranch.value === branch.value
+                          ? "opacity-100"
+                          : "opacity-0"
+                      )}
+                    />
+                    <p className="text-sm">{branch.label}</p>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
             )}
-            <CommandGroup>
-              {branches.map((branch) => (
-                <CommandItem
-                  key={branch.value}
-                  value={branch.value}
-                  onSelect={() => handleSelect(branch)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      selectedBranch && selectedBranch.value === branch.value
-                        ? "opacity-100"
-                        : "opacity-0"
-                    )}
-                  />
-                  <p className="text-sm">{branch.label}</p>
-                </CommandItem>
-              ))}
-            </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>

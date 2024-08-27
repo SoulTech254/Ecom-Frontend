@@ -10,8 +10,8 @@ import ProductCard from "./ProductCard";
 
 export default function ProductGroup({ products }) {
   return (
-    <div className="relative flex flex-col justify-center gap-2 items-center">
-      <div className="relative w-full">
+    <div className="flex flex-col justify-center gap-2 items-center">
+      <div className="w-full">
         <Carousel
           opts={{
             align: "end",
@@ -22,7 +22,7 @@ export default function ProductGroup({ products }) {
             {products.map((product, index) => (
               <CarouselItem
                 key={index}
-                className="w-full mr-1 md:basis-1/3 lg:basis-1/6"
+                className="w-full mr-1 md:basis-1/4 sm:basis-1/3 basis-1/2 lg:basis-1/6"
               >
                 <ProductCard
                   key={product._id}

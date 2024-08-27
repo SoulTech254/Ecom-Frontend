@@ -1,4 +1,4 @@
-import { CircleUserRound, LogInIcon, StoreIcon } from "lucide-react";
+import { CircleUserRound, LogInIcon, StoreIcon, Menu } from "lucide-react";
 import Logo from "../assets/images/quickmart.png";
 import SearchBar from "./SearchBar";
 import { Link } from "react-router-dom";
@@ -8,15 +8,18 @@ import StoreSelection from "./StoreSelection";
 import { useGetBranches } from "@/api/HomeApi";
 import { useState, useEffect } from "react";
 import { setBranch } from "@/redux/branch/branchSlice";
-import SubcategoryWindow from "@/components/SubcategoryWindow"; // Import SubcategoryWindow
+import SubcategoryWindow from "@/components/SubcategoryWindow";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { categories } from "@/utils/utils";
+import Sheet from "./Sheet";
+import MobileNavbar from "./MobileNavbar";
 
 const Navbar = () => {
   const { user } = useSelector((state) => state.user);
   const { branches: apiBranches, isLoadingBranches } = useGetBranches();
   const [branches, setBranches] = useState([]);
   const [hoveredCategory, setHoveredCategory] = useState(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -30,13 +33,19 @@ const Navbar = () => {
     dispatch(setBranch(branch));
   };
 
+  const handleSheetClose = () => setIsSheetOpen(false);
+
   return (
-    <div className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 box-border h-[90px]- mb-3 z-10">
-      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 ">
+    <div className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 box-border h-fit mb-3 z-10">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 gap-3">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0">
-            <img className="h-8" src={Logo} alt="quickmart Logo" />
+            <img
+              className="w-20 sm:w-24 md:w-32 lg:w-40 xl:w-48 h-auto"
+              src={Logo}
+              alt="quickmart Logo"
+            />
           </Link>
 
           {/* Search Bar */}
@@ -45,7 +54,7 @@ const Navbar = () => {
           </div>
 
           {/* Navigation Links */}
-          <div className="flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-8">
             {/* Select Store */}
             <div className="flex items-center gap-1">
               {isLoadingBranches ? (
@@ -84,13 +93,26 @@ const Navbar = () => {
                 </>
               )}
             </div>
-
-            {/* Cart */}
-            <Cart />
           </div>
+          <Cart />
+
+          {/* Mobile Menu Icon */}
+          <button
+            className="md:hidden text-orange-500 p-2"
+            onClick={() => setIsSheetOpen(true)}
+          >
+            <Menu />
+          </button>
+
+          {/* Mobile Navbar */}
+          <Sheet isOpen={isSheetOpen} onClose={handleSheetClose}>
+            <MobileNavbar isOpen={isSheetOpen} onClose={handleSheetClose} />
+          </Sheet>
         </div>
       </div>
-      <div className="relative flex justify-center gap-12 text-secondary font-bold box-border">
+
+      {/* Mobile Categories */}
+      <div className="relative flex justify-center gap-12 text-secondary font-bold box-border hidden md:flex">
         {categories.map((category) => (
           <span
             key={category.id}
@@ -99,7 +121,7 @@ const Navbar = () => {
             onMouseLeave={() => setHoveredCategory(null)}
           >
             {category.name}
-            <span className="absolute bottom-0 left-0 h-[2px] bg-secondary  transition-all duration-300 origin-left scale-x-0 group-hover:scale-x-100 w-full"></span>
+            <span className="absolute bottom-0 left-0 h-[2px] bg-secondary transition-all duration-300 origin-left scale-x-0 group-hover:scale-x-100 w-full"></span>
             {hoveredCategory === category.id && (
               <SubcategoryWindow groups={category.groups} />
             )}
