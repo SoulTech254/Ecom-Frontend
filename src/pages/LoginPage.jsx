@@ -11,7 +11,7 @@ import LoginForm from "@/forms/authForms/LoginForm";
 import OTPVerificationForm from "@/forms/authForms/OtpVerificationForm";
 import UpdatePasswordForm from "@/forms/authForms/UpdatePasswordForm";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { saveUser } from "@/redux/user/userSlice";
 import { mergeLocalCart } from "@/redux/cart/cartSlice";
@@ -19,6 +19,7 @@ import StoreBranchModal from "@/components/StoreSelection";
 import { useGetBranches } from "@/api/HomeApi";
 import { setBranch } from "@/redux/branch/branchSlice";
 import { SelectBranchModal } from "@/components/SelectBranchModal";
+import { setAccessToken } from "@/redux/auth/authSlice";
 
 const LoginPage = () => {
   const { login, isLogginIn } = useLogin();
@@ -39,6 +40,7 @@ const LoginPage = () => {
   const [showStoreBranchModal, setShowStoreBranchModal] = useState(false); // State to control StoreBranchModal visibility
   const navigate = useNavigate();
   const [branches, setBranches] = useState([]); // Local state to store branches
+  const { selectedBranch } = useSelector((state) => state.branch);
 
   useEffect(() => {
     // Update local state with API branches once they are loaded
@@ -77,11 +79,14 @@ const LoginPage = () => {
 
   const handleLoginSave = async (data) => {
     try {
-      const response = await login(data);
-      console.log(response);
-      dispatch(saveUser(response));
+      const { user, accessToken } = await login(data);
+      dispatch(saveUser(user));
+      dispatch(setAccessToken(accessToken));
       dispatch(mergeLocalCart());
       setShowStoreBranchModal(true); // Show StoreBranchModal after successful login
+      if (selectedBranch) {
+        navigate("/");
+      }
     } catch (error) {
       console.error("Login failed", error.message);
     }
@@ -143,7 +148,9 @@ const LoginPage = () => {
           onButtonClick={() => setResetPassword(true)}
         />
       )}
-      {showStoreBranchModal && <SelectBranchModal onSave={handleBranchSave} />}
+      {showStoreBranchModal && !selectedBranch && (
+        <SelectBranchModal onSave={handleBranchSave} />
+      )}
     </div>
   );
 };

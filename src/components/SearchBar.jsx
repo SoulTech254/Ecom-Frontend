@@ -42,11 +42,11 @@ const SearchBar = () => {
           className="w-full focus:outline-none bg-gray-200"
           {...register("searchQuery")}
           type="text"
-          placeholder="Search products..."
+          placeholder="Search"
           defaultValue={searchTerm}
         />
         <button type="submit" aria-label="Search">
-          <Search />
+          <Search  size={18}/>
         </button>
       </form>
     </div>

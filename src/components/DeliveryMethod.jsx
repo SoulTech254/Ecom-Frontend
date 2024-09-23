@@ -1,75 +1,57 @@
+import React from "react";
 import { Bike, ShoppingBasket, Truck } from "lucide-react";
-import React, { useState } from "react";
 
-const DeliveryMethod = ({ onMethodChange }) => {
-  const [activeTab, setActiveTab] = useState("normal");
-
+const DeliveryMethod = ({ activeMethod, onMethodChange }) => {
   // Function to handle tab selection
   const handleTabChange = (method) => {
-    setActiveTab(method);
     onMethodChange(method); // Notify parent component of selected method
   };
+
+  console.log(activeMethod)
+
+  const deliveryMethods = [
+    {
+      method: "normal",
+      icon: <Truck className="text-lg sm:text-xl md:text-2xl" />,
+      label: "Normal",
+    },
+    {
+      method: "express",
+      icon: <Bike className="text-lg sm:text-xl md:text-2xl" />,
+      label: "Express",
+    },
+    {
+      method: "pick-up",
+      icon: <ShoppingBasket className="text-lg sm:text-xl md:text-2xl" />,
+      label: "Pick Up",
+    },
+  ];
 
   return (
     <div className="bg-[#FAF0E660] border p-2 rounded-lg mt-3">
       <div className="flex">
-        <div
-          className={`flex-1 flex justify-center p-2 rounded-lg cursor-pointer ${
-            activeTab === "normal" ? "bg-white" : ""
-          }`}
-          onClick={() => handleTabChange("normal")}
-        >
-          <label className="flex items-center cursor-pointer">
-            <input
-              type="radio"
-              name="deliveryMethod"
-              value="normal"
-              checked={activeTab === "normal"}
-              onChange={() => handleTabChange("normal")}
-              className="sr-only"
-            />
-            <Truck />
-            <span className="ml-2">Normal Delivery</span>
-          </label>
-        </div>
-        <div
-          className={`flex-1 flex justify-center p-2 rounded-lg cursor-pointer ${
-            activeTab === "express" ? "bg-white" : ""
-          }`}
-          onClick={() => handleTabChange("express")}
-        >
-          <label className="flex items-center cursor-pointer">
-            <input
-              type="radio"
-              name="deliveryMethod"
-              value="express"
-              checked={activeTab === "express"}
-              onChange={() => handleTabChange("express")}
-              className="sr-only"
-            />
-            <Bike />
-            <span className="ml-2">Express Delivery</span>
-          </label>
-        </div>
-        <div
-          className={`flex-1 flex justify-center p-2 rounded-lg cursor-pointer ${
-            activeTab === "pick-up" ? "bg-white" : ""
-          }`}
-          onClick={() => handleTabChange("pick-up")}
-        >
-          <label className="flex items-center cursor-pointer">
-            <input
-              type="radio"
-              name="deliveryMethod"
-              value="pick-up"
-              checked={activeTab === "pick-up"}
-              onChange={() => handleTabChange("pick-up")}
-              className="sr-only"
-            />
-            <ShoppingBasket />
-            <span className="ml-2">Pick Up at Store</span>
-          </label>
-        </div>
+        {deliveryMethods.map(({ method, icon, label }) => (
+          <div
+            key={method}
+            className={`flex-1 flex justify-center p-3 rounded-lg cursor-pointer ${
+              activeMethod === method ? "bg-white" : ""
+            }`}
+            onClick={() => handleTabChange(method)}
+          >
+            <label className="flex items-center cursor-pointer text-xs sm:text-sm md:text-base">
+              <input
+                type="radio"
+                name="deliveryMethod"
+                value={method}
+                checked={activeMethod === method}
+                onChange={() => handleTabChange(method)}
+                className="sr-only"
+              />
+              {icon}
+              <span className="ml-2">{label}</span>
+            </label>
+          </div>
+        ))}
       </div>
     </div>
   );

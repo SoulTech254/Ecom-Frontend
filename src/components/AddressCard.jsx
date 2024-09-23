@@ -1,4 +1,4 @@
-import { EllipsisVertical } from "lucide-react";
+import { EllipsisVertical, MapPinIcon } from "lucide-react";
 import { useState } from "react";
 import {
   Popover,
@@ -10,21 +10,22 @@ const AddressCard = ({ address, onSelectAddress, onDeleteAddress }) => {
   const [isSelected, setIsSelected] = useState(false);
 
   const handleCardClick = () => {
-    onSelectAddress(address._id);
+    onSelectAddress(address); // Pass the entire address object
     setIsSelected(true);
   };
 
   return (
     <div
-      className={`relative flex items-center border-b-2 border-gray-200 py-2 cursor-pointer ${
-        isSelected ? "bg-gray-100" : ""
-      }`}
+      className={`relative flex items-center border-2 border-transparent py-2 cursor-pointer transition duration-300 ${
+        isSelected ? "border-primary bg-gray-100" : "border-gray-200"
+      } rounded-lg`} // Added rounded-lg for a card-like appearance
       onClick={handleCardClick}
     >
-      <div className="flex items-center w-full">
+      <div className="flex items-center w-full gap-1">
+        <MapPinIcon size={18} />
         <div className="flex-grow">
-          <span className="font-bold capitalize">{address.addressType}</span> -{" "}
-          {address.address} - {address.apartment} {address.city}
+          <span className="font-bold capitalize">{address.city}</span> -
+          {address.building} - {address.contactNumber}
         </div>
         <Popover>
           <PopoverTrigger asChild>

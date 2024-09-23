@@ -13,6 +13,11 @@ export const userSlice = createSlice({
     },
     deleteUser: (state) => {
       state.user = null;
+      try {
+        localStorage.removeItem("persist:user"); // Remove the user key from localStorage
+      } catch (error) {
+        console.error("Error removing user from localStorage:", error);
+      }
     },
   },
 });

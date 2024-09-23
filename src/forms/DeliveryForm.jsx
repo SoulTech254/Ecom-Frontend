@@ -186,7 +186,7 @@ const DeliveryForm = ({ onSubmit }) => {
                       })}
                       type="radio"
                       value="work"
-                      className="form-radio h-5 w-5 text-[#E61927]"
+                      className="form-radio h-5 w-5 text-[# E61927]"
                     />
                     <span className="ml-2">Work</span>
                   </label>

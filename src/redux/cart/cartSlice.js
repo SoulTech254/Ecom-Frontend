@@ -1,4 +1,6 @@
+import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { toast } from "sonner";
 
 const storage = localStorage.getItem("cartItems");
 
@@ -17,10 +19,32 @@ const saveCartToLocalStorage = (products) => {
   localStorage.setItem("cartItems", JSON.stringify(products));
 };
 
+// Error handling function
+const handleError = (error) => {
+  if (error.response) {
+    const statusCode = error.response.status;
+    switch (statusCode) {
+      case 400:
+        return "Invalid request. Please check your input.";
+      case 401:
+        return "Session has expired. Please login again.";
+      case 404:
+        return "Requested resource not found.";
+      case 500:
+      default:
+        return "Something went wrong on our end. Please try again later.";
+    }
+  }
+  return "Network error. Please check your internet connection.";
+};
+
 // Async thunk for adding product to cart (authenticated users)
 export const addProductToCart = createAsyncThunk(
   "cart/addProductToCart",
-  async ({ productID, quantity, method }, { getState, rejectWithValue }) => {
+  async (
+    { productID, quantity, method, axiosPrivate },
+    { getState, rejectWithValue }
+  ) => {
     const user = getState().user.user;
 
     if (!user) {
@@ -35,33 +59,24 @@ export const addProductToCart = createAsyncThunk(
       method: method,
     };
 
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/${id}/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      return rejectWithValue({
-        error: errorData.message || "Failed to add product to cart",
-      });
+    try {
+      const response = await axiosPrivate.post(
+        `/api/v1/cart/${id}/`,
+        requestBody
+      );
+      return response.data; // Assuming the response contains the updated cart
+    } catch (error) {
+      const message = handleError(error);
+      toast.error(message); // Display the error message
+      return rejectWithValue({ error: message });
     }
-
-    const data = await response.json();
-    return data;
   }
 );
 
 // Async thunk for merging local cart with backend cart
 export const mergeLocalCart = createAsyncThunk(
   "cart/mergeLocalCart",
-  async (_, { getState }) => {
+  async (_, { getState, rejectWithValue }) => {
     const user = getState().user.user;
     const localCartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
 
@@ -70,69 +85,66 @@ export const mergeLocalCart = createAsyncThunk(
       quantity: item.quantity,
     }));
 
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/merge/${user.cart}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(cartItemsToMerge),
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/merge/${user.cart}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(cartItemsToMerge),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to merge cart");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Failed to merge cart");
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      const message = handleError(error);
+      toast.error(message); // Display the error message
+      return rejectWithValue({ error: message });
     }
-
-    const data = await response.json();
-    return data;
   }
 );
 
+// Async thunk for deleting product from cart
 export const deleteProductFromCart = createAsyncThunk(
   "cart/deleteProductFromCart",
-  async ({ cartId, productId }, { getState, rejectWithValue }) => {
+  async (
+    { cartId, productId, axiosPrivate },
+    { getState, rejectWithValue }
+  ) => {
     const user = getState().user.user;
+
     if (!user) {
       return rejectWithValue({ error: "User not authenticated" });
     }
 
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/product/${cartId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ product: productId }),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to delete product from cart");
+    try {
+      const response = await axiosPrivate.delete(
+        `/api/v1/cart/product/${cartId}`,
+        { data: { product: productId } }
+      );
+      return response.data; // Assuming the response contains the updated cart
+    } catch (error) {
+      const message = handleError(error);
+      toast.error(message); // Display the error message
+      return rejectWithValue({ error: message });
     }
-
-    const data = await response.json();
-    return data;
   }
 );
 
+// Cart slice
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
     addToCartLocal: (state, action) => {
       const { id, img, price, name, discountPrice, quantity } = action.payload;
-
-      console.log("Add to cart local", {
-        id,
-        img,
-        price,
-        name,
-        discountPrice,
-        quantity,
-      });
 
       const existingItem = state.products.find(
         (cartItem) => cartItem.product._id === id
@@ -141,7 +153,6 @@ const cartSlice = createSlice({
       if (existingItem) {
         existingItem.quantity += quantity;
 
-        // Update savings if the quantity is updated
         existingItem.savings =
           (parseFloat(existingItem.product.price) - parseFloat(discountPrice)) *
           existingItem.quantity;
@@ -165,7 +176,7 @@ const cartSlice = createSlice({
         });
       }
 
-      // Recalculate total quantity, amount, and savings
+      // Recalculate totals
       state.totalQuantity = state.products.reduce(
         (acc, item) => acc + item.quantity,
         0
@@ -174,7 +185,7 @@ const cartSlice = createSlice({
         (acc, item) => acc + item.quantity * parseFloat(item.product.price),
         0
       );
-      state.totalSavings = state.products.reduce(
+      state.savings = state.products.reduce(
         (acc, item) => acc + item.savings,
         0
       );
@@ -192,6 +203,41 @@ const cartSlice = createSlice({
       state.totalQuantity = action.payload.totalQuantity;
       state.totalAmount = action.payload.totalAmount;
     },
+    resetCart: (state) => {
+      state.products = [];
+      state.savings = 0;
+      state.totalQuantity = 0;
+      state.totalAmount = 0;
+      localStorage.removeItem("cartItems");
+    },
+    deleteProductLocalCart: (state, action) => {
+      const { id } = action.payload;
+
+      // Remove the product from the cart
+      state.products = state.products.filter(
+        (cartItem) => cartItem.product._id !== id
+      );
+
+      // Recalculate totals
+      const { totalQuantity, totalAmount, totalSavings } =
+        state.products.reduce(
+          (totals, item) => {
+            totals.totalQuantity += item.quantity;
+            totals.totalAmount +=
+              item.quantity * parseFloat(item.product.price);
+            totals.totalSavings += item.savings;
+            return totals;
+          },
+          { totalQuantity: 0, totalAmount: 0, totalSavings: 0 }
+        );
+
+      state.totalQuantity = totalQuantity;
+      state.totalAmount = totalAmount;
+      state.savings = totalSavings;
+
+      // Save the updated cart to localStorage
+      saveCartToLocalStorage(state);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -207,7 +253,7 @@ const cartSlice = createSlice({
       })
       .addCase(addProductToCart.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message;
+        state.error = action.payload.error;
       })
       .addCase(mergeLocalCart.pending, (state) => {
         state.status = "loading";
@@ -238,11 +284,16 @@ const cartSlice = createSlice({
       })
       .addCase(deleteProductFromCart.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message;
+        state.error = action.payload.error;
       });
   },
 });
 
-export const { addToCartLocal, clearLocalCart, updateCartState } =
-  cartSlice.actions;
+export const {
+  addToCartLocal,
+  clearLocalCart,
+  updateCartState,
+  resetCart,
+  deleteProductLocalCart,
+} = cartSlice.actions;
 export default cartSlice.reducer;

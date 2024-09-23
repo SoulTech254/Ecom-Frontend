@@ -13,7 +13,7 @@ const ProductOrderCard = ({ product }) => {
         <div className="text-sm">
           {product.quantity} {product.quantity > 1 ? "Pieces" : "Piece"}{" "}
         </div>
-        <div className="text-xs">Ksh {product.id.price}</div>
+        <div className="text-xs mt-1">Ksh {product.id.discountPrice}</div>
       </div>
     </div>
   );

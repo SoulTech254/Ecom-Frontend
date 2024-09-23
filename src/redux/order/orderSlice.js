@@ -20,9 +20,21 @@ const orderSlice = createSlice({
     setCartInfo(state, action) {
       state.cartInfo = action.payload;
     },
+    deleteOrderInfo(state) {
+      state.cartInfo = [];
+      state.deliveryInfo = {};
+      state.paymentInfo = {};
+      try {
+        localStorage.removeItem("persist:cartInfo"); // Remove the user key from localStorage
+        localStorage.removeItem("persist:deliveryInfo"); // Remove the user key from localStorage
+        localStorage.removeItem("persist:paymentInfo"); // Remove the user key from localStorage
+      } catch (error) {
+        console.error("Error removing user from localStorage:", error);
+      }
+    },
     // You can add more reducers here based on your application's needs
   },
 });
 
-export const { setDeliveryInfo, setPaymentInfo } = orderSlice.actions;
+export const { setDeliveryInfo, setPaymentInfo, deleteOrderInfo } = orderSlice.actions;
 export default orderSlice.reducer;

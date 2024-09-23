@@ -1,12 +1,34 @@
-import { isError, useMutation, useQuery } from "react-query";
+import useAxiosPrivate from "@/hooks/useAxiosPrivate";
+import { useMutation, useQuery } from "react-query";
+import axios from "./axios";
+import { toast } from "sonner"; // Import the toast library
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+export const handleError = (error) => {
+  if (error.response) {
+    const statusCode = error.response.status;
+    const message = error.response.data?.message || "An error occurred";
+
+    switch (statusCode) {
+      case 400:
+        return "Invalid request. Please check your input.";
+      case 401:
+        return "Session has Expired. Please Login Again.";
+      case 403:
+        return "FORBIDDEN. You don't have permission to perform this action.";
+      case 404:
+        return "Requested resource not found.";
+      case 500:
+      default:
+        return "Something went wrong on our end. Please try again later.";
+    }
+  }
+  return "Network error. Please check your internet connection.";
+};
 
 export const useGetProducts = (branchName, brand) => {
-  console.log(branchName);
+  const axiosPrivate = useAxiosPrivate();
   const getProductsRequest = async () => {
     try {
-      // Create a URLSearchParams instance
       const params = new URLSearchParams();
       params.append("branch", branchName);
 
@@ -14,39 +36,25 @@ export const useGetProducts = (branchName, brand) => {
         params.append("brand", brand);
       }
 
-      // Construct the full URL with query parameters
-      const url = `${API_BASE_URL}/api/v1/products?${params.toString()}`;
-
-      const response = await fetch(url, {
-        method: "GET",
-      });
-
-      const data = await response.json();
-      console.log("Products data:", data);
-      if (!response.ok) {
-        throw new Error(data.message);
-      }
-      return data; // Ensure data includes both products and metadata
+      const response = await axios.get(`/api/v1/products?${params.toString()}`);
+      return response.data;
     } catch (error) {
-      console.error("Error fetching products:", error);
-      throw error;
+      const errorMessage = handleError(error);
+      toast.error(errorMessage); // Display toast message
+      throw new Error(errorMessage);
     }
   };
 
   const { data, isLoading: isProductsLoading } = useQuery(
-    ["products", branchName, brand], // Include brand in the query key for caching
+    ["products", branchName, brand],
     getProductsRequest,
     {
-      enabled: !!branchName, // Only run the query if branchName is provided
+      enabled: !!branchName,
     }
   );
 
   const products = data?.products || [];
-  const metadata = data?.metadata || {}; // Assuming metadata is an object
-
-  console.log("Products data from useQuery:", products);
-  console.log("Metadata from useQuery:", metadata);
-  console.log("Is products loading:", isProductsLoading);
+  const metadata = data?.metadata || {};
 
   return { products, metadata, isProductsLoading };
 };
@@ -54,73 +62,61 @@ export const useGetProducts = (branchName, brand) => {
 export const useGetBestSellers = (branchId) => {
   const getBestSellersRequest = async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/v1/products?branchId=${branchId}`,
-        {
-          method: "GET",
-        }
-      );
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message);
-      }
-      return data;
+      const response = await axios.get(`/api/v1/products?branchId=${branchId}`);
+      return response.data;
     } catch (error) {
-      console.error("Error fetching products:", error);
-      throw error;
+      const errorMessage = handleError(error);
+      toast.error(errorMessage); // Display toast message
+      throw new Error(errorMessage);
     }
   };
 
   const {
     data: bestSellers,
     isLoading,
-    error,
   } = useQuery(["bestSellers", branchId], getBestSellersRequest, {
     onError: (error) => {
-      // Handle error here, e.g., show error message to user
-      console.error("Error fetching best sellers:", error);
+      const errorMessage = handleError(error);
+      toast.error(errorMessage); // Display toast message
     },
   });
 
-  return { bestSellers, isLoading, error };
+  return { bestSellers, isLoading };
 };
 
 export const useGetAProduct = (id, branchName) => {
-  const getProductsRequest = async () => {
-    const response = await fetch(
-      `${API_BASE_URL}/api/v1/products/${id}?branchName=${branchName}`,
-      {
-        method: "GET",
-      }
-    );
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message);
+  const getProductRequest = async () => {
+    try {
+      const response = await axios.get(`/api/v1/products/${id}`, {
+        params: { branchName },
+      });
+      return response.data;
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(errorMessage); // Display toast message
+      throw new Error(errorMessage);
     }
-    return data;
   };
 
   const { data: product, isLoading: isProductLoading } = useQuery(
     ["product", id, branchName],
-    getProductsRequest
+    getProductRequest
   );
 
   return { product, isProductLoading };
 };
 
 export const useGetCart = (id) => {
+  const axiosPrivate = useAxiosPrivate();
   const getCartRequest = async () => {
-    console.log(id);
-    const response = await fetch(`${API_BASE_URL}/api/v1/cart/${id}`, {
-      method: "GET",
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message);
+    try {
+      const response = await axiosPrivate.get(`/api/v1/cart/${id}`);
+      return response.data;
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(errorMessage); // Display toast message
+      throw new Error(errorMessage);
     }
-    console.log(data);
-    return data;
   };
 
   const { data: cart, isLoading: isCartLoading } = useQuery(
@@ -131,47 +127,45 @@ export const useGetCart = (id) => {
   return { cart, isCartLoading };
 };
 
-export const useUpdateCart = async (id, productId, quantity) => {
-  const updateCartRequest = async () => {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/${id}/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ product: productId, quantity: quantity }),
-      }
-    );
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message);
+export const useUpdateCart = () => {
+  const axiosPrivate = useAxiosPrivate();
+  const updateCartRequest = async (id, productId, quantity) => {
+    try {
+      const response = await axiosPrivate.post(`/api/v1/cart/${id}/`, {
+        product: productId,
+        quantity,
+      });
+      return response.data;
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(errorMessage); // Display toast message
+      throw new Error(errorMessage);
     }
-    return data;
   };
 
   const {
-    data: cart,
+    mutateAsync: updateCart,
     isLoading: isCartLoading,
-    isSuccess,
-    error,
   } = useMutation(updateCartRequest);
 
-  return { cart, isCartLoading, isSuccess, error };
+  return { updateCart, isCartLoading };
 };
 
 export const useDeleteCartProduct = () => {
+  const axiosPrivate = useAxiosPrivate();
   const deleteProductRequest = async (id, productId) => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/cart/product/${id}`, {
-      method: "DELETE",
-      body: JSON.stringify({ product: productId }),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message);
+    try {
+      const response = await axiosPrivate.delete(`/api/v1/cart/product/${id}`, {
+        data: { product: productId },
+      });
+      return response.data;
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(errorMessage); // Display toast message
+      throw new Error(errorMessage);
     }
-    return data;
   };
+
   const { mutateAsync: deleteProduct, isLoading: isDeleting } =
     useMutation(deleteProductRequest);
 

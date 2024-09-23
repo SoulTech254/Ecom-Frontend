@@ -16,7 +16,8 @@ const CircleLink = lazy(() => import("@/components/CircleLink"));
 
 const HomePage = () => {
   const { selectedBranch } = useSelector((state) => state.branch);
-  const branch = selectedBranch.id;
+  const { accessToken } = useSelector((state) => state.user);
+  const branch = selectedBranch?.id || "6685508b50bbcc94fe606925";
   const { products, metadata, isProductsLoading } = useGetProducts(branch);
 
   const banners = [

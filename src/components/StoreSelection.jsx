@@ -33,7 +33,7 @@ const StoreSelection = ({ branches, onSelectBranch }) => {
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen} className="z-1000">
+    <Popover open={open} onOpenChange={setOpen} className="z-1000 ">
       <PopoverTrigger asChild>
         <Button
           variant="outline"

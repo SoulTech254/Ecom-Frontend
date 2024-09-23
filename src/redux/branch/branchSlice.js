@@ -1,5 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const DEFAULT_BRANCH = import.meta.env.VITE_DEFAULT_BRANCH;
+
 // Function to safely parse JSON from localStorage
 const parseJSONFromLocalStorage = (key) => {
   try {
@@ -15,7 +17,7 @@ const parseJSONFromLocalStorage = (key) => {
 };
 
 const initialState = {
-  selectedBranch: parseJSONFromLocalStorage("selectedBranch"),
+  selectedBranch: DEFAULT_BRANCH,
 };
 
 const branchSlice = createSlice({
@@ -30,9 +32,20 @@ const branchSlice = createSlice({
         console.error("Error saving selectedBranch to localStorage:", error);
       }
     },
+    removeBranch: (state) => {
+      state.selectedBranch = null;
+      try {
+        localStorage.removeItem("selectedBranch");
+      } catch (error) {
+        console.error(
+          "Error removing selectedBranch from localStorage:",
+          error
+        );
+      }
+    },
   },
 });
 
-export const { setBranch } = branchSlice.actions;
+export const { setBranch, removeBranch } = branchSlice.actions;
 
 export default branchSlice.reducer;

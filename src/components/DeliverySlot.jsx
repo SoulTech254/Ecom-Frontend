@@ -3,15 +3,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { ScrollArea } from "./ui/scroll-area";
 import { AlarmClock } from "lucide-react";
 
-const DeliverySlot = ({ onSelectSlot, method }) => {
+const DeliverySlot = ({ onSelectSlot, method, selectedSlot: propSelectedSlot }) => {
   const [deliverySlots, setDeliverySlots] = useState([]);
-  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [selectedSlot, setSelectedSlot] = useState(propSelectedSlot || null);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const generateDeliverySlots = () => {
       if (method === "express") {
-        // For express, set slot to 30 minutes from now
         const now = new Date();
         const slot = {
           datetime: new Date(now.getTime() + 30 * 60000).toISOString(),
@@ -19,9 +18,8 @@ const DeliverySlot = ({ onSelectSlot, method }) => {
         };
         setDeliverySlots([slot]);
         setSelectedSlot(slot);
-        onSelectSlot(slot.datetime);
+        onSelectSlot(slot.datetime); // Send ISO format directly
       } else {
-        // Generate slots for normal delivery
         const times = ["09:00", "12:00", "15:00", "17:00", "19:00"];
         const today = new Date();
         const tempDeliverySlots = [];
@@ -30,129 +28,116 @@ const DeliverySlot = ({ onSelectSlot, method }) => {
           const currentDate = new Date(today);
           currentDate.setDate(currentDate.getDate() + d);
 
-          const filteredTimes = times.filter((time) => {
+          times.forEach((time) => {
             const dateTimeString = `${currentDate.getFullYear()}-${(
               currentDate.getMonth() + 1
-            )
-              .toString()
-              .padStart(2, "0")}-${currentDate
-              .getDate()
-              .toString()
-              .padStart(2, "0")} ${time}`;
+            ).toString().padStart(2, "0")}-${currentDate.getDate().toString().padStart(2, "0")} ${time}`;
             const slotDateTime = new Date(dateTimeString);
-            return slotDateTime > today;
-          });
+            if (slotDateTime > today) {
+              const dayOfWeek = getDayOfWeek(currentDate.getDay());
+              const year = currentDate.getFullYear();
+              const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+              const day = currentDate.getDate().toString().padStart(2, "0");
+              const formattedTime = formatTime(time);
 
-          filteredTimes.forEach((time) => {
-            const dayOfWeek = getDayOfWeek(currentDate.getDay());
-            const year = currentDate.getFullYear();
-            const month = (currentDate.getMonth() + 1)
-              .toString()
-              .padStart(2, "0");
-            const day = currentDate.getDate().toString().padStart(2, "0");
-
-            const formattedTime = formatTime(time); // Format time to AM/PM format
-
-            const slot = {
-              datetime: `${year}-${month}-${day} ${time}`,
-              display: `${dayOfWeek} ${day}${getOrdinalSuffix(
-                day
-              )} ${getMonthName(month)} ${formattedTime}`,
-            };
-            tempDeliverySlots.push(slot);
+              const slot = {
+                datetime: slotDateTime.toISOString(),
+                display: `${dayOfWeek} ${day}${getOrdinalSuffix(day)} ${getMonthName(month)} ${formattedTime}`,
+              };
+              tempDeliverySlots.push(slot);
+            }
           });
         }
 
         setDeliverySlots(tempDeliverySlots);
-        setSelectedSlot(tempDeliverySlots[0]);
-        onSelectSlot(tempDeliverySlots[0].datetime);
+        
+        // Check if propSelectedSlot exists in generated slots
+        const matchedSlot = tempDeliverySlots.find(slot => slot.datetime === propSelectedSlot);
+        setSelectedSlot(matchedSlot || tempDeliverySlots[0]); // Select the matched slot or the first one
+        onSelectSlot(matchedSlot?.datetime || (tempDeliverySlots[0]?.datetime || null)); // Send ISO format directly
       }
-    };
-
-    const getDayOfWeek = (dayIndex) => {
-      const daysOfWeek = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ];
-      return daysOfWeek[dayIndex];
-    };
-
-    const getOrdinalSuffix = (day) => {
-      if (day > 3 && day < 21) return "th";
-      switch (day % 10) {
-        case 1:
-          return "st";
-        case 2:
-          return "nd";
-        case 3:
-          return "rd";
-        default:
-          return "th";
-      }
-    };
-
-    const getMonthName = (month) => {
-      const monthNames = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-      ];
-      return monthNames[parseInt(month, 10) - 1];
-    };
-
-    const formatTime = (time) => {
-      const [hour, minute] = time.split(":");
-      const hourInt = parseInt(hour, 10);
-      const isPM = hourInt >= 12;
-      const formattedHour = hourInt % 12 || 12; // Convert to 12-hour format
-      return `${formattedHour}:${minute}${isPM ? "PM" : "AM"}`;
     };
 
     generateDeliverySlots();
-  }, [method]);
+  }, [method, propSelectedSlot]); // Add propSelectedSlot to dependency array
 
-  const handleSelectSlot = (selectedSlot) => {
-    setSelectedSlot(selectedSlot);
-    onSelectSlot(selectedSlot.datetime);
+  useEffect(() => {
+    if (propSelectedSlot) {
+      setSelectedSlot(deliverySlots.find(slot => slot.datetime === propSelectedSlot) || null);
+    }
+  }, [propSelectedSlot, deliverySlots]);
+
+  const handleSelectSlot = (slot) => {
+    setSelectedSlot(slot);
+    onSelectSlot(slot.datetime); // Send ISO format directly
     setIsOpen(false);
+  };
+
+  const getDayOfWeek = (dayIndex) => {
+    const daysOfWeek = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    return daysOfWeek[dayIndex];
+  };
+
+  const getOrdinalSuffix = (day) => {
+    if (day > 3 && day < 21) return "th";
+    switch (day % 10) {
+      case 1: return "st";
+      case 2: return "nd";
+      case 3: return "rd";
+      default: return "th";
+    }
+  };
+
+  const getMonthName = (month) => {
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June", 
+      "July", "August", "September", "October", "November", "December"
+    ];
+    return monthNames[parseInt(month, 10) - 1];
+  };
+
+  const formatTime = (time) => {
+    const [hour, minute] = time.split(":");
+    const hourInt = parseInt(hour, 10);
+    const isPM = hourInt >= 12;
+    const formattedHour = hourInt % 12 || 12;
+    return `${formattedHour}:${minute}${isPM ? " PM" : " AM"}`;
   };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <div className="bg-[#A0D8BF] flex gap-8 px-10 py-3 mt-2">
-        <AlarmClock color="#E61927" />
-        <h2>Schedule Delivery Time</h2>
+      <div className="bg-[#A0D8BF] flex flex-row gap-2 sm:gap-8 px-4 sm:px-10 py-3 mt-2">
+        <AlarmClock color="#E61927" className="text-xl sm:text-2xl" />
+        <h2 className="text-base sm:text-lg font-semibold">
+          Schedule Delivery Time
+        </h2>
       </div>
-      <div className="bg-white flex justify-between items-center p-4">
-        <h2 className="text-lg font-semibold">Select Delivery Time Slot</h2>
-        <p className="text-gray-700">
+      <div className="bg-white flex sm:flex-row justify-between gap-4 items-start sm:items-center p-4">
+        <h2 className="text-sm sm:text-lg hidden font-semibold">
+          Select Delivery Time Slot
+        </h2>
+        <p className="text-sm sm:text-md text-gray-700 w-[50%]">
           {method === "express"
             ? "Express (Leaves in 30 minutes after payment)"
             : selectedSlot
             ? selectedSlot.display
             : "Select a slot"}
         </p>
-        <PopoverContent className="w-50 h-60 bg-white p-4">
+        <PopoverContent className="w-full sm:w-80 h-60 bg-white p-4">
           <ScrollArea className="h-full w-full border-none rounded-md border">
             <ul>
               {deliverySlots.map((slot, index) => (
                 <li
                   key={index}
-                  className="py-2 px-3 cursor-pointer hover:bg-gray-100 rounded-md transition duration-300"
+                  className={`py-2 px-3 cursor-pointer hover:bg-gray-100 rounded-md transition duration-300 text-xs sm:text-sm ${selectedSlot?.datetime === slot.datetime ? 'bg-gray-200' : ''}`}
                   onClick={() => handleSelectSlot(slot)}
                 >
                   {slot.display}
@@ -163,7 +148,7 @@ const DeliverySlot = ({ onSelectSlot, method }) => {
         </PopoverContent>
         <PopoverTrigger asChild>
           <button
-            className="border border-5 border-[#194A34] text-[#194A34] rounded-full px-4 py-2 hover:bg-[#194A34] hover:text-white transition duration-300"
+            className="border-2 border-[#194A34] text-[#194A34] rounded-full px-2 py-1 hover:bg-[#194A34] hover:text-white transition duration-300 text-xs sm:text-sm"
             onClick={() => setIsOpen(!isOpen)}
           >
             Select Time Slot

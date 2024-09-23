@@ -1,23 +1,33 @@
-import { useMutation, useQuery } from "react-query";
+import { useMutation } from "react-query";
 import { toast } from "sonner";
+import axios from "./axios"; // Adjust the import path as necessary
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-console.log(API_BASE_URL);
+const handleError = (error) => {
+  if (error.response) {
+    const statusCode = error.response.status;
+    const message = error.response.data?.message || "An error occurred";
+
+    switch (statusCode) {
+      case 400:
+        return "Invalid input. Please check your data.";
+      case 404:
+        return "User not found.";
+      case 500:
+      default:
+        return "Something went wrong on our end. Please try again later.";
+    }
+  }
+  return "Network error. Please check your internet connection.";
+};
+
 export const useCreateMyUser = () => {
   const createMyUserRequest = async (userFormData) => {
-    console.log(userFormData);
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/sign-up`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userFormData),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message);
+    try {
+      const response = await axios.post("/api/v1/auth/sign-up", userFormData);
+      return response.data; // Directly return the data
+    } catch (error) {
+      throw new Error(handleError(error));
     }
-    return data;
   };
 
   const {
@@ -26,40 +36,37 @@ export const useCreateMyUser = () => {
     isSuccess,
   } = useMutation(createMyUserRequest, {
     onSuccess: () => {
-      toast.success("User Created");
+      toast.success("User Created Successfully");
     },
     onError: (error) => {
-      toast.error(error.message);
+      toast.error(handleError(error));
     },
   });
+
   return { createUser, isLoading, isSuccess };
 };
 
 export const useUpdateUser = () => {
   const updateUserRequest = async (userFormData) => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/user/update`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userFormData),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message);
+    try {
+      const response = await axios.put("/api/v1/user/update", userFormData);
+      return response.data; // Directly return the data
+    } catch (error) {
+      throw new Error(handleError(error));
     }
-    return data;
   };
+
   const { mutateAsync: updateUser, isLoading: isUpdatingLoading } = useMutation(
     updateUserRequest,
     {
       onSuccess: () => {
-        toast.success("Update successful");
+        toast.success("Update Successful");
       },
       onError: (error) => {
-        toast.error(error.message);
+        toast.error(handleError(error));
       },
     }
   );
+
   return { updateUser, isUpdatingLoading };
 };

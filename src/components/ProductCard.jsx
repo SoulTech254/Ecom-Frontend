@@ -6,10 +6,10 @@ import { useState } from "react";
 import Loader from "./Loader";
 import { ShoppingBagIcon } from "lucide-react";
 import Counter from "./Counter";
+import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 
 const ProductCard = ({
   img,
-  description,
   price,
   discountPrice,
   id,
@@ -20,8 +20,10 @@ const ProductCard = ({
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
   const [isCartLoading, setIsCartLoading] = useState(false);
+  const axiosPrivate = useAxiosPrivate();
 
   const cart = useSelector((state) => state.cart);
+  console.log(cart)
   const existingCartItem = cart.products.find(
     (item) => item.product._id === id
   );
@@ -44,6 +46,7 @@ const ProductCard = ({
             productID: id,
             quantity: quantity,
             method: "update",
+            axiosPrivate,
           })
         )
           .unwrap()
@@ -87,7 +90,7 @@ const ProductCard = ({
     : 0;
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden flex flex-col justify-between w-[180px] sm:w-[180px] md:w-[192px] lg:w-[200px] h-[280px] sm:h-[310px] md:h-[370px] p-2">
+    <div className="bg-white rounded-xl overflow-hidden flex flex-col justify-between w-[175px] sm:w-[180px] md:w-[192px] lg:w-[200px] h-[280px] sm:h-[310px] md:h-[370px] p-2">
       <div className="flex-1 flex flex-col">
         <Link
           to={`/products/${id}`}
@@ -110,7 +113,7 @@ const ProductCard = ({
               By <span className="text-primary">{brand}</span>
             </p>
           </div>
-          {discountPrice && (
+          {discountPrice !== price && (
             <div>
               <p className="text-xs sm:text-sm">
                 <span className="line-through text-gray-500">KES {price}</span>{" "}

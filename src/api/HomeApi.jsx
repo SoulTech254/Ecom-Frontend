@@ -1,24 +1,46 @@
 import { useQuery } from "react-query";
+import axios from "./axios"; // Adjust the import path as necessary
+import { toast } from "sonner";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const handleError = (error) => {
+  if (error.response) {
+    const statusCode = error.response.status;
+    const message = error.response.data?.message || "An error occurred";
+
+    switch (statusCode) {
+      case 400:
+        return "Invalid request. Please try again.";
+      case 404:
+        return "Requested resource not found.";
+      case 401:
+        return "You are not authorized. Please log in.";
+      case 500:
+      default:
+        return "Something went wrong on our end. Please try again later.";
+    }
+  }
+  return "Network error. Please check your internet connection.";
+};
 
 export const useGetBranches = () => {
   const getBranchesRequest = async () => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/branch/`);
-    const responseData = await response.json();
-    if (!response.ok) {
-      throw new Error(responseData.message);
+    try {
+      const response = await axios.get("/api/v1/branch/");
+      return response.data;
+    } catch (error) {
+      throw new Error(handleError(error));
     }
-
-    return responseData;
   };
 
   const { data: branches, isLoading: isLoadingBranches } = useQuery(
     "branches",
-    getBranchesRequest
+    getBranchesRequest,
+    {
+      onError: (error) => {
+        toast.error(handleError(error));
+      },
+    }
   );
-
-  console.log(branches);
 
   return { branches, isLoadingBranches };
 };
@@ -32,38 +54,26 @@ export const useSearchProducts = (
   limit = 10
 ) => {
   const searchProductRequest = async () => {
+    const searchParams = new URLSearchParams({
+      query,
+      branchId,
+      sortBy,
+      sortOrder,
+      page,
+      limit,
+    });
+
+    console.log(
+      `Fetching products with query: ${query}, branchId: ${branchId}, sortBy: ${sortBy}, sortOrder: ${sortOrder}, page: ${page}, limit: ${limit}`
+    );
+
     try {
-      // Build the query string with the query, branchId, sortBy, sortOrder, page, and limit
-      const searchParams = new URLSearchParams();
-      searchParams.append("query", query);
-      searchParams.append("branchId", branchId);
-      searchParams.append("sortBy", sortBy);
-      searchParams.append("sortOrder", sortOrder);
-      searchParams.append("page", page);
-      searchParams.append("limit", limit);
-
-      console.log(
-        `Fetching products with query ${query}, branchId ${branchId}, sortBy ${sortBy}, sortOrder ${sortOrder}, page ${page}, and limit ${limit}`
+      const response = await axios.get(
+        `/api/v1/search?${searchParams.toString()}`
       );
-
-      const response = await fetch(
-        `${API_BASE_URL}/api/v1/search?${searchParams.toString()}`,
-        {
-          method: "GET",
-        }
-      );
-      const data = await response.json();
-
-      console.log("Data:", data);
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to fetch products");
-      }
-
-      return data; // Ensure data includes both products and metadata
+      return response.data;
     } catch (error) {
-      console.error("Error fetching products:", error);
-      throw error;
+      throw new Error(handleError(error));
     }
   };
 
@@ -71,16 +81,15 @@ export const useSearchProducts = (
     ["SearchProducts", query, branchId, sortBy, sortOrder, page, limit],
     searchProductRequest,
     {
-      enabled: !!query && !!branchId, // Only run the query if both query and branchId are provided
+      enabled: !!query && !!branchId,
+      onError: (error) => {
+        toast.error(handleError(error));
+      },
     }
   );
 
   const products = data?.products || [];
-  const metadata = data?.metadata || {}; // Assuming metadata includes pagination info
-
-  console.log("Products data from useQuery:", products);
-  console.log("Metadata from useQuery:", metadata);
-  console.log("Is products loading:", isProductsLoading);
+  const metadata = data?.metadata || {};
 
   return { products, metadata, isProductsLoading };
 };
@@ -95,50 +104,29 @@ export const useGetCategoryProducts = (
   searchQuery = ""
 ) => {
   const fetchCategoryProducts = async () => {
+    const searchParams = new URLSearchParams({
+      branch: branchId,
+      sortBy,
+      sortOrder,
+      page,
+      limit,
+      category: categoryId,
+    });
+    if (searchQuery) {
+      searchParams.append("query", searchQuery);
+    }
+
+    console.log(
+      `Fetching products for category: ${categoryId}, branchId: ${branchId}, sortBy: ${sortBy}, sortOrder: ${sortOrder}, page: ${page}, limit: ${limit}, searchQuery: ${searchQuery}`
+    );
+
     try {
-      console.log(
-        categoryId,
-        branchId,
-        sortBy,
-        sortOrder,
-        page,
-        limit,
-        searchQuery
+      const response = await axios.get(
+        `/api/v1/category?${searchParams.toString()}`
       );
-      // Build the query string with the search parameters
-      const searchParams = new URLSearchParams();
-      searchParams.append("branch", branchId);
-      searchParams.append("sortBy", sortBy);
-      searchParams.append("sortOrder", sortOrder);
-      searchParams.append("page", page);
-      searchParams.append("limit", 10);
-      searchParams.append("category", categoryId);
-      if (searchQuery) {
-        searchParams.append("query", searchQuery);
-      }
-
-      console.log(
-        `Fetching products for category ${categoryId}, branchId ${branchId}, sortBy ${sortBy}, sortOrder ${sortOrder}, page ${page}, limit ${limit}, and searchQuery ${searchQuery}`
-      );
-
-      const response = await fetch(
-        `${API_BASE_URL}/api/v1/category?${searchParams.toString()}`,
-        {
-          method: "GET",
-        }
-      );
-      const data = await response.json();
-
-      console.log("Data:", data);
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to fetch category products");
-      }
-
-      return data; // Ensure data includes both products and metadata
+      return response.data;
     } catch (error) {
-      console.error("Error fetching category products:", error);
-      throw error;
+      throw new Error(handleError(error));
     }
   };
 
@@ -155,36 +143,39 @@ export const useGetCategoryProducts = (
     ],
     fetchCategoryProducts,
     {
-      enabled: !!categoryId && !!branchId, // Only run the query if both categoryId and branchId are provided
+      enabled: !!categoryId && !!branchId,
+      onError: (error) => {
+        toast.error(handleError(error));
+      },
     }
   );
 
   const products = data?.products || [];
-  const metadata = data?.metadata || {}; // Assuming metadata includes pagination info
-
-  console.log("Products data from useQuery:", products);
-  console.log("Metadata from useQuery:", metadata);
-  console.log("Is products loading:", isProductsLoading);
+  const metadata = data?.metadata || {};
 
   return { products, metadata, isProductsLoading };
 };
 
 export const useGetSubcategories = (categoryId) => {
-  const searchParams = new URLSearchParams();
-  searchParams.append("category", categoryId);
   const fetchSubcategories = async () => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/category/subcategory?${searchParams.toString()}`);
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to fetch subcategories");
+    try {
+      const response = await axios.get("/api/v1/category/subcategory", {
+        params: { category: categoryId },
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(handleError(error));
     }
-
-    return data;
   };
 
   const { data, isLoading: isSubcategoriesLoading } = useQuery(
     ["Subcategories", categoryId],
-    fetchSubcategories
+    fetchSubcategories,
+    {
+      onError: (error) => {
+        toast.error(handleError(error));
+      },
+    }
   );
 
   return { subcategories: data, isSubcategoriesLoading };

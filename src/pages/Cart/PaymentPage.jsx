@@ -2,157 +2,142 @@ import OrderSummary from "@/components/OrderSummary";
 import Stepper from "@/components/Stepper";
 import { links, steps } from "@/config/cartConfig";
 import { setPaymentInfo } from "@/redux/order/orderSlice";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import airtel from "../../assets/airtel.jpg";
-import mpesa from "../../assets/mpesa.png";
-import mastercard from "../../assets/mastercard.jpg";
-import visa from "../../assets/Visa.jpg";
-import CardDetailsForm from "@/forms/CardDetailsForm";
+import { toast } from "sonner"; // Import toast for notifications
+import mpesa from "../../assets/mpesa.png"; // Ensure this asset is available
 
 const PaymentPage = () => {
-  const [paymentMethod, setPaymentMethod] = useState(null);
+  const [paymentMethod] = useState("mpesa");
   const [cardholderName, setCardholderName] = useState("");
   const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue, // Destructure setValue from useForm
   } = useForm();
   const navigate = useNavigate();
 
   const { totalAmount } = useSelector((state) => state.cart);
+  const deliveryInfo = useSelector((state) => state.order.deliveryInfo);
+  const paymentInfo = useSelector((state) => state.order.paymentInfo);
+  const cart = useSelector((state) => state.cart);
+
+  // Check if deliveryInfo is defined and handle navigation
+  useEffect(() => {
+    if (!deliveryInfo || Object.keys(deliveryInfo).length === 0) {
+      navigate("/address");
+      toast.error("Fill in Delivery Details First");
+    }
+    if (!cart || cart.products.length === 0) {
+      toast.error("Add items to Cart First");
+      navigate("/cart");
+    }
+  }, [deliveryInfo, cart, navigate]);
+
+  // Set the phone number field with the paymentInfo if available
+  useEffect(() => {
+    if (paymentInfo?.paymentAccount) {
+      setValue("phoneNumber", paymentInfo.paymentAccount);
+    }
+  }, [paymentInfo, setValue]);
 
   const onSubmit = (data) => {
     const paymentInfo = {
-      paymentMethod: paymentMethod,
-      paymentAccount:
-        paymentMethod === "mpesa" ? data.phoneNumber : data.cardNumber,
-      cardholderName: cardholderName, // Add cardholderName to paymentInfo
+      paymentMethod,
+      paymentAccount: data.phoneNumber,
+      cardholderName,
     };
     dispatch(setPaymentInfo(paymentInfo));
     navigate("/checkout");
   };
 
-  const handleMethodChange = (e) => {
-    setPaymentMethod(e.target.value);
-  };
-
-  const handleCardholderNameChange = (e) => {
-    setCardholderName(e.target.value);
-  };
-
-  const handleProceedToCheckout = () => {
-    // Function to proceed to checkout if needed
-  };
+  console.log(cart.products);
+  // Determine done steps based on deliveryInfo and paymentInfo
+  const doneSteps = [];
+  if (Object.keys(deliveryInfo).length > 0) {
+    doneSteps.push(1);
+  }
+  if (Object.keys(paymentInfo).length > 0) {
+    doneSteps.push(2);
+  }
+  if (cart.products.length > 0) {
+    doneSteps.push(0);
+  }
 
   return (
-    <div className="mt-2">
+    <div className="mt-2 bg-gray-50 sm:px-6 lg:px-8">
       <Stepper
-        doneSteps={[0, 1]}
         steps={steps}
-        activeStep={2}
+        activeStep={doneSteps.length + 1} // Adjust active step based on completed steps
         to={links}
+        doneSteps={doneSteps}
         heading={"Checkout Process"}
       />
 
-      <div className="flex gap-8 justify-center">
-        <div className="mt-2">
-          <div className="flex flex-col">
-            <div className="bg-white mt-1 w-fit px-40 py-4 rounded-lg">
-              <h2 className="text-xl font-bold mb-3">Select Payment Method</h2>
-              <p className="mb-2">
-                Please select your preferred payment method.
-              </p>
-              <div className="flex gap-6">
-                <input
-                  type="radio"
-                  value="mpesa"
-                  checked={paymentMethod === "mpesa"}
-                  onChange={handleMethodChange}
-                />
-                <img src={mpesa} className="w-20 h-10" alt="M-Pesa" />
-              </div>
-              <p>Mpesa</p>
-              <div className="flex gap-6">
-                <input
-                  type="radio"
-                  value="credit_card"
-                  checked={paymentMethod === "credit_card"}
-                  onChange={handleMethodChange}
-                />
+      <div className="flex flex-col lg:flex-row gap-8 justify-center lg:justify-between px-4 lg:px-8 py-4">
+        <div className="flex-1">
+          <div className="bg-white mt-2 p-6 rounded-lg shadow-md">
+            <h2 className="text-lg md:text-xl font-bold mb-4">
+              Select Payment Method
+            </h2>
+            <p className="mb-4 text-sm md:text-base">
+              You have selected M-Pesa as your payment method.
+            </p>
+            <div className="flex items-center gap-4 mb-4">
+              <img
+                src={mpesa}
+                className="w-24 h-12 rounded-md shadow-md"
+                alt="M-Pesa"
+              />
+              <span className="font-semibold text-lg">M-Pesa</span>
+            </div>
 
-                <div className="flex">
-                  <img src={visa} className="w-20 h-10" alt="Visa" />
-                  <img
-                    src={mastercard}
-                    className="w-20 h-10"
-                    alt="Mastercard"
+            <div className="bg-gray-100 p-4 rounded-lg shadow-sm mt-4">
+              <h3 className="text-lg font-semibold mb-2">Enter Phone Number</h3>
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <div className="flex items-center mb-4">
+                  <span
+                    className={`w-[80px] mr-2 border-b pb-1 outline-none ${
+                      errors.phoneNumber ? "border-red-600" : "border-gray-400"
+                    }`}
+                  >
+                    +254
+                  </span>
+                  <input
+                    {...register("phoneNumber", {
+                      required: "Phone number is required",
+                    })}
+                    type="text"
+                    placeholder="Phone Number"
+                    className={`w-full border-b pb-1 outline-none bg-transparent ${
+                      errors.phoneNumber ? "border-red-600" : "border-gray-400"
+                    }`}
                   />
                 </div>
-              </div>
-              <p>Credit/Debit Card</p>
+                {errors.phoneNumber && (
+                  <p className="text-red-600 text-sm mb-2">
+                    {errors.phoneNumber.message}
+                  </p>
+                )}
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    className="bg-primary text-white px-6 py-2 rounded-full hover:bg-green-700 transition duration-300"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-          {paymentMethod && (
-            <div className="">
-              {paymentMethod === "mpesa" && (
-                <div className="rounded-lg bg-white mt-2 w-fit px-48 py-4">
-                  <form onSubmit={handleSubmit(onSubmit)}>
-                    <h3 className="text-lg font-semibold mb-2">
-                      Enter Phone Number
-                    </h3>
-                    <div className="flex">
-                      <span
-                        className={`w-[80px] mr-2 border-b outline-none focus:outline-none ${
-                          errors.phoneNumber
-                            ? "border-[#E71926]"
-                            : "border-[#194A3491]"
-                        }`}
-                      >
-                        +254
-                      </span>
-                      <input
-                        {...register("phoneNumber")}
-                        type="number"
-                        name="phoneNumber"
-                        placeholder="Phone Number"
-                        className={`w-full border-b pb-2 outline-none focus:outline-none ${
-                          errors.phoneNumber
-                            ? "border-[#E71926]"
-                            : "border-[#194A3491]"
-                        }`}
-                      />
-                    </div>
-                    {errors.phoneNumber && (
-                      <p className="text-[#E71926]">
-                        {errors.phoneNumber.message}
-                      </p>
-                    )}
-                    <div className="flex justify-center">
-                      <button
-                        type="submit"
-                        className="bg-[#194A34] text-white px-4 py-2 rounded-full mt-2"
-                      >
-                        Continue
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
-
-              {paymentMethod === "credit_card" && (
-                <div className="bg-white rounded-lg mt-2 w-fit px-40 py-4">
-                  <CardDetailsForm onSave={onSubmit} />
-                </div>
-              )}
-            </div>
-          )}
         </div>
-        <div className="mt-2">
-          <OrderSummary subtotal={totalAmount} savings={10} />
+
+        <div className="w-full lg:w-1/3">
+          <OrderSummary shippingFee={100} subtotal={totalAmount} savings={10} />
         </div>
       </div>
     </div>

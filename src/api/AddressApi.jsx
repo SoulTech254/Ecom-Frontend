@@ -1,127 +1,131 @@
+import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { useMutation, useQuery } from "react-query";
 import { toast } from "sonner";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const handleError = (error) => {
+  if (error.response) {
+    const statusCode = error.response.status;
+    const message = error.response.data?.message || "An error occurred";
 
-console.log(API_BASE_URL);
+    // Customize messages based on status codes or specific messages
+    switch (statusCode) {
+      case 400:
+        return "Please check your input and try again.";
+      case 401:
+        return "Session has Expired. Please Login Again.";
+      case 403:
+        return "FORBIDDEN. You don't have permission to perform this action.";
+      case 404:
+        return "The address you are trying to access was not found.";
+      case 500:
+      default:
+        return "Something went wrong on our end. Please try again later.";
+    }
+  }
+  return "Network error. Please check your internet connection.";
+};
+
 export const useCreateAddress = (userId) => {
-  console.log(userId);
+  const axiosPrivate = useAxiosPrivate();
   const createAddress = async (data) => {
-    const res = await fetch(`${API_BASE_URL}/api/v1/addresses`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ address: data, userId: userId }),
+    const response = await axiosPrivate.post(`/api/v1/addresses`, {
+      address: data,
+      userId: userId,
     });
-    const result = await res.json();
-    return result;
+    return response.data;
   };
 
   const { mutateAsync: createAddressRequest, isLoading: isCreatingAddress } =
     useMutation(createAddress, {
       onSuccess: () => {
-        toast.success("Address created");
+        toast.success("Address created successfully!");
       },
       onError: (error) => {
-        toast.error(error.message);
+        toast.error(handleError(error));
       },
     });
 
   return { createAddressRequest, isCreatingAddress };
 };
 
-export const useupdateAddress = () => {
+export const useUpdateAddress = () => {
+  const axiosPrivate = useAxiosPrivate();
   const updateAddress = async (data) => {
-    const res = await fetch(`${API_BASE_URL}/api/v1/addresses`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-    const result = await res.json();
-    return result;
+    const response = await axiosPrivate.put(`/api/v1/addresses`, data);
+    return response.data;
   };
 
   const { mutateAsync: updateAddressRequest, isLoading: isUpdatingAddress } =
     useMutation(updateAddress, {
       onSuccess: () => {
-        toast.success("Address updated");
+        toast.success("Address updated successfully!");
       },
       onError: (error) => {
-        toast.error(error.message);
+        toast.error(handleError(error));
       },
     });
 
   return { updateAddressRequest, isUpdatingAddress };
 };
 
-export const useGetAddress = () => {
-  const getAddress = async (id) => {
-    const res = await fetch(`${API_BASE_URL}/api/v1/addresses/${id}`);
-    const result = await res.json();
-    return result;
+export const useGetAddress = (id) => {
+  const axiosPrivate = useAxiosPrivate();
+  const getAddress = async () => {
+    const response = await axiosPrivate.get(`/api/v1/addresses/${id}`);
+    return response.data;
   };
 
   const { data: address, isLoading: isAddressLoading } = useQuery({
-    queryKey: ["address"],
+    queryKey: ["address", id],
     queryFn: getAddress,
+    enabled: !!id,
   });
 
   return { address, isAddressLoading };
 };
 
 export const useGetAddresses = (userId) => {
-  console.log("Inside useGetAddresses, userId:", userId);
+  const axiosPrivate = useAxiosPrivate();
+
   const getAddresses = async () => {
-    console.log("Fetching addresses for userId:", userId);
-    const res = await fetch(`${API_BASE_URL}/api/v1/addresses/${userId}`);
-    if (!res.ok) {
-      throw new Error("Network response was not ok");
-    }
-    const result = await res.json();
-    console.log("Fetched addresses:", result);
-    return result;
+    const response = await axiosPrivate.get(`/api/v1/addresses/${userId}`);
+    return response.data;
   };
 
   const {
     data: addresses,
     isLoading: isAddressesLoading,
     error,
-  } = useQuery("addresses", getAddresses);
+  } = useQuery(["addresses", userId], getAddresses, {
+    enabled: !!userId,
+    cacheTime: 0,
+    staleTime: 0,
+  });
 
   if (error) {
+    toast.error(handleError(error)); // Display error message for addresses fetch
     console.error("Error in useGetAddresses:", error);
   }
-
-  console.log("Returning addresses:", addresses);
-  console.log("isAddressesLoading:", isAddressesLoading);
 
   return { addresses, isAddressesLoading };
 };
 
 export const useDeleteAddress = (userId) => {
-  console.log(userId)
+  const axiosPrivate = useAxiosPrivate();
   const deleteAddress = async (id) => {
-    console.log("Deleting address with id:", id);
-    const res = await fetch(`${API_BASE_URL}/api/v1/addresses/${userId}/${id}`, {
-      method: "DELETE",
-    });
-    const result = await res.json();
-    console.log("Deleted address:", result);
-    return result;
+    const response = await axiosPrivate.delete(
+      `/api/v1/addresses/${userId}/${id}`
+    );
+    return response.data;
   };
 
   const { mutateAsync: deleteAddressRequest, isLoading: isDeletingAddress } =
     useMutation(deleteAddress, {
       onSuccess: () => {
-        console.log("Address deleted successfully");
-        toast.success("Address deleted");
+        toast.success("Address deleted successfully!");
       },
       onError: (error) => {
-        console.error("Error deleting address:", error);
-        toast.error(error.message);
+        toast.error(handleError(error));
       },
     });
 

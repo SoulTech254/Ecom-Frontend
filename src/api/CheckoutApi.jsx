@@ -1,95 +1,106 @@
+import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { useMutation, useQuery } from "react-query";
+import { toast } from "sonner";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-export const useGetOrderSummary = () => {
-  // Function to fetch order summary data asynchronously
-  const getOrderSummary = async (data) => {
-    console.log(data);
-    // Sending a POST request to the specified API endpoint
-    const response = await fetch(`${API_BASE_URL}/api/v1/checkout/initiate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+const handleError = (error) => {
+  if (error.response) {
+    const statusCode = error.response.status;
+    const message = error.response.data?.message || "An error occurred";
 
-    // Parsing response data as JSON
-    const responseData = await response.json();
-
-    // If response is not OK (HTTP status not in the range 200-299),
-    // throw an error with the error message from the response data
-    if (!response.ok) {
-      throw new Error(responseData.message);
+    switch (statusCode) {
+      case 400:
+        return "Please check your input and try again.";
+      case 401:
+        return "You are not authorized. Please log in.";
+      case 403:
+        return "FORBIDDEN. You don't have permission to perform this action.";
+      case 404:
+        return "Order not found.";
+      case 500:
+      default:
+        return "Something went wrong on our end. Please try again later.";
     }
+  }
+  return "Network error. Please check your internet connection.";
+};
 
-    // Return the parsed data
-    return responseData;
+export const useGetOrderSummary = () => {
+  const axiosPrivate = useAxiosPrivate();
+
+  const getOrderSummary = async (data) => {
+    try {
+      const response = await axiosPrivate.post(
+        `/api/v1/checkout/initiate`,
+        data
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(handleError(error));
+    }
   };
 
-  // Destructuring the mutateAsync function and isLoading state from useMutation hook
   const { mutateAsync: getOrderSummaryData, isLoading: isLoadingOrderSummary } =
-    useMutation(getOrderSummary);
+    useMutation(getOrderSummary, {
+      onError: (error) => {
+        toast.error(handleError(error));
+      },
+    });
 
-  // Returning an object with getOrderSummaryData function and isLoadingOrderSummary state
   return { getOrderSummaryData, isLoadingOrderSummary };
 };
 
 export const usePlaceOrder = () => {
-  // Function to place order asynchronously
+  const axiosPrivate = useAxiosPrivate();
+
   const placeOrderRequest = async (data) => {
-    // Sending a POST request to the specified API endpoint
-    const response = await fetch(
-      `${API_BASE_URL}/api/v1/checkout/payment/mpesa`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      }
-    );
-
-    const responseData = await response.json();
-
-    console.log(responseData);
-
-    if (!response.ok) {
-      throw new Error(responseData.message);
+    try {
+      const response = await axiosPrivate.post(
+        `/api/v1/checkout/payment/mpesa`,
+        data
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(handleError(error));
     }
-    return responseData;
   };
+
   const { mutateAsync: placeOrder, isLoading: isLoadingPlaceOrder } =
-    useMutation(placeOrderRequest);
+    useMutation(placeOrderRequest, {
+      onError: (error) => {
+        toast.error(handleError(error));
+      },
+    });
 
   return { placeOrder, isLoadingPlaceOrder };
 };
 
 export const useCheckOrder = (orderId) => {
+  const axiosPrivate = useAxiosPrivate();
+
   const checkOrderRequest = async () => {
-    // Sending a GET request to the specified API endpoint
-    const response = await fetch(
-      `${API_BASE_URL}/api/v1/checkout/payment/mpesa/processing/${orderId}`
-    );
-
-    const responseData = await response.json();
-
-    if (!response.ok) {
-      throw new Error(responseData.message);
+    try {
+      const response = await axiosPrivate.get(
+        `/api/v1/checkout/payment/mpesa/processing/${orderId}`
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(handleError(error));
     }
-
-    return responseData; // Assuming responseData contains the order status
   };
 
   const {
     data: orderStatus,
     isLoading: isLoadingOrderStatus,
     error,
-    refetch, // Add refetch function to manually trigger a refresh
-  } = useQuery(
-    ["checkOrder", orderId], // Unique key for the query
-    checkOrderRequest, // The query function that fetches data
-    {
-      enabled: !!orderId, // Enable the query when orderId is truthy
-      cacheTime: 0, // Disable caching
-    }
-  );
+    refetch,
+  } = useQuery(["checkOrder", orderId], checkOrderRequest, {
+    enabled: !!orderId,
+    cacheTime: 0,
+  });
 
-  return { orderStatus, isLoadingOrderStatus, error, refetch };
+  if (error) {
+    toast.error(handleError(error));
+  }
+
+  return { orderStatus, isLoadingOrderStatus, refetch };
 };

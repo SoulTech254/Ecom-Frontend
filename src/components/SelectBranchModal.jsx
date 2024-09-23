@@ -27,26 +27,16 @@ export function SelectBranchModal({ onSave }) {
       </Button>
 
       {/* Modal content */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 py-10">
         <div className="bg-white rounded-lg p-8 max-w-md w-full">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Select Branch</h2>
-            <button className="text-gray-700 hover:text-gray-900">
-              &times;
-            </button>
+            <h2 className="text-xl font-semibold text-primary">Select Branch</h2>
           </div>
-
           {/* StoreSelection component */}
           <StoreSelection
             branches={branches}
             onSelectBranch={handleSelectBranch}
           />
-
-          <div className="mt-4 flex justify-end">
-            <Button onClick={() => console.log("Save changes")}>
-              Save changes
-            </Button>
-          </div>
         </div>
       </div>
     </div>

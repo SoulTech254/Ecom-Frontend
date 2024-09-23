@@ -4,13 +4,12 @@ import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useGetProducts } from "@/api/ProductApi";
+import SkeletonCard from "@/components/skeletons/SkeletonCard";
 
 const BrandPage = () => {
   const { brand } = useParams(); // Get brand from the route parameters
   const [searchParams, setSearchParams] = useSearchParams();
   const branch = useSelector((state) => state.branch.selectedBranch.id);
-  console.log(branch);
-  console.log(brand);
 
   // Initialize state for current page
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,25 +25,55 @@ const BrandPage = () => {
   };
 
   if (isProductsLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex flex-col min-h-screen mt-4">
+        {/* Skeleton for the brand heading */}
+        <div className="mb-4">
+          <div className="w-1/2 bg-gray-200 h-8 rounded-md">
+            <div className="animate-pulse h-full w-full"></div>
+          </div>
+        </div>
+
+        {/* Skeleton for the product count */}
+        <div className="flex justify-between items-center mb-4">
+          <div className="w-1/3 bg-gray-200 h-6 rounded-md">
+            <div className="animate-pulse h-full w-full"></div>
+          </div>
+        </div>
+
+        {/* Skeleton for product cards */}
+        <div className="flex flex-wrap mb-4 gap-2">
+          {[...Array(6)].map((_, index) => (
+            <SkeletonCard key={index} />
+          ))}
+        </div>
+
+        {/* Skeleton for the pagination */}
+        <div className="mt-auto mb-4 flex justify-center">
+          <div className="w-1/3 bg-gray-200 h-8 rounded-md">
+            <div className="animate-pulse h-full w-full"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="mt-4">
-      <h2 className="text-xl font-semibold text-gray-600">
-        <span className="uppercase">{brand}</span> products
+    <div className="flex flex-col min-h-screen mt-4">
+      <h2 className="text-2xl md:text-3xl font-semibold text-gray-600 mb-4">
+        <span className="capitalize">{brand}</span> Products
       </h2>
 
-      <div className="flex justify-between items-center mb-4 mt-4">
-        <h2 className="text-2xl font-semibold text-gray-600">
-          <p className="text-gray-600 text-sm">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg md:text-xl font-semibold text-gray-600">
+          <p className="text-sm md:text-base text-gray-600">
             {metadata.totalDocuments} product
             {metadata.totalDocuments === 1 ? "" : "s"} found
           </p>
         </h2>
       </div>
 
-      <div className="flex flex-wrap mb-4">
+      <div className="flex flex-wrap mb-4 gap-2">
         {products.map((product) => (
           <ProductCard
             key={product._id}
@@ -59,11 +88,13 @@ const BrandPage = () => {
         ))}
       </div>
 
-      <PaginationSelector
-        page={currentPage}
-        pages={metadata.totalPages}
-        onPageChange={handlePageChange}
-      />
+      <div className="mt-auto">
+        <PaginationSelector
+          page={currentPage}
+          pages={metadata.totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
     </div>
   );
 };

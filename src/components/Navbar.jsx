@@ -6,13 +6,17 @@ import { useDispatch, useSelector } from "react-redux";
 import Cart from "./Cart";
 import StoreSelection from "./StoreSelection";
 import { useGetBranches } from "@/api/HomeApi";
-import { useState, useEffect } from "react";
-import { setBranch } from "@/redux/branch/branchSlice";
+import { useState, useEffect, useCallback } from "react";
+import { removeBranch, setBranch } from "@/redux/branch/branchSlice";
 import SubcategoryWindow from "@/components/SubcategoryWindow";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { categories } from "@/utils/utils";
 import Sheet from "./Sheet";
 import MobileNavbar from "./MobileNavbar";
+import { deleteUser } from "@/redux/user/userSlice";
+import { clearLocalCart, resetCart } from "@/redux/cart/cartSlice";
+import { deleteOrderInfo } from "@/redux/order/orderSlice";
+import { useLogOut } from "@/api/AuthApi";
 
 const Navbar = () => {
   const { user } = useSelector((state) => state.user);
@@ -20,6 +24,7 @@ const Navbar = () => {
   const [branches, setBranches] = useState([]);
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { logOut, isLoggingOut } = useLogOut();
 
   const dispatch = useDispatch();
 
@@ -32,6 +37,20 @@ const Navbar = () => {
   const handleSelectBranch = (branch) => {
     dispatch(setBranch(branch));
   };
+
+  const handleSignOut = useCallback(async () => {
+    try {
+      await logOut();
+      dispatch(deleteUser());
+      dispatch(removeBranch());
+      dispatch(resetCart());
+      dispatch(deleteOrderInfo());
+      window.location.reload
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Optionally, you can show a toast notification or alert here
+    }
+  }, [dispatch, logOut]);
 
   const handleSheetClose = () => setIsSheetOpen(false);
 
@@ -79,17 +98,24 @@ const Navbar = () => {
                       <CircleUserRound color="#b12e26" size="20" />
                       <p className="text-sm">Hello {user.fName}</p>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[150px] p-2">
+                    <PopoverContent className="w-[150px] p-2 flex flex-col">
                       <Link className="hover:text-[#b12e26]" to="/orders">
                         Orders
                       </Link>
+                      <button
+                        onClick={handleSignOut}
+                        className="w-fit hover:text-secondary"
+                        disabled={isLoggingOut} // Disable while logging out
+                      >
+                        Sign Out
+                      </button>
                     </PopoverContent>
                   </Popover>
                 </>
               ) : (
                 <>
                   <LogInIcon color="#b12e26" size="20" />
-                  <Link to="/">Login & Register</Link>
+                  <Link to="/sign-in">Login & Register</Link>
                 </>
               )}
             </div>

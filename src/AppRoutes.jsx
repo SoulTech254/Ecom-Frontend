@@ -62,15 +62,15 @@ const AppRoutes = () => {
           </Layout>
         }
       />
+      <Route
+        path="/cart"
+        element={
+          <Layout>
+            <CartPage />
+          </Layout>
+        }
+      />
       <Route element={<PrivateRoute />}>
-        <Route
-          path="/cart"
-          element={
-            <Layout>
-              <CartPage />
-            </Layout>
-          }
-        />
         <Route
           path="/address"
           element={
