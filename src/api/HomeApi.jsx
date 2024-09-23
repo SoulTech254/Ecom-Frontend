@@ -2,44 +2,20 @@ import { useQuery } from "react-query";
 import axios from "./axios"; // Adjust the import path as necessary
 import { toast } from "sonner";
 
-const handleError = (error) => {
-  if (error.response) {
-    const statusCode = error.response.status;
-    const message = error.response.data?.message || "An error occurred";
-
-    switch (statusCode) {
-      case 400:
-        return "Invalid request. Please try again.";
-      case 404:
-        return "Requested resource not found.";
-      case 401:
-        return "You are not authorized. Please log in.";
-      case 500:
-      default:
-        return "Something went wrong on our end. Please try again later.";
-    }
-  }
-  return "Network error. Please check your internet connection.";
-};
-
 export const useGetBranches = () => {
   const getBranchesRequest = async () => {
     try {
       const response = await axios.get("/api/v1/branch/");
       return response.data;
     } catch (error) {
-      throw new Error(handleError(error));
+      console.log(error.message);
+      throw new Error(error);
     }
   };
 
   const { data: branches, isLoading: isLoadingBranches } = useQuery(
     "branches",
-    getBranchesRequest,
-    {
-      onError: (error) => {
-        toast.error(handleError(error));
-      },
-    }
+    getBranchesRequest
   );
 
   return { branches, isLoadingBranches };
@@ -67,31 +43,33 @@ export const useSearchProducts = (
       `Fetching products with query: ${query}, branchId: ${branchId}, sortBy: ${sortBy}, sortOrder: ${sortOrder}, page: ${page}, limit: ${limit}`
     );
 
-    try {
-      const response = await axios.get(
-        `/api/v1/search?${searchParams.toString()}`
-      );
-      return response.data;
-    } catch (error) {
-      throw new Error(handleError(error));
-    }
+    const response = await axios.get(
+      `/api/v1/search?${searchParams.toString()}`
+    );
+    return response.data;
   };
 
-  const { data, isLoading: isProductsLoading } = useQuery(
+  const {
+    data,
+    isLoading: isProductsLoading,
+    error: queryError, // Rename the error to avoid confusion
+  } = useQuery(
     ["SearchProducts", query, branchId, sortBy, sortOrder, page, limit],
     searchProductRequest,
     {
       enabled: !!query && !!branchId,
-      onError: (error) => {
-        toast.error(handleError(error));
-      },
     }
   );
 
   const products = data?.products || [];
   const metadata = data?.metadata || {};
 
-  return { products, metadata, isProductsLoading };
+  // Return the error state
+  const error = queryError
+    ? queryError.response?.data || "An error occurred"
+    : null;
+
+  return { products, metadata, isProductsLoading, error };
 };
 
 export const useGetCategoryProducts = (
@@ -112,6 +90,7 @@ export const useGetCategoryProducts = (
       limit,
       category: categoryId,
     });
+
     if (searchQuery) {
       searchParams.append("query", searchQuery);
     }
@@ -120,17 +99,17 @@ export const useGetCategoryProducts = (
       `Fetching products for category: ${categoryId}, branchId: ${branchId}, sortBy: ${sortBy}, sortOrder: ${sortOrder}, page: ${page}, limit: ${limit}, searchQuery: ${searchQuery}`
     );
 
-    try {
-      const response = await axios.get(
-        `/api/v1/category?${searchParams.toString()}`
-      );
-      return response.data;
-    } catch (error) {
-      throw new Error(handleError(error));
-    }
+    const response = await axios.get(
+      `/api/v1/category?${searchParams.toString()}`
+    );
+    return response.data;
   };
 
-  const { data, isLoading: isProductsLoading } = useQuery(
+  const {
+    data,
+    isLoading: isProductsLoading,
+    error: queryError,
+  } = useQuery(
     [
       "CategoryProducts",
       categoryId,
@@ -144,16 +123,19 @@ export const useGetCategoryProducts = (
     fetchCategoryProducts,
     {
       enabled: !!categoryId && !!branchId,
-      onError: (error) => {
-        toast.error(handleError(error));
-      },
     }
   );
 
   const products = data?.products || [];
   const metadata = data?.metadata || {};
 
-  return { products, metadata, isProductsLoading };
+  // Handle the error and provide a more useful error message
+  const error = queryError
+    ? queryError.response?.data ||
+      "An error occurred while fetching category products."
+    : null;
+
+  return { products, metadata, isProductsLoading, error };
 };
 
 export const useGetSubcategories = (categoryId) => {
@@ -164,18 +146,13 @@ export const useGetSubcategories = (categoryId) => {
       });
       return response.data;
     } catch (error) {
-      throw new Error(handleError(error));
+      console.error(error);
     }
   };
 
   const { data, isLoading: isSubcategoriesLoading } = useQuery(
     ["Subcategories", categoryId],
-    fetchSubcategories,
-    {
-      onError: (error) => {
-        toast.error(handleError(error));
-      },
-    }
+    fetchSubcategories
   );
 
   return { subcategories: data, isSubcategoriesLoading };

@@ -16,47 +16,148 @@ export const months = {
 export const categories = [
   {
     id: 1,
-    name: "Quick Foods",
+    name: "Electronics",
     groups: [
       {
-        title: "Snacks",
+        title: "Mobile Phones",
         subcategories: [
-          { id: 1, name: "Chips", link: "/chips" },
-          { id: 2, name: "Biscuits", link: "/biscuits" },
-          { id: 3, name: "Sweets", link: "/sweets" },
+          { id: 1, name: "Smartphones", link: "/smartphones" },
+          { id: 2, name: "Accessories", link: "/accessories" },
         ],
       },
       {
-        title: "Dairy",
+        title: "Computers",
         subcategories: [
-          { id: 4, name: "Yoghurt", link: "/yogurt" },
-          { id: 5, name: "Cheese", link: "/cheese" },
-          { id: 6, name: "Butter", link: "/butter" },
+          { id: 3, name: "Laptops", link: "/laptops" },
+          { id: 4, name: "Desktops", link: "/desktops" },
         ],
       },
     ],
   },
   {
     id: 2,
-    name: "Category 2",
+    name: "Foods",
     groups: [
       {
-        title: "Group A",
+        title: "Snacks",
         subcategories: [
-          { id: 7, name: "Item 1", link: "/item1" },
-          { id: 8, name: "Item 2", link: "/item2" },
+          { id: 5, name: "Chips", link: "/chips" },
+          { id: 6, name: "Candy", link: "/candy" },
         ],
       },
       {
-        title: "Group B",
+        title: "Beverages",
         subcategories: [
-          { id: 9, name: "Item 3", link: "/item3" },
-          { id: 10, name: "Item 4", link: "/item4" },
+          { id: 7, name: "Soda", link: "/soda" },
+          { id: 8, name: "Juice", link: "/juice" },
         ],
       },
     ],
   },
-  // Add more categories as needed
+  {
+    id: 3,
+    name: "Cleaning Supplies",
+    groups: [
+      {
+        title: "Household Cleaners",
+        subcategories: [
+          {
+            id: 9,
+            name: "All-Purpose Cleaners",
+            link: "/all-purpose-cleaners",
+          },
+          { id: 10, name: "Glass Cleaners", link: "/glass-cleaners" },
+        ],
+      },
+      {
+        title: "Laundry Supplies",
+        subcategories: [
+          { id: 11, name: "Detergents", link: "/detergents" },
+          { id: 12, name: "Fabric Softener", link: "/fabric-softener" },
+        ],
+      },
+    ],
+  },
+  {
+    id: 4,
+    name: "Beauty",
+    groups: [
+      {
+        title: "Makeup",
+        subcategories: [
+          { id: 13, name: "Lipstick", link: "/lipstick" },
+          { id: 14, name: "Foundation", link: "/foundation" },
+        ],
+      },
+      {
+        title: "Skincare",
+        subcategories: [
+          { id: 15, name: "Moisturizers", link: "/moisturizers" },
+          { id: 16, name: "Sunscreen", link: "/sunscreen" },
+        ],
+      },
+    ],
+  },
+  {
+    id: 5,
+    name: "Health and Fitness",
+    groups: [
+      {
+        title: "Supplements",
+        subcategories: [
+          { id: 17, name: "Vitamins", link: "/vitamins" },
+          { id: 18, name: "Protein Powder", link: "/protein-powder" },
+        ],
+      },
+      {
+        title: "Fitness Equipment",
+        subcategories: [
+          { id: 19, name: "Weights", link: "/weights" },
+          { id: 20, name: "Yoga Mats", link: "/yoga-mats" },
+        ],
+      },
+    ],
+  },
+  {
+    id: 6,
+    name: "Toys and Outdoors",
+    groups: [
+      {
+        title: "Outdoor Toys",
+        subcategories: [
+          { id: 21, name: "Bikes", link: "/bikes" },
+          { id: 22, name: "Kites", link: "/kites" },
+        ],
+      },
+      {
+        title: "Indoor Toys",
+        subcategories: [
+          { id: 23, name: "Board Games", link: "/board-games" },
+          { id: 24, name: "Action Figures", link: "/action-figures" },
+        ],
+      },
+    ],
+  },
+  {
+    id: 7,
+    name: "Home & Garden",
+    groups: [
+      {
+        title: "Furniture",
+        subcategories: [
+          { id: 25, name: "Sofas", link: "/sofas" },
+          { id: 26, name: "Tables", link: "/tables" },
+        ],
+      },
+      {
+        title: "Gardening",
+        subcategories: [
+          { id: 27, name: "Plants", link: "/plants" },
+          { id: 28, name: "Tools", link: "/tools" },
+        ],
+      },
+    ],
+  },
 ];
 
 export const chunkArray = (array, size) => {

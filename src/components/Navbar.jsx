@@ -45,7 +45,7 @@ const Navbar = () => {
       dispatch(removeBranch());
       dispatch(resetCart());
       dispatch(deleteOrderInfo());
-      window.location.reload
+      window.location.reload()
     } catch (error) {
       console.error("Logout failed:", error);
       // Optionally, you can show a toast notification or alert here

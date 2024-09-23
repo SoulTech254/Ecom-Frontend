@@ -90,7 +90,7 @@ const ProductCard = ({
     : 0;
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden flex flex-col justify-between w-[175px] sm:w-[180px] md:w-[192px] lg:w-[200px] h-[280px] sm:h-[310px] md:h-[370px] p-2">
+    <div className="bg-white rounded-xl overflow-hidden flex flex-col justify-between w-[175px] sm:w-[117px] md:w-[192px] lg:w-[200px] h-[280px] sm:h-[310px] md:h-[370px] p-2">
       <div className="flex-1 flex flex-col">
         <Link
           to={`/products/${id}`}

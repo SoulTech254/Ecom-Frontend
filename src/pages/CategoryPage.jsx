@@ -8,23 +8,28 @@ import { useSelector } from "react-redux";
 import { useParams, useSearchParams } from "react-router-dom";
 
 const CategoryPage = () => {
-  const { categoryId } = useParams(); // Get the categoryId from the URL params
+  const { categoryId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const branch = useSelector((state) => state.branch.selectedBranch.id);
 
-  // Initialize state for sortBy, sortOrder, and current page
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState(-1);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { products, metadata, isProductsLoading } = useGetCategoryProducts(
+  const {
+    products,
+    metadata,
+    isProductsLoading,
+    error: productsError,
+  } = useGetCategoryProducts(
     categoryId,
     branch,
     sortBy,
     sortOrder,
-    currentPage, // Pass currentPage to the hook
-    searchParams.get("searchQuery") || "" // Optional search query within the category
+    currentPage,
+    searchParams.get("searchQuery") || ""
   );
+
   const { subcategories, isSubcategoriesLoading } =
     useGetSubcategories(categoryId);
 
@@ -37,7 +42,7 @@ const CategoryPage = () => {
       sortOrder: order,
       page: 1,
     });
-    setCurrentPage(1); // Reset to first page when sorting changes
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page) => {
@@ -47,7 +52,6 @@ const CategoryPage = () => {
 
   return (
     <div className="mt-4">
-      {/* Render subcategories if they are loaded or display loading skeleton */}
       {isSubcategoriesLoading ? (
         <div className="flex flex-wrap justify-around mb-4 gap-4">
           {[...Array(4)].map((_, index) => (
@@ -61,7 +65,7 @@ const CategoryPage = () => {
         </div>
       ) : (
         subcategories && (
-          <div className="">
+          <div>
             <h1 className="text-lg font-bold mb-4 capitalize">
               Shop {categoryId} By Category
             </h1>
@@ -79,36 +83,15 @@ const CategoryPage = () => {
         )
       )}
 
-      {/* Display product list or skeleton based on product loading state */}
       {isProductsLoading ? (
-        <div>
-          {/* Skeleton for the brand heading */}
-          <div className="mb-4">
-            <div className="w-1/2 bg-gray-200 h-8 rounded-md">
-              <div className="animate-pulse h-full w-full"></div>
-            </div>
-          </div>
-
-          {/* Skeleton for the product count */}
-          <div className="flex justify-between items-center mb-4">
-            <div className="w-1/3 bg-gray-200 h-6 rounded-md">
-              <div className="animate-pulse h-full w-full"></div>
-            </div>
-          </div>
-
-          {/* Skeleton for product cards */}
-          <div className="flex flex-wrap mb-4 gap-2">
-            {[...Array(6)].map((_, index) => (
-              <SkeletonCard key={index} />
-            ))}
-          </div>
-
-          {/* Skeleton for the pagination */}
-          <div className="mt-auto mb-4 flex justify-center">
-            <div className="w-1/3 bg-gray-200 h-8 rounded-md">
-              <div className="animate-pulse h-full w-full"></div>
-            </div>
-          </div>
+        <div className="flex flex-wrap justify-around mb-4 gap-4">
+          {[...Array(8)].map((_, index) => (
+            <SkeletonCard/>
+          ))}
+        </div>
+      ) : productsError ? (
+        <div className="text-red-500 text-center mt-4">
+          No categories found. Try another criteria.
         </div>
       ) : (
         <>
@@ -120,7 +103,7 @@ const CategoryPage = () => {
               </p>
             </h2>
 
-            <div className="">
+            <div>
               <label htmlFor="sort" className="mr-2">
                 Sort by:
               </label>

@@ -1,7 +1,12 @@
 import React from "react";
 import { cn } from "@/lib/utils"; // Utility function for classNames
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { User } from "lucide-react";
+import walmartLogo from "../assets/images/quickmart.png";
 
 const Sheet = ({ isOpen, onClose, children, className, ...props }) => {
+  const { user } = useSelector((state) => state.user);
   return (
     <>
       {/* Background Overlay */}
@@ -16,18 +21,39 @@ const Sheet = ({ isOpen, onClose, children, className, ...props }) => {
       {/* Sheet Content */}
       <div
         className={cn(
-          "fixed top-0 right-0 h-full w-80 bg-white shadow-lg transition-transform transform",
+          "fixed top-0 right-0 h-full w-80 shadow-lg transition-transform transform bg-primary overflow-scroll",
           isOpen ? "translate-x-0" : "translate-x-full", // Slide in/out effect
           "duration-300 z-50"
         )}
       >
+        <div className=" absolute top-3 left-2">
+          {user ? (
+            <div className="flex">
+              <p className="text-md font-medium text-white">Hi {user.fName}</p>
+              <User color="#ffffff" />
+            </div>
+          ) : (
+            <div className="flex">
+              <Link to="/sign-in">Sign In</Link>
+              <User color="#ffffff" />
+            </div>
+          )}
+        </div>
         <button
-          className="absolute right-3 z-50 top-3 text-gray-600 hover:text-gray-900 text-2xl"
+          className="absolute right-3 z-50 top-3 text-white hover:text-gray-900 text-2xl"
           onClick={onClose}
           aria-label="Close"
         >
           &times;
         </button>
+        <div className="absolute top-12 left-2">
+          <h3 className="text-2xl text-white font-medium">Browse</h3>
+          <img
+            src={walmartLogo}
+            alt="Walmart Logo"
+            className="w-fit h-[40px]"
+          />
+        </div>
         <div className="p-6 relative h-full">{children}</div>
       </div>
     </>
