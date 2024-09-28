@@ -26,16 +26,12 @@ const Sheet = ({ isOpen, onClose, children, className, ...props }) => {
           "duration-300 z-50"
         )}
       >
-        <div className=" absolute top-3 left-2">
-          {user ? (
+        <div className="absolute top-3 left-2">
+          {user && (
             <div className="flex">
-              <p className="text-md font-medium text-white">Hi {user.fName}</p>
-              <User color="#ffffff" />
-            </div>
-          ) : (
-            <div className="flex">
-              <Link to="/sign-in">Sign In</Link>
-              <User color="#ffffff" />
+              <p className="text-md font-medium text-white">
+                Hi {user.fName} 👋
+              </p>
             </div>
           )}
         </div>

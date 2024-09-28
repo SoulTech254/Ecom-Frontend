@@ -14,18 +14,23 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import StoreSelection from "./StoreSelection";
 import { useGetBranches } from "@/api/HomeApi";
-import { setBranch } from "@/redux/branch/branchSlice";
+import { removeBranch, setBranch } from "@/redux/branch/branchSlice";
 import { categories } from "@/utils/utils";
 import { useState, useEffect } from "react";
 import { ScrollArea } from "./ui/scroll-area";
 import MobileNavLinks from "./MobileNavLinks";
 import { clearAccessToken } from "@/redux/auth/authSlice";
+import { deleteUser } from "@/redux/user/userSlice";
+import { resetCart } from "@/redux/cart/cartSlice";
+import { deleteOrderInfo } from "@/redux/order/orderSlice";
+import { useLogOut } from "@/api/AuthApi";
 
 const MobileNavbar = ({ isOpen }) => {
   const { user } = useSelector((state) => state.user);
   const { branches: apiBranches, isLoadingBranches } = useGetBranches();
   const [branches, setBranches] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false); // State for category expansion
+  const { logOut, isLoggingOut } = useLogOut();
 
   const dispatch = useDispatch();
 
@@ -39,8 +44,13 @@ const MobileNavbar = ({ isOpen }) => {
     dispatch(setBranch(branch));
   };
 
-  const handleSignOut = () => {
-    dispatch(clearAccessToken());
+  const handleSignOut = async () => {
+    await logOut();
+    dispatch(deleteUser());
+    dispatch(removeBranch());
+    dispatch(resetCart());
+    dispatch(deleteOrderInfo());
+    window.location.reload();
   };
 
   const formatCategoryNameForUrl = (categoryName) => {
@@ -50,8 +60,8 @@ const MobileNavbar = ({ isOpen }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed mt-28 right-0 h-full w-80 bg-white shadow-lg transform transition-transform translate-x-0 overflow-scroll">
-      <ScrollArea className="h-full bg-white">
+    <div className="fixed mt-28 right-0 h-fit w-80 bg-white shadow-lg transform transition-transform translate-x-0 overflow-scroll">
+      <ScrollArea className=" bg-white">
         <div className="space-y-2">
           {/* Branch selection */}
           <div className="border-b-2 py-2">
@@ -125,15 +135,17 @@ const MobileNavbar = ({ isOpen }) => {
           </div>
         </div>
         {/* Sign-Out Button at the Bottom */}
-        <div className="">
-          <button
-            onClick={handleSignOut}
-            className="flex items-center text-red-600 hover:bg-red-100 w-full px-2 py-2 mt-2 rounded"
-          >
-            <LogOutIcon className="mr-2" />
-            Sign Out
-          </button>
-        </div>
+        {user && (
+          <div className="">
+            <button
+              onClick={handleSignOut}
+              className="flex items-center text-red-600 w-full px-2 py-2 mt-2 mb-4 rounded"
+            >
+              <LogOutIcon className="mr-2" />
+              Sign Out
+            </button>
+          </div>
+        )}
       </ScrollArea>
     </div>
   );
