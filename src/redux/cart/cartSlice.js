@@ -1,3 +1,4 @@
+import axios from "@/api/axios";
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "sonner";
@@ -86,23 +87,17 @@ export const mergeLocalCart = createAsyncThunk(
     }));
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/v1/cart/merge/${user.cart}`,
+      const response = await axios.post(
+        `/api/v1/cart/merge/${user.cart}`,
+        cartItemsToMerge,
         {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(cartItemsToMerge),
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to merge cart");
-      }
-
-      const data = await response.json();
-      return data;
+      return response.data;
     } catch (error) {
       const message = handleError(error);
       toast.error(message); // Display the error message
