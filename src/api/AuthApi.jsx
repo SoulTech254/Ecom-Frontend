@@ -1,8 +1,8 @@
-import { useMutation } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { toast } from "sonner";
-import axios from "axios";
+import axios from "./axios"; // Adjust the import path as necessary
+import { API_BASE_URL } from "@/config"; // Adjust the import if necessary
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const handleError = (error) => {
   if (error.response) {
@@ -28,20 +28,13 @@ const handleError = (error) => {
 
 export const useLogin = () => {
   const loginRequest = async (credentials) => {
-    const response = await axios.post(
-      `${API_BASE_URL}/api/v1/auth/sign-in`,
-      credentials,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-      }
-    );
+    const response = await axios.post(`/api/v1/auth/sign-in`, credentials, {
+      withCredentials: true,
+    });
     return response.data;
   };
 
-  const { mutateAsync: login, isLoading: isLogginIn } = useMutation(
+  const { mutateAsync: login, isLoading: isLoggingIn } = useMutation(
     loginRequest,
     {
       onSuccess: () => {
@@ -53,24 +46,15 @@ export const useLogin = () => {
     }
   );
 
-  return { login, isLogginIn };
+  return { login, isLoggingIn };
 };
 
 export const useVerification = () => {
   const verificationRequest = async (credentials) => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/verify-user`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(credentials),
-      credentials: "include",
+    const response = await axios.post(`/api/v1/auth/verify-user`, credentials, {
+      withCredentials: true,
     });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message);
-    }
-    return data;
+    return response.data;
   };
 
   const { mutateAsync: verifyPhoneNumber, isLoading: isVerifying } =
@@ -88,18 +72,11 @@ export const useVerification = () => {
 
 export const useCheckPhoneNumber = () => {
   const verificationRequest = async (credentials) => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/reset-password`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(credentials),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message);
-    }
-    return data;
+    const response = await axios.post(
+      `/api/v1/auth/reset-password`,
+      credentials
+    );
+    return response.data;
   };
 
   const { mutateAsync: checkNumber, isLoading: isChecking } = useMutation(
@@ -119,21 +96,11 @@ export const useCheckPhoneNumber = () => {
 
 export const useUpdatePassword = () => {
   const updatePasswordRequest = async (userFormData) => {
-    const response = await fetch(
-      `${API_BASE_URL}/api/v1/auth/update-password`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userFormData),
-      }
+    const response = await axios.put(
+      `/api/v1/auth/update-password`,
+      userFormData
     );
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message);
-    }
-    return data;
+    return response.data;
   };
 
   const { mutateAsync: updatePassword, isLoading: isUpdatingPassword } =
@@ -151,18 +118,8 @@ export const useUpdatePassword = () => {
 
 export const useResendOtp = () => {
   const resendOtpRequest = async (phoneNumber) => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/resend-otp`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(phoneNumber),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message);
-    }
-    return data;
+    const response = await axios.post(`/api/v1/auth/resend-otp`, phoneNumber);
+    return response.data;
   };
 
   const { mutateAsync: resendOtp, isLoading: isResendingOtp } = useMutation(
@@ -184,7 +141,7 @@ export const useLogOut = () => {
   const axiosPrivate = useAxiosPrivate();
   const logoutRequest = async () => {
     const response = await axiosPrivate.post(
-      `${API_BASE_URL}/api/v1/auth/logout`,
+      `/api/v1/auth/logout`,
       {},
       {
         withCredentials: true,
@@ -207,3 +164,20 @@ export const useLogOut = () => {
 
   return { logOut, isLoggingOut };
 };
+
+// Example of using Axios with useQuery
+export const useGetBranches = () => {
+  const getBranchesRequest = async () => {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/branch/`);
+    return response.data;
+  };
+
+  const { data: branches, isLoading: isLoadingBranches } = useQuery(
+    "branches",
+    getBranchesRequest
+  );
+
+  return { branches, isLoadingBranches };
+};
+
+// Add additional hooks as needed...
