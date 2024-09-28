@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from "react-query";
 import { toast } from "sonner";
 import axios from "./axios"; // Adjust the import path as necessary
-import { API_BASE_URL } from "@/config"; // Adjust the import if necessary
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 
 const handleError = (error) => {
