@@ -103,7 +103,7 @@ const CategoryPage = () => {
                   key={subcategory._id}
                   src={subcategory.imageUrl}
                   title={subcategory.name}
-                  link={`/category/${subcategory._id}`}
+                  link={`/category/${subcategory.name}`}
                 />
               ))}
             </div>
@@ -112,8 +112,8 @@ const CategoryPage = () => {
       )}
 
       {isProductsLoading ? (
-        <div className="flex flex-wrap justify-around mb-4 gap-4">
-          {[...Array(8)].map((_, index) => (
+        <div className="flex flex-wrap mb-4 gap-4">
+          {[...Array(5)].map((_, index) => (
             <SkeletonCard key={index} />
           ))}
         </div>
@@ -164,7 +164,7 @@ const CategoryPage = () => {
           </div>
 
           {isLoadingMore && (
-            <div className="flex flex-wrap justify-around mb-4 gap-4">
+            <div className="flex flex-wrap justify-around gap-2">
               {[...Array(4)].map((_, index) => (
                 <SkeletonCard key={index} />
               ))}
