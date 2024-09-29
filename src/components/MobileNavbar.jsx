@@ -60,11 +60,11 @@ const MobileNavbar = ({ isOpen }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed mt-28 right-0 h-full w-80 bg-white shadow-lg transform transition-transform translate-x-0 overflow-scroll">
+    <div className="fixed mt-28 right-0 h-fit w-80 bg-white shadow-lg transform transition-transform translate-x-0 overflow-scroll">
       <ScrollArea className=" bg-white">
         <div className="space-y-2">
           {/* Branch selection */}
-          <div className="border-b-2 py-2">
+          <div className="border-b-2 py-2 mb-2">
             <div className="flex items-center gap-2 px-4">
               {isLoadingBranches ? (
                 <p>Loading...</p>
@@ -81,7 +81,7 @@ const MobileNavbar = ({ isOpen }) => {
           </div>
 
           {/* Categories Section */}
-          <div className="space-y-2 border-b-2">
+          <div className="space-y-2 border-b-2 mb-2">
             <h2 className="font-bold text-md text-gray-800 px-4">Categories</h2>
             <div className="flex flex-col gap-3">
               {categories
