@@ -148,7 +148,7 @@ const CategoryPage = () => {
             </div>
           </div>
 
-          <div className="flex flex-wrap mb-4 gap-2">
+          <div className="flex flex-wrap justify-around mb-4 gap-2 mx-auto">
             {products.map((product) => (
               <ProductCard
                 key={product._id}

@@ -137,7 +137,7 @@ const SearchPage = () => {
               </select>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 w-full mb-4">
+          <div className="flex flex-wrap justify-around gap-2 w-full mb-4">
             {products.map((product) => (
               <ProductCard
                 key={product._id}
