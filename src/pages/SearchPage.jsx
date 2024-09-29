@@ -2,7 +2,7 @@ import { useSearchProducts } from "@/api/HomeApi";
 import PaginationSelector from "@/components/PaginationSelector";
 import ProductCard from "@/components/ProductCard";
 import SkeletonCard from "@/components/skeletons/SkeletonCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 
@@ -14,14 +14,38 @@ const SearchPage = () => {
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState(-1);
   const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [products, setProducts] = useState([]);
 
   const {
-    products,
+    products: fetchedProducts,
     metadata,
     isProductsLoading,
     error: productsError,
   } = useSearchProducts(searchTerm, branch, sortBy, sortOrder, currentPage);
 
+  // Reset products and current page when searchTerm changes
+  useEffect(() => {
+    setCurrentPage(1); // Reset to the first page
+    setProducts([]); // Reset products on new search
+  }, [searchTerm]);
+
+  // Update products when fetchedProducts changes
+  useEffect(() => {
+    if (currentPage === 1) {
+      setProducts(fetchedProducts);
+    } else {
+      setProducts((prev) => [...prev, ...fetchedProducts]);
+    }
+  }, [fetchedProducts, currentPage]);
+
+  // Update hasMore state
+  useEffect(() => {
+    setHasMore(metadata.totalDocuments > products.length);
+  }, [metadata.totalDocuments, products.length]);
+
+  // Handle sort change
   const handleSortChange = (e) => {
     const [sortField, order] = e.target.value.split(",");
     setSortBy(sortField);
@@ -32,15 +56,41 @@ const SearchPage = () => {
       sortOrder: order,
       page: 1,
     });
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to the first page
+    setProducts([]); // Reset products on sort change
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    setSearchParams({ searchTerm, sortBy, sortOrder, page });
+  // Handle scroll for loading more products
+  const handleScroll = () => {
+    const scrollPosition =
+      window.innerHeight + document.documentElement.scrollTop;
+    const bottomPosition = document.documentElement.offsetHeight - 550; // Adjust threshold
+
+    if (scrollPosition >= bottomPosition && hasMore && !isLoadingMore) {
+      loadMoreProducts();
+    }
   };
 
-  // Return skeleton loading UI if products are loading
+  const loadMoreProducts = () => {
+    if (isLoadingMore) return;
+    setIsLoadingMore(true);
+    setCurrentPage((prev) => prev + 1);
+  };
+
+  useEffect(() => {
+    if (isLoadingMore) {
+      setIsLoadingMore(false);
+    }
+  }, [currentPage]);
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [hasMore]);
+
+  // Loading state
   if (isProductsLoading) {
     return (
       <div>
@@ -87,7 +137,6 @@ const SearchPage = () => {
               </select>
             </div>
           </div>
-
           <div className="flex flex-wrap gap-2 w-full mb-4">
             {products.map((product) => (
               <ProductCard
@@ -102,12 +151,13 @@ const SearchPage = () => {
               />
             ))}
           </div>
-
-          <PaginationSelector
-            page={currentPage}
-            pages={metadata.totalPages}
-            onPageChange={handlePageChange}
-          />
+          {isLoadingMore && (
+            <div className="flex flex-wrap gap-2 w-full mb-4">
+              {[...Array(4)].map((_, index) => (
+                <SkeletonCard key={index} />
+              ))}
+            </div>
+          )}
         </>
       )}
     </div>

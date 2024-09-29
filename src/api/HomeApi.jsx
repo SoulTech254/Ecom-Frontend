@@ -52,7 +52,7 @@ export const useSearchProducts = (
   const {
     data,
     isLoading: isProductsLoading,
-    error: queryError, // Rename the error to avoid confusion
+    error: queryError,
   } = useQuery(
     ["SearchProducts", query, branchId, sortBy, sortOrder, page, limit],
     searchProductRequest,
@@ -61,10 +61,9 @@ export const useSearchProducts = (
     }
   );
 
-  const products = data?.products || [];
+  const products = data?.products || []; // Update to match the pagination results
   const metadata = data?.metadata || {};
 
-  // Return the error state
   const error = queryError
     ? queryError.response?.data || "An error occurred"
     : null;

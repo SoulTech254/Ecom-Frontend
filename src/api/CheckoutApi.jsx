@@ -54,10 +54,7 @@ export const usePlaceOrder = () => {
 
   const placeOrderRequest = async (data) => {
     try {
-      const response = await axiosPrivate.post(
-        `/api/v1/checkout/payment/mpesa`,
-        data
-      );
+      const response = await axiosPrivate.post(`/api/v1/payment/mpesa`, data);
       return response.data;
     } catch (error) {
       throw new Error(handleError(error));

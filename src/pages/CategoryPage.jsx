@@ -1,9 +1,8 @@
 import { useGetCategoryProducts, useGetSubcategories } from "@/api/HomeApi";
 import CircleLink from "@/components/CircleLink";
-import PaginationSelector from "@/components/PaginationSelector";
 import ProductCard from "@/components/ProductCard";
 import SkeletonCard from "@/components/skeletons/SkeletonCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useParams, useSearchParams } from "react-router-dom";
 
@@ -15,6 +14,8 @@ const CategoryPage = () => {
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState(-1);
   const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const {
     products,
@@ -33,22 +34,49 @@ const CategoryPage = () => {
   const { subcategories, isSubcategoriesLoading } =
     useGetSubcategories(categoryId);
 
+  useEffect(() => {
+    if (metadata.totalDocuments > products.length) {
+      setHasMore(true);
+    } else {
+      setHasMore(false);
+    }
+  }, [metadata.totalDocuments, products.length]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition =
+        window.innerHeight + document.documentElement.scrollTop;
+      const bottomPosition = document.documentElement.offsetHeight - 200; // Adjust threshold
+
+      if (scrollPosition >= bottomPosition && hasMore && !isLoadingMore) {
+        loadMoreProducts();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [hasMore, isLoadingMore]);
+
+  const loadMoreProducts = () => {
+    if (isLoadingMore) return;
+    setIsLoadingMore(true);
+    setCurrentPage((prev) => prev + 1);
+  };
+
   const handleSortChange = (e) => {
     const [sortField, order] = e.target.value.split(",");
     setSortBy(sortField);
     setSortOrder(Number(order));
-    setSearchParams({
-      sortBy: sortField,
-      sortOrder: order,
-      page: 1,
-    });
+    setSearchParams({ sortBy: sortField, sortOrder: order, page: 1 });
     setCurrentPage(1);
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    setSearchParams({ sortBy, sortOrder, page });
-  };
+  useEffect(() => {
+    if (!isLoadingMore) return;
+    setIsLoadingMore(false);
+  }, [currentPage]);
 
   return (
     <div className="mt-4">
@@ -86,7 +114,7 @@ const CategoryPage = () => {
       {isProductsLoading ? (
         <div className="flex flex-wrap justify-around mb-4 gap-4">
           {[...Array(8)].map((_, index) => (
-            <SkeletonCard/>
+            <SkeletonCard key={index} />
           ))}
         </div>
       ) : productsError ? (
@@ -135,11 +163,13 @@ const CategoryPage = () => {
             ))}
           </div>
 
-          <PaginationSelector
-            page={currentPage}
-            pages={metadata.totalPages}
-            onPageChange={handlePageChange}
-          />
+          {isLoadingMore && (
+            <div className="flex flex-wrap justify-around mb-4 gap-4">
+              {[...Array(4)].map((_, index) => (
+                <SkeletonCard key={index} />
+              ))}
+            </div>
+          )}
         </>
       )}
     </div>

@@ -1,6 +1,5 @@
-import PaginationSelector from "@/components/PaginationSelector";
 import ProductCard from "@/components/ProductCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useGetProducts } from "@/api/ProductApi";
@@ -11,18 +10,51 @@ const BrandPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const branch = useSelector((state) => state.branch.selectedBranch.id);
 
-  // Initialize state for current page
+  // Initialize state for current page and loading states
   const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const { products, metadata, isProductsLoading } = useGetProducts(
     branch,
     brand
   );
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    setSearchParams({ page });
+  useEffect(() => {
+    if (metadata.totalDocuments > products.length) {
+      setHasMore(true);
+    } else {
+      setHasMore(false);
+    }
+  }, [metadata.totalDocuments, products.length]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition =
+        window.innerHeight + document.documentElement.scrollTop;
+      const bottomPosition = document.documentElement.offsetHeight - 200; // Adjust threshold
+
+      if (scrollPosition >= bottomPosition && hasMore && !isLoadingMore) {
+        loadMoreProducts();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [hasMore, isLoadingMore]);
+
+  const loadMoreProducts = () => {
+    if (isLoadingMore) return;
+    setIsLoadingMore(true);
+    setCurrentPage((prev) => prev + 1);
   };
+
+  useEffect(() => {
+    if (!isLoadingMore) return;
+    setIsLoadingMore(false);
+  }, [currentPage]);
 
   if (isProductsLoading) {
     return (
@@ -46,13 +78,6 @@ const BrandPage = () => {
           {[...Array(6)].map((_, index) => (
             <SkeletonCard key={index} />
           ))}
-        </div>
-
-        {/* Skeleton for the pagination */}
-        <div className="mt-auto mb-4 flex justify-center">
-          <div className="w-1/3 bg-gray-200 h-8 rounded-md">
-            <div className="animate-pulse h-full w-full"></div>
-          </div>
         </div>
       </div>
     );
@@ -88,13 +113,13 @@ const BrandPage = () => {
         ))}
       </div>
 
-      <div className="mt-auto">
-        <PaginationSelector
-          page={currentPage}
-          pages={metadata.totalPages}
-          onPageChange={handlePageChange}
-        />
-      </div>
+      {isLoadingMore && (
+        <div className="flex flex-wrap justify-around mb-4 gap-4">
+          {[...Array(4)].map((_, index) => (
+            <SkeletonCard key={index} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

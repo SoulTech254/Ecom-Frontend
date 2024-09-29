@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASEURL = "https://ecom-backend-qdwv.onrender.com";
+const BASEURL = "http://127.0.0.1:3000";
 
 export default axios.create({
   baseURL: BASEURL,
@@ -8,7 +8,7 @@ export default axios.create({
 });
 
 export const axiosPrivate = axios.create({
-  baseURL: "https://ecom-backend-qdwv.onrender.com", // Ensure this matches your server's URL
+  baseURL: "http://127.0.0.1:3000", // Ensure this matches your server's URL
   headers: { "Content-Type": "application/json" },
   withCredentials: true, // Include credentials (cookies) with requests
 });
