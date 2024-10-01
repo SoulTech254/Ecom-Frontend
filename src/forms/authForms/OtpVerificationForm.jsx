@@ -57,7 +57,7 @@ const OTPVerificationForm = ({
         <h1 className="text-3xl">Verify Your Account</h1>
         {onButtonClick && <p>Hi {name}</p>}
         <div className="flex gap-2">
-          <p>Check your phone we have sent your OTP</p>
+          <p>Check your Email we have sent your OTP</p>
           {onButtonClick && (
             <button className="cursor-pointer" onClick={onButtonClick}>
               <FilePenLine color="#194A34" />
@@ -80,7 +80,7 @@ const OTPVerificationForm = ({
           <button
             disabled={isLoading}
             type="submit"
-            className={`bg-[#194A34] flex justify-center items-center text-white p-3 w-full rounded-3xl transition-colors duration-200 hover:bg-[#1F4F38] ${
+            className={`bg-primary flex justify-center items-center text-white p-3 w-full rounded-3xl transition-colors duration-200 hover:bg-primary hover:opacity-80 ${
               isLoading ? "opacity-60 cursor-default" : "cursor-pointer"
             }`}
           >
@@ -96,7 +96,7 @@ const OTPVerificationForm = ({
               onClick={handleResendOtpClick}
               type="button"
               disabled={timer > 0}
-              className={`border-[1px] text-center p-2 text-[#194A34] border-[#194A34] transition duration-300 ease-in-out transform ${
+              className={`border-[1px] text-center p-2 text-primary border-primary transition duration-300 ease-in-out transform ${
                 timer === 0
                   ? "hover:scale-105 hover:border-[#194A45] cursor-pointer"
                   : "cursor-default"

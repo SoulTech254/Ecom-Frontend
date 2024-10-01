@@ -114,7 +114,7 @@ const DeliverySlot = ({ onSelectSlot, method, selectedSlot: propSelectedSlot }) 
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <div className="bg-[#A0D8BF] flex flex-row gap-2 sm:gap-8 px-4 sm:px-10 py-3 mt-2">
+      <div className="bg-primary bg-opacity-60 flex sm:flex-row gap-4 px-4 py-2 sm:px-10 sm:py-3 mt-2">
         <AlarmClock color="#E61927" className="text-xl sm:text-2xl" />
         <h2 className="text-base sm:text-lg font-semibold">
           Schedule Delivery Time
@@ -148,7 +148,7 @@ const DeliverySlot = ({ onSelectSlot, method, selectedSlot: propSelectedSlot }) 
         </PopoverContent>
         <PopoverTrigger asChild>
           <button
-            className="border-2 border-[#194A34] text-[#194A34] rounded-full px-2 py-1 hover:bg-[#194A34] hover:text-white transition duration-300 text-xs sm:text-sm"
+            className="border-2 border-primary text-primary rounded-full px-2 py-1 hover:bg-primary hover:text-white transition duration-300 text-xs sm:text-sm"
             onClick={() => setIsOpen(!isOpen)}
           >
             Select Time Slot

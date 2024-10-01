@@ -2,7 +2,7 @@ import RegisterForm from "@/forms/authForms/RegisterForm";
 import React, { useState } from "react";
 import { useCreateMyUser, useUpdateUser } from "@/api/MyUserApi";
 import OTPVerificationForm from "@/forms/authForms/OtpVerificationForm";
-import ChangeNumberForm from "@/forms/authForms/UpdateNumberForm";
+import ChangeEmailForm from "@/forms/authForms/UpdateNumberForm";
 import { useResendOtp, useVerification } from "@/api/AuthApi";
 import QuickmartCart from "../assets/images/BG.jpg";
 import { toast } from "sonner";
@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 const RegistrationPage = () => {
   //API
   const { createUser, isLoading, isSuccess } = useCreateMyUser();
-  const { verifyPhoneNumber, isVerifying } = useVerification();
+  const { verifyEmail, isVerifying } = useVerification();
   const { updateUser, isUpdating } = useUpdateUser();
   const { resendOtp } = useResendOtp();
 
@@ -25,21 +25,21 @@ const RegistrationPage = () => {
   const [showVerificationForm, setShowVerificationForm] = useState(false);
   const [showUpdateNumberForm, setShowUpdateNumberForm] = useState(false);
   const [name, setName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
 
   const navigate = useNavigate();
 
   const handleRegisterSave = async (userData) => {
-    const { date, month, year, fName, phoneNumber, ...restUserData } = userData;
+    const { date, month, year, fName, email, ...restUserData } = userData;
 
     const dobDate = new Date(year, month - 1, date);
     setName(fName);
-    setPhoneNumber(phoneNumber);
+    setEmail(email);
 
     const refinedUserData = {
       ...restUserData,
       fName,
-      phoneNumber,
+      email,
       DOB: dobDate,
     };
 
@@ -57,27 +57,27 @@ const RegistrationPage = () => {
   const handleVerifySave = async (data) => {
     const { otp } = data;
     const verifyData = {
-      phoneNumber,
+      email,
       otp,
     };
     try {
-      await verifyPhoneNumber(verifyData);
+      await verifyEmail(verifyData);
       navigate("/sign-in");
     } catch (error) {
-      toast.error("Failed to Verify phone Number");
+      console.error("Failed to Verify phone Number");
     }
   };
 
   const handleUpdateSave = async (data) => {
     const updateData = {
-      phoneNumber,
+      email,
       ...data,
     };
 
-    const { formPhoneNumber } = data;
+    const { email: formEmail } = data;
     try {
       await updateUser(updateData);
-      setPhoneNumber(formPhoneNumber);
+      setEmail(formEmail);
       setShowVerificationForm(true);
     } catch (error) {
       console.log("Error Updating User");
@@ -98,10 +98,10 @@ const RegistrationPage = () => {
             setShowUpdateNumberForm(true);
           }}
           onXButtonClick={() => setShowVerificationForm(false)}
-          onResendOtpClick={() => resendOtp({ phoneNumber })}
+          onResendOtpClick={() => resendOtp({ email })}
         />
       ) : showUpdateNumberForm ? (
-        <ChangeNumberForm
+        <ChangeEmailForm
           onSave={handleUpdateSave}
           isLoading={isUpdating}
           onButtonClick={() => {

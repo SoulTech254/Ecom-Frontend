@@ -31,7 +31,7 @@ const AddressSlot = ({
 
   return (
     <>
-      <div className="bg-[#A0D8BF] flex sm:flex-row gap-4 px-4 py-2 sm:px-10 sm:py-3 rounded-md">
+      <div className="bg-primary bg-opacity-60 flex sm:flex-row gap-4 px-4 py-2 sm:px-10 sm:py-3 ">
         <MapPinned color="#E61927" className="text-xl sm:text-2xl" />
         <h1 className="text-lg sm:text-xl font-semibold">Delivery Details</h1>
       </div>
@@ -57,7 +57,7 @@ const AddressSlot = ({
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
           <PopoverTrigger asChild>
             <button
-              className="border-2 border-primary text-primary rounded-full px-2 py-1 hover:bg-primary hover:text-white transition duration-300 text-sm sm:text-base"
+              className="border-2 border-primary text-primary rounded-full px-2 py-1 hover:bg-primary hover:text-white transition duration-300 text-xs sm:text-sm"
               onClick={() => setIsPopoverOpen(true)}
             >
               View Addresses

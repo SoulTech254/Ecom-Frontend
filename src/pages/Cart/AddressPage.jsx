@@ -174,7 +174,7 @@ const AddressPage = () => {
 
           <div className="flex w-full justify-center mt-4">
             <button
-              className="bg-[#194A34] text-white px-4 py-2 rounded-full"
+              className="bg-primary text-white px-4 py-2 rounded-full"
               type="button"
               onClick={handleDeliverySubmit}
             >

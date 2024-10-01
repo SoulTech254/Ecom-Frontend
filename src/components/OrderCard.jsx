@@ -89,7 +89,7 @@ const OrderCard = ({ order }) => {
               <button
                 onClick={toggleOpen}
                 variant="ghost"
-                className="text-xs md:text-sm px-3 py-1 border border-[#194A34] hover:bg-[#194A34] hover:text-white text-[#194A34] rounded-full transition-all duration-300"
+                className="text-xs md:text-sm px-3 py-1 border border-primary hover:bg-primary hover:text-white text-primary rounded-full transition-all duration-300"
               >
                 {isOpen ? "View Less" : "View More"}
               </button>

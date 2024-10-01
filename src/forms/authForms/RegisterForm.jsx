@@ -251,7 +251,7 @@ const RegisterForm = ({ onSave, isLoading }) => {
           <button
             disabled={isLoading}
             type="submit"
-            className={`bg-[#194A34] flex justify-center items-center text-white p-3 w-full rounded-3xl transition-colors duration-200 hover:bg-[#1F4F38] ${
+            className={`bg-primary flex justify-center items-center text-white p-3 w-full rounded-3xl transition-colors duration-200 hover:bg-primary hover:opacity-80 ${
               isLoading ? "opacity-60 cursor-default" : "cursor-pointer "
             }`}
           >
@@ -263,7 +263,7 @@ const RegisterForm = ({ onSave, isLoading }) => {
             <div className="flex-1 ml-5 border-t border-[#1E4E38]"></div>
           </div>
           <Link to={"/sign-in"}>
-            <div className="cursor-pointer border-[1px] text-center p-3 text-[#194A34] border-[#194A34] transition duration-300 ease-in-out transform hover:scale-105 hover:border-[#194A45]">
+            <div className="cursor-pointer border-[1px] text-center p-3 text-primary border-primary transition duration-300 ease-in-out transform hover:scale-105 hover:border-[#194A45]">
               LOG IN
             </div>
           </Link>

@@ -211,7 +211,7 @@ const DeliveryForm = ({ onSubmit }) => {
 
           <button
             type="submit"
-            className="bg-[#194A34] w-full hover:bg-[#194A3490] text-white py-2 px-4 rounded-full focus:outline-none"
+            className="bg-primary w-full hover:bg-[#194A3490] text-white py-2 px-4 rounded-full focus:outline-none"
           >
             Save Details
           </button>

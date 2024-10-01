@@ -2,31 +2,18 @@ import { useMutation } from "react-query";
 import { toast } from "sonner";
 import axios from "./axios"; // Adjust the import path as necessary
 
-const handleError = (error) => {
-  if (error.response) {
-    const statusCode = error.response.status;
-    const message = error.response.data?.message || "An error occurred";
-
-    switch (statusCode) {
-      case 400:
-        return "Invalid input. Please check your data.";
-      case 404:
-        return "User not found.";
-      case 500:
-      default:
-        return "Something went wrong on our end. Please try again later.";
-    }
-  }
-  return "Network error. Please check your internet connection.";
-};
-
 export const useCreateMyUser = () => {
   const createMyUserRequest = async (userFormData) => {
     try {
       const response = await axios.post("/api/v1/auth/sign-up", userFormData);
       return response.data; // Directly return the data
     } catch (error) {
-      throw new Error(handleError(error));
+      // Rethrow the error with the relevant information
+      if (error.response && error.response.data) {
+        throw new Error(error.response.data.message);
+      } else {
+        throw new Error("An unexpected error occurred");
+      }
     }
   };
 
@@ -39,7 +26,7 @@ export const useCreateMyUser = () => {
       toast.success("User Created Successfully");
     },
     onError: (error) => {
-      toast.error(handleError(error));
+      toast.error(error.message);
     },
   });
 
@@ -52,7 +39,7 @@ export const useUpdateUser = () => {
       const response = await axios.put("/api/v1/user/update", userFormData);
       return response.data; // Directly return the data
     } catch (error) {
-      throw new Error(handleError(error));
+      throw new Error(error.message);
     }
   };
 
@@ -63,7 +50,7 @@ export const useUpdateUser = () => {
         toast.success("Update Successful");
       },
       onError: (error) => {
-        toast.error(handleError(error));
+        toast.error(error.message);
       },
     }
   );

@@ -20,6 +20,7 @@ import { useLogOut } from "@/api/AuthApi";
 
 const Navbar = () => {
   const { user } = useSelector((state) => state.user);
+  console.log(user);
   const { branches: apiBranches, isLoadingBranches } = useGetBranches();
   const [branches, setBranches] = useState([]);
   const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -38,19 +39,21 @@ const Navbar = () => {
     dispatch(setBranch(branch));
   };
 
-  const handleSignOut = useCallback(async () => {
+  const handleSignOut = async () => {
     try {
-      await logOut();
-      dispatch(deleteUser());
-      dispatch(removeBranch());
-      dispatch(resetCart());
-      dispatch(deleteOrderInfo());
-      window.location.reload()
+      await logOut().then(() => {
+        dispatch(deleteUser());
+        dispatch(removeBranch());
+        dispatch(resetCart());
+        dispatch(deleteOrderInfo());
+        localStorage.removeItem("persist:root");
+        window.location.reload();
+      });
     } catch (error) {
       console.error("Logout failed:", error);
       // Optionally, you can show a toast notification or alert here
     }
-  }, [dispatch, logOut]);
+  };
 
   const handleSheetClose = () => setIsSheetOpen(false);
 
@@ -80,7 +83,7 @@ const Navbar = () => {
                 <p>Loading...</p>
               ) : (
                 <>
-                  <StoreIcon color="#b12e26" size={20} />
+                  <StoreIcon color="#DAA520" size={20} />
                   <StoreSelection
                     branches={branches}
                     onSelectBranch={handleSelectBranch}
@@ -94,12 +97,12 @@ const Navbar = () => {
               {user ? (
                 <>
                   <Popover>
-                    <PopoverTrigger className="flex hover:text-[#b12e26] items-center gap-1">
-                      <CircleUserRound color="#b12e26" size="20" />
+                    <PopoverTrigger className="flex hover:text-[#DAA520] items-center gap-1">
+                      <CircleUserRound color="#DAA520" size="20" />
                       <p className="text-sm">Hello {user.fName}</p>
                     </PopoverTrigger>
                     <PopoverContent className="w-[150px] p-2 flex flex-col">
-                      <Link className="hover:text-[#b12e26]" to="/orders">
+                      <Link className="hover:text-[#DAA520]" to="/orders">
                         Orders
                       </Link>
                       <button
@@ -114,7 +117,7 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <LogInIcon color="#b12e26" size="20" />
+                  <LogInIcon color="#DAA520" size="20" />
                   <Link to="/sign-in">Login & Register</Link>
                 </>
               )}

@@ -1,12 +1,11 @@
 import {
-  useCheckPhoneNumber,
+  useCheckEmail,
   useLogin,
   useResendOtp,
   useUpdatePassword,
-  useVerification,
+  useVerifyRegisteredUser,
 } from "@/api/AuthApi";
 import { useUpdateUser } from "@/api/MyUserApi";
-import ConfirmNumberForm from "@/forms/authForms/ConfirmNumber";
 import LoginForm from "@/forms/authForms/LoginForm";
 import OTPVerificationForm from "@/forms/authForms/OtpVerificationForm";
 import UpdatePasswordForm from "@/forms/authForms/UpdatePasswordForm";
@@ -20,21 +19,23 @@ import { useGetBranches } from "@/api/HomeApi";
 import { setBranch } from "@/redux/branch/branchSlice";
 import { SelectBranchModal } from "@/components/SelectBranchModal";
 import { setAccessToken } from "@/redux/auth/authSlice";
+import ConfirmEmailForm from "@/forms/authForms/ConfirmEmail";
 
 const LoginPage = () => {
   const { login, isLogginIn } = useLogin();
+  console.log(isLogginIn);
   const dispatch = useDispatch();
 
   // API Hooks
-  const { verifyPhoneNumber, isVerifying } = useVerification();
-  const { checkNumber, isChecking } = useCheckPhoneNumber();
+  const { verifyRegisteredEmail, isVerifying } = useVerifyRegisteredUser();
+  const { checkEmail, isChecking } = useCheckEmail();
   const { updatePassword, isUpdatingPassword } = useUpdatePassword();
   const { resendOtp } = useResendOtp();
   const { branches: apiBranches, isLoadingBranches } = useGetBranches();
 
   // States
   const [resetPassword, setResetPassword] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [showVerificationForm, setShowVerificationForm] = useState(false);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
   const [showStoreBranchModal, setShowStoreBranchModal] = useState(false); // State to control StoreBranchModal visibility
@@ -46,17 +47,19 @@ const LoginPage = () => {
     // Update local state with API branches once they are loaded
     if (!isLoadingBranches && apiBranches.length > 0) {
       setBranches(apiBranches);
+      dispatch(setBranch(apiBranches[0]));
     }
   }, [apiBranches, isLoadingBranches]);
 
   // OnSave Functions
   const handleResetPasswordSave = async (data) => {
-    const { phoneNumber } = data;
+    const { email } = data;
     try {
-      await checkNumber(data);
-      setPhoneNumber(phoneNumber);
-      setResetPassword(false);
-      setShowVerificationForm(true);
+      await checkEmail(data).then(() => {
+        setEmail(email);
+        setResetPassword(false);
+        setShowVerificationForm(true);
+      });
     } catch (error) {
       console.log("Error");
     }
@@ -64,14 +67,16 @@ const LoginPage = () => {
 
   const handleVerificationSave = async (data) => {
     const { otp } = data;
+    console.log(otp);
     const verifyData = {
-      phoneNumber,
+      email,
       otp,
     };
     try {
-      await verifyPhoneNumber(verifyData);
-      setShowVerificationForm(false);
-      setShowUpdateForm(true);
+      await verifyRegisteredEmail(verifyData).then(() => {
+        setShowVerificationForm(false);
+        setShowUpdateForm(true);
+      });
     } catch (error) {
       console.log("Error");
     }
@@ -95,13 +100,14 @@ const LoginPage = () => {
   const handleUpdateSave = async (data) => {
     const password = data.password;
     const updateData = {
-      phoneNumber,
+      email,
       password,
     };
     console.log(updateData);
     try {
-      await updatePassword(updateData);
-      navigate("/");
+      await updatePassword(updateData).then(() => {
+        window.location.reload();
+      });
     } catch (error) {
       console.log("Error");
     }
@@ -122,7 +128,7 @@ const LoginPage = () => {
       className={`h-screen w-full flex items-center justify-center md:bg-white md:p-20 bg-cover bg-center lg:bg-gradient-to-b lg:from-white lg:to-gray-300`}
     >
       {resetPassword ? (
-        <ConfirmNumberForm
+        <ConfirmEmailForm
           onButtonClick={() => setResetPassword(false)}
           isLoading={isChecking}
           onSave={handleResetPasswordSave}

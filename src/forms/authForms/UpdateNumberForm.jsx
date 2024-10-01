@@ -9,18 +9,19 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const formSchema = z.object({
-  phoneNumber: z
+  email: z
     .string()
-    .regex(/^\d{9}$/, "Please enter a valid phone number."),
+    .email("Please enter a valid email address."),
 });
-const ChangeNumberForm = ({
+
+const ChangeEmailForm = ({
   onSave,
   isLoading,
   fName,
   lName,
   onButtonClick,
 }) => {
-  const { register, handleSubmit } = useForm({
+  const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(formSchema),
   });
 
@@ -33,39 +34,32 @@ const ChangeNumberForm = ({
       </div>
       <div className="flex flex-col gap-3">
         <img src={walmartLogo} alt="" className="w-fit h-fit " />
-        <h1 className="text-3xl">Change Phone Number</h1>
-        <p>Update your phone number</p>{" "}
+        <h1 className="text-3xl">Change Email</h1>
+        <p>Update your Email</p>
         <form
           className="flex flex-col gap-4 mt-2"
           onSubmit={handleSubmit(onSave)}
         >
           <div className="flex">
-            <span
-              className={`w-[80px] mr-2 border-b outline-none focus:outline-none "border-[#194A3491]"
-              }`}
-            >
-              +254
-            </span>
             <input
-              {...register("phoneNumber")}
-              type="number"
-              name="phoneNumber"
-              placeholder="Phone Number"
-              className={`w-full border-b pb-5 outline-none focus:outline-none  "border-[#194A3491]"
-              }`}
+              {...register("email")}
+              type="email"
+              name="email"
+              placeholder="Email Address"
+              className={`w-full border-b pb-5 outline-none focus:outline-none border-[#194A3491]`}
             />
           </div>
-          {/* {errors.phoneNumber && (
-            <p className="text-[#E71926]">{errors.phoneNumber.message}</p>
-          )} */}
+          {errors.email && (
+            <p className="text-[#E71926]">{errors.email.message}</p>
+          )}
           <button
             disabled={isLoading}
             type="submit"
-            className={`bg-[#194A34] flex justify-center items-center text-white p-3 w-full rounded-3xl transition-colors duration-200 hover:bg-[#1F4F38] ${
+            className={`bg-primary flex justify-center items-center text-white p-3 w-full rounded-3xl transition-colors duration-200 hover:bg-primary hover:opacity-80 ${
               isLoading ? "opacity-60 cursor-default" : "cursor-pointer "
             }`}
           >
-            {isLoading ? <Loader /> : "Update Number"}
+            {isLoading ? <Loader /> : "Update Email"}
           </button>
         </form>
       </div>
@@ -73,4 +67,4 @@ const ChangeNumberForm = ({
   );
 };
 
-export default ChangeNumberForm;
+export default ChangeEmailForm;

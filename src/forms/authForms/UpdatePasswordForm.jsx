@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import Loader from "@/components/Loader";
 import { z } from "zod";
 import walmartLogo from "../../assets/images/quickmart.png";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const formSchema = z.object({
   password: z
@@ -46,7 +47,7 @@ const UpdatePasswordForm = ({ onSave, isLoading, onButtonClick }) => {
           <button
             disabled={isLoading}
             type="submit"
-            className={`bg-[#194A34] flex justify-center items-center text-white p-3 w-full rounded-3xl transition-colors duration-200 hover:bg-[#1F4F38] ${
+            className={`bg-primary flex justify-center items-center text-white p-3 w-full rounded-3xl transition-colors duration-200 hover:bg-primary hover:opacity-80 ${
               isLoading ? "opacity-60 cursor-default" : "cursor-pointer "
             }`}
           >

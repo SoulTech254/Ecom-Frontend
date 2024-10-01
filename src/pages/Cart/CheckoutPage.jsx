@@ -278,7 +278,7 @@ const CheckoutPage = () => {
           {/* Proceed to Pay Button */}
           <div className="flex justify-center mt-6">
             <button
-              className="bg-[#194A34] text-white py-2 px-4 rounded-full"
+              className="bg-primary text-white py-2 px-4 rounded-full"
               onClick={handleProceedToPay}
               disabled={isLoadingPlaceOrder}
             >
