@@ -15,9 +15,6 @@ const CheckoutPage = () => {
   const { selectedBranch } = useSelector((state) => state.branch);
   const cartP = useSelector((state) => state.cart);
 
-  console.log(deliveryInfo);
-  console.log(paymentInfo);
-
   const { getOrderSummaryData, isLoadingOrderSummary } = useGetOrderSummary();
   const [orderSummary, setOrderSummary] = useState(null);
   const [error, setError] = useState(null);
@@ -31,19 +28,35 @@ const CheckoutPage = () => {
   };
 
   useEffect(() => {
-    if (Object.keys(deliveryInfo).length === 0) {
-      navigate("/address");
-      toast.error("Fill in Delivery Details First");
-    }
+    // Check deliveryInfo and navigate if criteria are not met
     if (cartP.products.length === 0) {
       navigate("/cart");
       toast.error("Add items to Cart First");
     }
-    if (Object.keys(paymentInfo).length === 0) {
-      navigate("/payment");
-      toast.error("Fill in Payment Details First");
+
+    const deliveryMethod = deliveryInfo.method;
+    const hasAddress = deliveryInfo.address;
+    const hasDeliverySlot = deliveryInfo.deliverySlot;
+
+    if (deliveryMethod === "pickup") {
+      // If method is pickup, no need for address and delivery slot
+      if (Object.keys(paymentInfo).length === 0) {
+        navigate("/payment");
+        toast.error("Fill in Payment Details First");
+      }
+    } else {
+      // For other methods, check for address and delivery slot
+      if (!hasAddress || !hasDeliverySlot) {
+        navigate("/address");
+        toast.error("Fill in Delivery Details First");
+      }
+
+      if (Object.keys(paymentInfo).length === 0) {
+        navigate("/payment");
+        toast.error("Fill in Payment Details First");
+      }
     }
-  }, [deliveryInfo, cartP, navigate]);
+  }, [deliveryInfo, cartP, navigate, paymentInfo]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,7 +90,6 @@ const CheckoutPage = () => {
   const handleProceedToPay = async () => {
     try {
       const payment = await placeOrder(orderSummary);
-      console.log(payment);
       navigate(`/checking-payment/${payment._id}`);
       dispatch(mergeLocalCart());
     } catch (error) {
@@ -100,14 +112,20 @@ const CheckoutPage = () => {
   };
 
   const doneSteps = [];
-  if (Object.keys(deliveryInfo).length > 0) {
-    doneSteps.push(1);
+  const deliveryMethod = deliveryInfo.method;
+  const hasAddress = deliveryInfo.address;
+  const hasDeliverySlot = deliveryInfo.deliverySlot;
+
+  if (deliveryMethod === "pickup" || (hasAddress && hasDeliverySlot)) {
+    doneSteps.push(1); // Delivery step completed
   }
+
   if (Object.keys(paymentInfo).length > 0) {
-    doneSteps.push(2);
+    doneSteps.push(2); // Payment step completed
   }
+
   if (cartP.products.length > 0) {
-    doneSteps.push(0);
+    doneSteps.push(0); // Cart step completed
   }
 
   return (

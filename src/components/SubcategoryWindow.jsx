@@ -1,6 +1,6 @@
 const SubcategoryWindow = ({ groups }) => {
   return (
-    <div className="fixed inset-x-0  min-h-[88%] mt-1 p-3 bg-white border border-gray-200 shadow-lg z-20">
+    <div className="fixed inset-x-0  min-h-[40%] mt-1 p-3 bg-white border border-gray-200 shadow-lg z-20">
       <div className="">
         {groups.map((group) => (
           <div key={group.title} className="mb-2">

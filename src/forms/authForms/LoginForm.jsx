@@ -4,7 +4,9 @@ import { z } from "zod";
 import walmartLogo from "../../assets/images/quickmart.png";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { Link } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import Loader from "@/components/Loader";
+import { useState } from "react";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -19,6 +21,7 @@ const LoginForm = ({ onSave, isLoading, onButtonClick }) => {
   } = useForm({
     resolver: zodResolver(formSchema),
   });
+  const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="bg-white h-fit w-screen md:max-w-[500px] p-4 md:p-12 md:border rounded-xl">
       <div className=" flex flex-col gap-3 ">
@@ -39,15 +42,25 @@ const LoginForm = ({ onSave, isLoading, onButtonClick }) => {
           {errors.email && (
             <p className="text-[#E71926]">{errors.email.message}</p>
           )}
-          <input
-            {...register("password")}
-            type="password"
-            name="password"
-            placeholder="Password"
-            className={`w-full border-b pb-5 outline-none focus:outline-none ${
-              errors.password ? "border-[#E71926]" : "border-[#194A3491]"
-            }`}
-          />
+          <div className="relative">
+            <input
+              {...register("password")}
+              type={showPassword ? "text" : "password"} // Conditional input type
+              name="password"
+              placeholder="Password"
+              className={`w-full border-b pb-5 outline-none focus:outline-none ${
+                errors.password ? "border-[#E71926]" : "border-[#194A3491]"
+              }`}
+            />
+            <button
+              type="button"
+              className="absolute right-2 top-2"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}{" "}
+              {/* Eye icon */}
+            </button>
+          </div>
           {errors.password && (
             <p className="text-[#E71926]">{errors.password.message}</p>
           )}

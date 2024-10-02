@@ -6,14 +6,15 @@ import walmartLogo from "../../assets/images/quickmart.png";
 import { Link } from "react-router-dom";
 import { months } from "@/utils/utils";
 import Loader from "@/components/Loader";
+import { Eye, EyeOff } from "lucide-react"; // Import the eye icons
+import { useState } from "react";
 
 const GenderEnum = z.enum(["Male", "Female"]);
 
 const formSchema = z.object({
   gender: GenderEnum,
   email: z.string().email("Please enter a valid email address."),
-  fName: z.string()
-  ,
+  fName: z.string(),
   lName: z.string().min(1, "Last name cannot be empty."),
   phoneNumber: z
     .string()
@@ -59,6 +60,7 @@ const RegisterForm = ({ onSave, isLoading }) => {
       agreeTerms: false,
     },
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const agreeTerms = useWatch({
     name: "agreeTerms",
@@ -163,15 +165,26 @@ const RegisterForm = ({ onSave, isLoading }) => {
           {errors.phoneNumber && (
             <p className="text-[#E71926]">{errors.phoneNumber.message}</p>
           )}
-          <input
-            {...register("password")}
-            type="password"
-            name="password"
-            placeholder="Password"
-            className={`w-full border-b pb-5 outline-none focus:outline-none ${
-              errors.password ? "border-[#E71926]" : "border-[#194A3491]"
-            }`}
-          />
+          <div className="relative">
+            <input
+              {...register("password")}
+              type={showPassword ? "text" : "password"} // Conditional input type
+              name="password"
+              placeholder="Password"
+              className={`w-full border-b pb-5 outline-none focus:outline-none ${
+                errors.password ? "border-[#E71926]" : "border-[#194A3491]"
+              }`}
+            />
+            <button
+              type="button"
+              className="absolute right-2 top-2"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}{" "}
+              {/* Eye icon */}
+            </button>
+          </div>
+
           {errors.password && (
             <p className="text-[#E71926]">{errors.password.message}</p>
           )}

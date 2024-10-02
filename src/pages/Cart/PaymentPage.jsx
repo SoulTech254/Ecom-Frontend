@@ -28,15 +28,30 @@ const PaymentPage = () => {
 
   // Check if deliveryInfo is defined and handle navigation
   useEffect(() => {
-    if (!deliveryInfo || Object.keys(deliveryInfo).length === 0) {
-      navigate("/address");
-      toast.error("Fill in Delivery Details First");
-    }
-    if (!cart || cart.products.length === 0) {
-      toast.error("Add items to Cart First");
+    // Check deliveryInfo and navigate if criteria are not met
+    if (cart.products.length === 0) {
       navigate("/cart");
+      toast.error("Add items to Cart First");
     }
-  }, [deliveryInfo, cart, navigate]);
+
+    const deliveryMethod = deliveryInfo.method;
+    const hasAddress = deliveryInfo.address;
+    const hasDeliverySlot = deliveryInfo.deliverySlot;
+
+    if (deliveryMethod === "pickup") {
+      // If method is pickup, no need for address and delivery slot
+      if (Object.keys(paymentInfo).length === 0) {
+        navigate("/payment");
+        toast.error("Fill in Payment Details First");
+      }
+    } else {
+      // For other methods, check for address and delivery slot
+      if (!hasAddress || !hasDeliverySlot) {
+        navigate("/address");
+        toast.error("Fill in Delivery Details First");
+      }
+    }
+  }, [deliveryInfo, cart, navigate, paymentInfo]);
 
   // Set the phone number field with the paymentInfo if available
   useEffect(() => {
