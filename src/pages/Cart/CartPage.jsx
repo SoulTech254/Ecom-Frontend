@@ -157,16 +157,21 @@ const CartPage = () => {
     }
   };
 
-  const activeStep = 0;
   const doneSteps = [];
-  if (Object.keys(deliveryInfo).length > 0) {
-    doneSteps.push(1);
+  const deliveryMethod = deliveryInfo.method;
+  const hasAddress = deliveryInfo.address;
+  const hasDeliverySlot = deliveryInfo.deliverySlot;
+
+  if (deliveryMethod === "pickup" || (hasAddress && hasDeliverySlot)) {
+    doneSteps.push(1); // Delivery step completed
   }
+
   if (Object.keys(paymentInfo).length > 0) {
-    doneSteps.push(2);
+    doneSteps.push(2); // Payment step completed
   }
+
   if (cart.products.length > 0) {
-    doneSteps.push(0);
+    doneSteps.push(0); // Cart step completed
   }
 
   return (
@@ -174,7 +179,6 @@ const CartPage = () => {
       <Suspense fallback={<div>Loading...</div>}>
         <Stepper
           steps={steps}
-          activeStep={activeStep}
           to={links}
           doneSteps={doneSteps}
           heading={"Checkout Process"}

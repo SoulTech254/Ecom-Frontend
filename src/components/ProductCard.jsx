@@ -21,9 +21,10 @@ const ProductCard = ({
   const user = useSelector((state) => state.user.user);
   const [isCartLoading, setIsCartLoading] = useState(false);
   const axiosPrivate = useAxiosPrivate();
+  const { selectedBranch } = useSelector((state) => state.branch);
 
   const cart = useSelector((state) => state.cart);
-  console.log(cart)
+  console.log(cart);
   const existingCartItem = cart.products.find(
     (item) => item.product._id === id
   );
@@ -32,6 +33,9 @@ const ProductCard = ({
     : 0;
 
   const handleAddToCart = (quantity) => {
+    if (!selectedBranch) {
+      return toast.error("Please select a branch to add to cart");
+    }
     const totalQuantityAfterAdding = currentQuantityInCart + quantity;
 
     if (

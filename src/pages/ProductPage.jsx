@@ -1,9 +1,5 @@
-import React, { useState } from "react";
-import {
-  useGetAProduct,
-  useGetBestSellers,
-  useGetProducts,
-} from "@/api/ProductApi";
+import React, { useEffect, useState } from "react";
+import { useGetAProduct, useGetProducts } from "@/api/ProductApi";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Autoplay from "embla-carousel-autoplay";
 import {
@@ -17,30 +13,49 @@ import { useSelector, useDispatch } from "react-redux";
 import ShareButton from "@/components/ShareButton";
 import QuantityDropdown from "@/components/QuantityDropdown";
 import { addProductToCart, addToCartLocal } from "@/redux/cart/cartSlice";
-import Loader from "@/components/Loader";
-import ProductCard from "@/components/ProductCard";
-import { chunkArray } from "@/utils/utils";
-import ProductGroup from "@/components/ProductGroup";
 import { toast } from "sonner";
 import SkeletonProductPage from "@/components/skeletons/SkeletonProductPage";
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
+import StoreSelection from "@/components/StoreSelection";
+import { useGetBranches } from "@/api/HomeApi";
+import { setBranch } from "@/redux/branch/branchSlice";
+import ProductGroup from "@/components/ProductGroup";
 
 const ProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { selectedBranch } = useSelector((state) => state.branch);
-  const { products, metadata, isProductsLoading } = useGetProducts(
-    selectedBranch.id
+  const { branches: fetchedBranches, isLoadingBranches } = useGetBranches();
+  const [branches, setBranches] = useState([]);
+
+  useEffect(() => {
+    if (!isLoadingBranches) {
+      setBranches(fetchedBranches);
+    }
+  }, [fetchedBranches, isLoadingBranches]);
+
+  const handleBranchSelection = (branch) => {
+    dispatch(setBranch(branch));
+    navigate(`/products/${id}`);
+  };
+
+  // Always call hooks
+  const { products, isProductsLoading } = useGetProducts(
+    selectedBranch ? selectedBranch.id : null
+  );
+  const { product, isProductLoading } = useGetAProduct(
+    id,
+    selectedBranch ? selectedBranch.id : null
   );
   const axiosPrivate = useAxiosPrivate();
-  const { product, isProductLoading } = useGetAProduct(id, selectedBranch.id);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const cart = useSelector((state) => state.cart);
   const user = useSelector((state) => state.user.user); // Add user selector
 
-  if (isProductLoading) {
+  // Handle loading states
+  if (isLoadingBranches || isProductLoading) {
     return <SkeletonProductPage />;
   }
 
@@ -61,7 +76,6 @@ const ProductPage = () => {
     stockLevel,
   } = product;
 
-  const options = Array.from({ length: SKU }, (_, i) => i + 1);
   const breadcrumbs = category
     ? [
         { name: "Home", path: "/" },
@@ -135,8 +149,20 @@ const ProductPage = () => {
     }
   };
 
+  // If no branch is selected, return StoreSelection component
+  if (!selectedBranch) {
+    return (
+      <div className="flex items-center justify-center w-full p-24 bg-white shadow-md">
+        <StoreSelection
+          branches={branches}
+          onSelectBranch={handleBranchSelection}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className=" md:p-8 lg:p-4">
+    <div className="md:p-8 lg:p-4">
       {/* Breadcrumbs */}
       <div className="py-4">
         {breadcrumbs.length > 0 && (
@@ -161,7 +187,7 @@ const ProductPage = () => {
         )}
       </div>
 
-      <div className="flex flex-col  sm:flex-row gap-8 lg:gap-16">
+      <div className="flex flex-col sm:flex-row gap-8 lg:gap-16">
         {/* Image Carousel */}
         <div className="lg:w-[30vw] md:w-[50vw]">
           <Carousel

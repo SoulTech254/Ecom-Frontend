@@ -16,18 +16,15 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useSelector } from "react-redux";
+import { toast } from "sonner";
 
-const StoreSelection = ({ branches, onSelectBranch }) => {
+const StoreSelection = ({ branches, onSelectBranch, selectedBranch }) => {
   const [open, setOpen] = React.useState(false);
-  const { selectedBranch: initialSelectedBranch } = useSelector(
-    (state) => state.branch
-  );
-  const [selectedBranch, setSelectedBranch] = React.useState(
-    initialSelectedBranch || null
-  );
 
   const handleSelect = (branch) => {
-    setSelectedBranch(branch);
+    toast.message(
+      "We will check the branch during checkout to verify availability"
+    );
     onSelectBranch(branch); // Notify parent component
     setOpen(false); // Close popover
   };

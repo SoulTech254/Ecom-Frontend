@@ -70,6 +70,9 @@ const CheckoutPage = () => {
         };
 
         const orderSummaryData = await getOrderSummaryData(data);
+        if(orderSummaryData.adjustments){
+          toast.info("We have adjusted your Order based on Selected Branch")
+        }
         setOrderSummary(orderSummaryData);
       } catch (error) {
         console.error("Error fetching order summary:", error);
@@ -133,7 +136,6 @@ const CheckoutPage = () => {
       <Stepper
         steps={steps}
         doneSteps={doneSteps}
-        activeStep={2}
         to={links}
         heading={"Checkout Process"}
       />

@@ -121,23 +121,27 @@ const AddressPage = () => {
     });
   };
 
-
   const doneSteps = [];
-  if (Object.keys(deliveryInfo).length > 0) {
-    doneSteps.push(1);
+  const deliveryMethod = deliveryInfo.method;
+  const hasAddress = deliveryInfo.address;
+  const hasDeliverySlot = deliveryInfo.deliverySlot;
+
+  if (deliveryMethod === "pickup" || (hasAddress && hasDeliverySlot)) {
+    doneSteps.push(1); // Delivery step completed
   }
+
   if (Object.keys(paymentInfo).length > 0) {
-    doneSteps.push(2);
+    doneSteps.push(2); // Payment step completed
   }
+
   if (cart.products.length > 0) {
-    doneSteps.push(0);
+    doneSteps.push(0); // Cart step completed
   }
 
   return (
     <div className="w-full mt-2 sm:px-6 lg:px-8">
       <Stepper
         steps={steps}
-        activeStep={doneSteps.length + 1} // Adjust this based on how many steps have been completed
         to={links}
         doneSteps={doneSteps}
         heading={"Checkout Process"}

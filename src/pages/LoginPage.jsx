@@ -22,8 +22,8 @@ import { setAccessToken } from "@/redux/auth/authSlice";
 import ConfirmEmailForm from "@/forms/authForms/ConfirmEmail";
 
 const LoginPage = () => {
-  const { login, isLogginIn } = useLogin();
-  console.log(isLogginIn);
+  const { login, isLoggingIn } = useLogin();
+  console.log(isLoggingIn);
   const dispatch = useDispatch();
 
   // API Hooks
@@ -150,7 +150,7 @@ const LoginPage = () => {
       ) : (
         <LoginForm
           onSave={handleLoginSave}
-          isLoading={isLogginIn}
+          isLoading={isLoggingIn}
           onButtonClick={() => setResetPassword(true)}
         />
       )}

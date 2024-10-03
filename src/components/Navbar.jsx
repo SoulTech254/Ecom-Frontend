@@ -26,6 +26,7 @@ const Navbar = () => {
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { logOut, isLoggingOut } = useLogOut();
+  const { selectedBranch } = useSelector((state) => state.branch);
 
   const dispatch = useDispatch();
 
@@ -37,6 +38,7 @@ const Navbar = () => {
 
   const handleSelectBranch = (branch) => {
     dispatch(setBranch(branch));
+    setSelectedBranch(branch);
   };
 
   const handleSignOut = async () => {
@@ -85,6 +87,7 @@ const Navbar = () => {
                 <>
                   <StoreIcon color="#DAA520" size={20} />
                   <StoreSelection
+                    selectedBranch={selectedBranch}
                     branches={branches}
                     onSelectBranch={handleSelectBranch}
                   />
@@ -102,12 +105,12 @@ const Navbar = () => {
                       <p className="text-sm">Hello {user.fName}</p>
                     </PopoverTrigger>
                     <PopoverContent className="w-[150px] p-2 flex flex-col">
-                      <Link className="hover:text-[#DAA520]" to="/orders">
+                      <Link className="hover:text-primary" to="/orders">
                         Orders
                       </Link>
                       <button
                         onClick={handleSignOut}
-                        className="w-fit hover:text-secondary"
+                        className="w-fit text-md hover:text-primary"
                         disabled={isLoggingOut} // Disable while logging out
                       >
                         Sign Out
@@ -118,7 +121,9 @@ const Navbar = () => {
               ) : (
                 <>
                   <LogInIcon color="#DAA520" size="20" />
-                  <Link to="/sign-in">Login & Register</Link>
+                  <Link to="/sign-in" className="text-sm hover:text-primary">
+                    Login & Register
+                  </Link>
                 </>
               )}
             </div>

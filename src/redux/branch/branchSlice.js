@@ -17,7 +17,7 @@ const parseJSONFromLocalStorage = (key) => {
 };
 
 const initialState = {
-  selectedBranch: DEFAULT_BRANCH,
+  selectedBranch: null,
 };
 
 const branchSlice = createSlice({
