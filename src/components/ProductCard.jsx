@@ -32,57 +32,55 @@ const ProductCard = ({
     ? existingCartItem.quantity
     : 0;
 
-  const handleAddToCart = (quantity) => {
+  const handleAddToCart = async (quantity) => {
     if (!selectedBranch) {
       return toast.error("Please select a branch to add to cart");
     }
+
     const totalQuantityAfterAdding = currentQuantityInCart + quantity;
 
-    if (
-      totalQuantityAfterAdding <= stockLevel &&
-      totalQuantityAfterAdding >= 0
-    ) {
+    if (totalQuantityAfterAdding < 0) {
+      toast.error("Quantity cannot be negative.");
+      return;
+    }
+
+    if (totalQuantityAfterAdding <= stockLevel) {
       setIsCartLoading(true);
 
-      if (user) {
-        dispatch(
-          addProductToCart({
-            productID: id,
-            quantity: quantity,
-            method: "update",
-            axiosPrivate,
-          })
-        )
-          .unwrap()
-          .then(() => {
-            setIsCartLoading(false);
-            toast.success(
-              `Product ${quantity > 0 ? "added to" : "removed from"} cart.`
-            );
-          })
-          .catch(() => {
-            toast.error("Failed to update product in cart.");
-            setIsCartLoading(false);
-          });
-      } else {
-        dispatch(
-          addToCartLocal({
-            img,
-            price,
-            id,
-            name,
-            quantity,
-            discountPrice,
-          })
-        );
-        setIsCartLoading(false);
+      try {
+        if (user) {
+          await dispatch(
+            addProductToCart({
+              productID: id,
+              quantity,
+              method: "update",
+              axiosPrivate,
+            })
+          ).unwrap();
+        } else {
+          dispatch(
+            addToCartLocal({
+              img,
+              price,
+              id,
+              name,
+              quantity,
+              discountPrice,
+            })
+          );
+        }
+
         toast.success(
           `Product ${quantity > 0 ? "added to" : "removed from"} cart.`
         );
+      } catch (error) {
+        toast.error("Failed to update product in cart. Try Again Later");
+      } finally {
+        setIsCartLoading(false);
       }
     } else {
       toast.error(
-        "Invalid quantity. Please check stock level or quantity in cart."
+        `Sorry, the stock for ${name} is currently ${stockLevel}. Please try again later or select a different amount.`
       );
       setIsCartLoading(false);
     }
