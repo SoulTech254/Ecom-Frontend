@@ -1,52 +1,64 @@
 import { useCheckOrder } from "@/api/CheckoutApi";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import CheckingSkeleton from "@/components/skeletons/CheckingSkeleton"; // Adjust the import path as needed
 
 const CheckingPaymentPage = () => {
   const { id } = useParams();
   const { orderStatus, isLoadingOrderStatus, refetch } = useCheckOrder(id);
   const [statusMessage, setStatusMessage] = useState("");
+  const [isPolling, setIsPolling] = useState(true); // Control polling state
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 10; // Set maximum retries
 
   useEffect(() => {
-    let intervalId;
-
-    const checkPaymentStatus = async () => {
-      console.log("Checking payment status...");
-      console.log("isLoadingOrderStatus:", isLoadingOrderStatus);
-      console.log("orderStatus:", orderStatus);
-
-      // Manually trigger a refetch
-      await refetch();
-
-      // Update status message if orderStatus is available
-      if (!isLoadingOrderStatus && orderStatus) {
-        setStatusMessage(orderStatus.message);
-
-        // Check if payment is successful to stop refetching
-        if (orderStatus.message !== "Payment pending") {
-          clearInterval(intervalId); // Stop interval if payment status changes
-        }
+    const intervalId = setInterval(async () => {
+      if (isPolling && retryCount < maxRetries) {
+        await refetch();
+        setRetryCount((prev) => prev + 1);
       }
-    };
-
-    // Initial check when component mounts
-    checkPaymentStatus();
-
-    // Set interval to check status every 5 seconds
-    intervalId = setInterval(async () => {
-      await checkPaymentStatus();
     }, 5000);
 
     // Clean up interval on component unmount
     return () => clearInterval(intervalId);
-  }, [isLoadingOrderStatus, orderStatus, refetch]);
+  }, [isPolling, retryCount, refetch]);
 
-  console.log(statusMessage);
+  useEffect(() => {
+    // Update status message and check if we should stop polling
+    if (!isLoadingOrderStatus && orderStatus) {
+      setStatusMessage(orderStatus.message);
+
+      // Notify user of the response status
+      if (retryCount < maxRetries) {
+        if (orderStatus.message === "Payment pending") {
+          setStatusMessage(
+            (prev) => `${prev} (Attempt ${retryCount + 1} of ${maxRetries})`
+          );
+        } else {
+          setIsPolling(false); // Stop polling if payment status changes
+        }
+      }
+    }
+  }, [isLoadingOrderStatus, orderStatus, retryCount]);
 
   return (
-    <div>
-      <h1>Checking Payment Status</h1>
-      {isLoadingOrderStatus ? <p>Loading...</p> : <p>{statusMessage}</p>}
+    <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4">
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full text-center">
+        <h1 className="text-2xl font-bold mb-4 text-primary">
+          Checking Payment Status
+        </h1>
+        {isLoadingOrderStatus ? (
+          <CheckingSkeleton /> // Show skeleton while loading
+        ) : (
+          <p className="text-gray-800 mb-4">{statusMessage}</p>
+        )}
+        {retryCount >= maxRetries && (
+          <p className="text-red-500">
+            Max Check Retries reached. Once you successfully paid, we will send
+            an email.
+          </p>
+        )}
+      </div>
     </div>
   );
 };

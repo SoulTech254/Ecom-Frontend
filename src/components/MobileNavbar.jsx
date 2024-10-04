@@ -108,7 +108,7 @@ const MobileNavbar = ({ isOpen }) => {
               className="flex items-center text-gray-600 hover:text-gray-800 px-4 py-2"
             >
               {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              <span className="ml-2 text">
+              <span className="ml-2 text-sm">
                 {isExpanded ? "Show Less" : "Show More"}
               </span>
             </button>

@@ -132,7 +132,7 @@ const Navbar = () => {
 
           {/* Mobile Menu Icon */}
           <button
-            className="md:hidden text-orange-500 p-2"
+            className="md:hidden text-primary p-2"
             onClick={() => setIsSheetOpen(true)}
           >
             <Menu />

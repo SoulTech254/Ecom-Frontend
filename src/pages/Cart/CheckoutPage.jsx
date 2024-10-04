@@ -4,8 +4,9 @@ import { useSelector, useDispatch } from "react-redux";
 import Stepper from "@/components/Stepper";
 import { links, steps } from "@/config/cartConfig";
 import { useNavigate } from "react-router-dom";
-import { mergeLocalCart } from "@/redux/cart/cartSlice";
+import { mergeLocalCart, resetCart } from "@/redux/cart/cartSlice";
 import { toast } from "sonner";
+import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 
 const CheckoutPage = () => {
   const { user } = useSelector((state) => state.user);
@@ -14,6 +15,7 @@ const CheckoutPage = () => {
   const { paymentInfo } = useSelector((state) => state.order);
   const { selectedBranch } = useSelector((state) => state.branch);
   const cartP = useSelector((state) => state.cart);
+  const axiosPrivate = useAxiosPrivate();
 
   const { getOrderSummaryData, isLoadingOrderSummary } = useGetOrderSummary();
   const [orderSummary, setOrderSummary] = useState(null);
@@ -70,8 +72,8 @@ const CheckoutPage = () => {
         };
 
         const orderSummaryData = await getOrderSummaryData(data);
-        if(orderSummaryData.adjustments){
-          toast.info("We have adjusted your Order based on Selected Branch")
+        if (orderSummaryData.adjustments) {
+          toast.info("We have adjusted your Order based on Selected Branch");
         }
         setOrderSummary(orderSummaryData);
       } catch (error) {
@@ -94,7 +96,14 @@ const CheckoutPage = () => {
     try {
       const payment = await placeOrder(orderSummary);
       navigate(`/checking-payment/${payment._id}`);
-      dispatch(mergeLocalCart());
+
+      // Delay resetting the cart
+      setTimeout(() => {
+        dispatch(resetCart());
+        toast.message(
+          "🎉 Great news! We've sent an M-Pesa prompt to your phone. Please complete the payment to finalize your transaction."
+        );
+      }, 100); // 100 milliseconds or adjust as needed
     } catch (error) {
       console.error("Error placing order:", error);
       setError(error.message);

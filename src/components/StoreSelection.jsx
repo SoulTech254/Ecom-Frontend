@@ -39,7 +39,7 @@ const StoreSelection = ({ branches, onSelectBranch }) => {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[130px] hover:text-[#b12e26] justify-between border-none hover:bg-white p-0"
+          className="w-[130px] hover:text-primary justify-between border-none hover:bg-white p-0"
         >
           {selectedBranch ? selectedBranch.label : "Select Branch"}
           <ChevronDownIcon className="ml-2" />
