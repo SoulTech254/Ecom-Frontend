@@ -21,7 +21,7 @@ const Sheet = ({ isOpen, onClose, children, className, ...props }) => {
       {/* Sheet Content */}
       <div
         className={cn(
-          "fixed top-0 right-0 min-h-screen w-80 shadow-lg transition-transform transform bg-primary overflow-scroll",
+          "fixed top-0 right-0 h-full w-80 shadow-lg transition-transform transform bg-primary overflow-scroll",
           isOpen ? "translate-x-0" : "translate-x-full", // Slide in/out effect
           "duration-300 z-50"
         )}
