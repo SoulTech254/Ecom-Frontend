@@ -26,31 +26,33 @@ const Sheet = ({ isOpen, onClose, children, className, ...props }) => {
           "duration-300 z-50"
         )}
       >
-        <div className="absolute top-3 left-2">
-          {user && (
-            <div className="flex">
-              <p className="text-md font-medium text-white">
-                Hi {user.fName} 👋
-              </p>
-            </div>
-          )}
+        <div className="h-[40vh]">
+          <div className="absolute top-3 left-2">
+            {user && (
+              <div className="flex">
+                <p className="text-md font-medium text-white">
+                  Hi {user.fName} 👋
+                </p>
+              </div>
+            )}
+          </div>
+          <button
+            className="absolute right-3 z-50 top-3 text-white hover:text-gray-900 text-2xl"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            &times;
+          </button>
+          <div className="absolute top-12 left-2">
+            <h3 className="text-2xl text-white font-medium">Browse</h3>
+            <img
+              src={walmartLogo}
+              alt="Walmart Logo"
+              className="w-fit h-[40px]"
+            />
+          </div>
         </div>
-        <button
-          className="absolute right-3 z-50 top-3 text-white hover:text-gray-900 text-2xl"
-          onClick={onClose}
-          aria-label="Close"
-        >
-          &times;
-        </button>
-        <div className="absolute top-12 left-2">
-          <h3 className="text-2xl text-white font-medium">Browse</h3>
-          <img
-            src={walmartLogo}
-            alt="Walmart Logo"
-            className="w-fit h-[40px]"
-          />
-        </div>
-        <div className="p-6 relative h-full">{children}</div>
+        <div className="p-6 relative h-[80vh]">{children}</div>
       </div>
     </>
   );
