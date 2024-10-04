@@ -134,10 +134,14 @@ const HomePage = () => {
 
       {/* Quickmart Exclusives */}
       <div className="mt-8 w-full">
-        <h2 className="text-xl mb-4 font-bold">Quickmart Exclusives</h2>
-        <Suspense fallback={<ProductGroupSkeleton />}>
-          <ProductGroup products={products} />
-        </Suspense>
+        <h2 className="text-xl mb-4 font-bold">Best Sellers</h2>
+        {isProductsLoading ? (
+          <ProductGroupSkeleton />
+        ) : (
+          <Suspense fallback={<div>Loading products...</div>}>
+            <ProductGroup products={products} />
+          </Suspense>
+        )}
       </div>
 
       <img
@@ -149,10 +153,14 @@ const HomePage = () => {
 
       {/* Weekly Deals */}
       <div className="mt-8 w-full">
-        <h2 className="text-xl mb-4 font-bold">Weekly Deals</h2>
-        <Suspense fallback={<ProductGroupSkeleton />}>
-          <ProductGroup products={products} />
-        </Suspense>
+        <h2 className="text-xl mb-4 font-bold">Best Sellers</h2>
+        {isProductsLoading ? (
+          <ProductGroupSkeleton />
+        ) : (
+          <Suspense fallback={<div>Loading products...</div>}>
+            <ProductGroup products={products} />
+          </Suspense>
+        )}
       </div>
 
       <div className="mt-8">
