@@ -77,17 +77,22 @@ export const addProductToCart = createAsyncThunk(
 // Async thunk for merging local cart with backend cart
 export const mergeLocalCart = createAsyncThunk(
   "cart/mergeLocalCart",
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { getState, rejectWithValue, extra }) => {
     const user = getState().user.user;
-    const localCartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
 
+    if (!user) {
+      return rejectWithValue({ error: "User not authenticated" });
+    }
+
+    const localCartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+    
     const cartItemsToMerge = localCartItems.map((item) => ({
       product: item.product._id,
       quantity: item.quantity,
     }));
 
     try {
-      const response = await axios.post(
+      const response = await extra.axiosPrivate.post(
         `/api/v1/cart/merge/${user.cart}`,
         cartItemsToMerge,
         {
@@ -105,6 +110,7 @@ export const mergeLocalCart = createAsyncThunk(
     }
   }
 );
+
 
 // Async thunk for deleting product from cart
 export const deleteProductFromCart = createAsyncThunk(
