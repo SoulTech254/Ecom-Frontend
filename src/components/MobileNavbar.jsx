@@ -60,7 +60,7 @@ const MobileNavbar = ({ isOpen }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed right-0 max-h-[80vh] w-80 bg-white shadow-lg transform transition-transform translate-x-0 overflow-scroll">
+    <div className="fixed right-0 w-80 bg-white shadow-lg transform transition-transform translate-x-0 overflow-scroll">
       <ScrollArea className=" bg-white">
         <div className="space-y-2">
           {/* Branch selection */}
@@ -70,7 +70,7 @@ const MobileNavbar = ({ isOpen }) => {
                 <p>Loading...</p>
               ) : (
                 <>
-                  <StoreIcon color="#b12e26" size={20} />
+                  <StoreIcon color="#DAA520" size={20} />
                   <StoreSelection
                     branches={branches}
                     onSelectBranch={handleSelectBranch}

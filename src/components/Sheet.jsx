@@ -26,7 +26,7 @@ const Sheet = ({ isOpen, onClose, children, className, ...props }) => {
           "duration-300 z-50"
         )}
       >
-        <div className="h-[20vh]">
+        <div className="h-[15vh]">
           <div className="absolute top-3 left-2">
             {user && (
               <div className="flex">
@@ -52,7 +52,7 @@ const Sheet = ({ isOpen, onClose, children, className, ...props }) => {
             />
           </div>
         </div>
-        <div className="p-6 relative h-[80vh]">{children}</div>
+        <div className="p-6 relative h-[85vh]">{children}</div>
       </div>
     </>
   );
