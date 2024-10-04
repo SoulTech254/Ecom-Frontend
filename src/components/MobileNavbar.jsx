@@ -1,3 +1,30 @@
+import {
+  CircleUserRound,
+  LogInIcon,
+  StoreIcon,
+  ChevronRight,
+  LogOutIcon,
+  ChevronDown, // Import ChevronDown
+  ChevronUp,
+  ShoppingCart,
+  Package,
+  Phone, // Import ChevronUp
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import StoreSelection from "./StoreSelection";
+import { useGetBranches } from "@/api/HomeApi";
+import { removeBranch, setBranch } from "@/redux/branch/branchSlice";
+import { categories } from "@/utils/utils";
+import { useState, useEffect } from "react";
+import { ScrollArea } from "./ui/scroll-area";
+import MobileNavLinks from "./MobileNavLinks";
+import { clearAccessToken } from "@/redux/auth/authSlice";
+import { deleteUser } from "@/redux/user/userSlice";
+import { resetCart } from "@/redux/cart/cartSlice";
+import { deleteOrderInfo } from "@/redux/order/orderSlice";
+import { useLogOut } from "@/api/AuthApi";
+
 const MobileNavbar = ({ isOpen }) => {
   const { user } = useSelector((state) => state.user);
   const { branches: apiBranches, isLoadingBranches } = useGetBranches();
