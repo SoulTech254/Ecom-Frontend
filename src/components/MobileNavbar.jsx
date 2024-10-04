@@ -1,30 +1,3 @@
-import {
-  CircleUserRound,
-  LogInIcon,
-  StoreIcon,
-  ChevronRight,
-  LogOutIcon,
-  ChevronDown, // Import ChevronDown
-  ChevronUp,
-  ShoppingCart,
-  Package,
-  Phone, // Import ChevronUp
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import StoreSelection from "./StoreSelection";
-import { useGetBranches } from "@/api/HomeApi";
-import { removeBranch, setBranch } from "@/redux/branch/branchSlice";
-import { categories } from "@/utils/utils";
-import { useState, useEffect } from "react";
-import { ScrollArea } from "./ui/scroll-area";
-import MobileNavLinks from "./MobileNavLinks";
-import { clearAccessToken } from "@/redux/auth/authSlice";
-import { deleteUser } from "@/redux/user/userSlice";
-import { resetCart } from "@/redux/cart/cartSlice";
-import { deleteOrderInfo } from "@/redux/order/orderSlice";
-import { useLogOut } from "@/api/AuthApi";
-
 const MobileNavbar = ({ isOpen }) => {
   const { user } = useSelector((state) => state.user);
   const { branches: apiBranches, isLoadingBranches } = useGetBranches();
@@ -60,8 +33,10 @@ const MobileNavbar = ({ isOpen }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed right-0 w-80 bg-white shadow-lg transform transition-transform translate-x-0 overflow-scroll">
-      <ScrollArea className=" bg-white">
+    <div className="fixed right-0 w-80 h-[85vh] bg-white shadow-lg transform transition-transform translate-x-0 overflow-hidden">
+      <ScrollArea className="h-full bg-white">
+        {" "}
+        {/* Ensure ScrollArea takes full height */}
         <div className="space-y-2">
           {/* Branch selection */}
           <div className="border-b-2 py-2 mb-2">
@@ -114,7 +89,6 @@ const MobileNavbar = ({ isOpen }) => {
             </button>
           </div>
         </div>
-
         <div className="flex flex-col border-b-2 py-2 gap-4">
           <h2 className="text-md font-bold px-4">Links</h2>
           <div className="flex gap-1 px-2 items-center">
@@ -129,17 +103,17 @@ const MobileNavbar = ({ isOpen }) => {
             <div className="bg-gray-200 p-2 rounded-full ">
               <Phone size={16} className="text-gray-500" />
             </div>
-            <Link to="/contacts" className="text-sm  hover:underline">
+            <Link to="/contacts" className="text-sm hover:underline">
               Contact Us
             </Link>
           </div>
         </div>
         {/* Sign-Out Button at the Bottom */}
         {user && (
-          <div className="">
+          <div className="mt-auto">
             <button
               onClick={handleSignOut}
-              className="flex items-center text-red-600 w-full px-2 py-2 mt-2 mb-4 rounded"
+              className="flex items-center text-red-600 w-full px-2 py-2 mb-4 rounded"
             >
               <LogOutIcon className="mr-2" />
               Sign Out
