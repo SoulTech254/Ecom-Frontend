@@ -26,7 +26,7 @@ const Sheet = ({ isOpen, onClose, children, className, ...props }) => {
           "duration-300 z-50"
         )}
       >
-        <div className="h-[40vh]">
+        <div className="h-[20vh]">
           <div className="absolute top-3 left-2">
             {user && (
               <div className="flex">
