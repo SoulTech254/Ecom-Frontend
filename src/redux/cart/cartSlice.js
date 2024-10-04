@@ -1,5 +1,4 @@
 import axios from "@/api/axios";
-import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "sonner";
 
@@ -77,22 +76,26 @@ export const addProductToCart = createAsyncThunk(
 // Async thunk for merging local cart with backend cart
 export const mergeLocalCart = createAsyncThunk(
   "cart/mergeLocalCart",
-  async (_, { getState, rejectWithValue, extra }) => {
+  async ({ axiosPrivate }, { getState, rejectWithValue }) => {
     const user = getState().user.user;
+    console.log(user)
 
     if (!user) {
       return rejectWithValue({ error: "User not authenticated" });
     }
 
-    const localCartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+    const localCartItems = JSON.parse(localStorage.getItem("cartItems")) 
+    console.log(localCartItems)
     
-    const cartItemsToMerge = localCartItems.map((item) => ({
+    const cartItemsToMerge = localCartItems.products.map((item) => ({
       product: item.product._id,
       quantity: item.quantity,
     }));
 
+    console.log("Merging local cart items:", cartItemsToMerge);
+
     try {
-      const response = await extra.axiosPrivate.post(
+      const response = await axiosPrivate.post(
         `/api/v1/cart/merge/${user.cart}`,
         cartItemsToMerge,
         {
@@ -102,14 +105,18 @@ export const mergeLocalCart = createAsyncThunk(
         }
       );
 
+      console.log("Response after merging local cart:", response.data);
+
       return response.data;
     } catch (error) {
+      console.log("Error while merging local cart:", error);
+
       const message = handleError(error);
       toast.error(message); // Display the error message
       return rejectWithValue({ error: message });
     }
   }
-);
+); 
 
 
 // Async thunk for deleting product from cart
@@ -262,10 +269,7 @@ const cartSlice = createSlice({
       .addCase(mergeLocalCart.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.products = action.payload.products;
-        state.totalQuantity = state.products.reduce(
-          (acc, curr) => acc + curr.quantity,
-          0
-        );
+        state.totalQuantity = action.payload.totalQuantity;
         state.savings = action.payload.savings;
         state.totalAmount = action.payload.totalAmount;
         localStorage.removeItem("cartItems");

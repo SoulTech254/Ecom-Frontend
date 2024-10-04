@@ -20,6 +20,7 @@ import { setBranch } from "@/redux/branch/branchSlice";
 import { SelectBranchModal } from "@/components/SelectBranchModal";
 import { setAccessToken } from "@/redux/auth/authSlice";
 import ConfirmEmailForm from "@/forms/authForms/ConfirmEmail";
+import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 
 const LoginPage = () => {
   const { login, isLoggingIn } = useLogin();
@@ -32,6 +33,7 @@ const LoginPage = () => {
   const { updatePassword, isUpdatingPassword } = useUpdatePassword();
   const { resendOtp } = useResendOtp();
   const { branches: apiBranches, isLoadingBranches } = useGetBranches();
+  const axiosPrivate = useAxiosPrivate();
 
   // States
   const [resetPassword, setResetPassword] = useState(false);
@@ -87,7 +89,7 @@ const LoginPage = () => {
       const { user, accessToken } = await login(data);
       dispatch(saveUser(user));
       dispatch(setAccessToken(accessToken));
-      dispatch(mergeLocalCart());
+      dispatch(mergeLocalCart({ axiosPrivate }));
       setShowStoreBranchModal(true); // Show StoreBranchModal after successful login
       if (selectedBranch) {
         navigate("/");

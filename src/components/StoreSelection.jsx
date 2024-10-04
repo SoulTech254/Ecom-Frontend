@@ -27,9 +27,6 @@ const StoreSelection = ({ branches, onSelectBranch }) => {
   );
 
   const handleSelect = (branch) => {
-    toast.info(
-      "We will check the branch during checkout to verify availability"
-    );
     setSelectedBranch(branch);
     onSelectBranch(branch); // Notify parent component
     setOpen(false); // Close popover
