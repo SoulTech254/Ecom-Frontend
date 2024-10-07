@@ -21,15 +21,15 @@ export const categories = [
       {
         title: "Mobile Phones",
         subcategories: [
-          { id: 1, name: "Smartphones", link: "/smartphones" },
-          { id: 2, name: "Accessories", link: "/accessories" },
+          { id: 1, name: "Smartphones", link: encodeURIComponent("Smartphones") },
+          { id: 2, name: "Accessories", link: encodeURIComponent("Accessories") },
         ],
       },
       {
         title: "Computers",
         subcategories: [
-          { id: 3, name: "Laptops", link: "/laptops" },
-          { id: 4, name: "Desktops", link: "/desktops" },
+          { id: 3, name: "Laptops", link: encodeURIComponent("Laptops") },
+          { id: 4, name: "Desktops", link: encodeURIComponent("Desktops") },
         ],
       },
     ],
@@ -41,15 +41,15 @@ export const categories = [
       {
         title: "Snacks",
         subcategories: [
-          { id: 5, name: "Chips", link: "/chips" },
-          { id: 6, name: "Candy", link: "/candy" },
+          { id: 5, name: "Chips", link: encodeURIComponent("Chips") },
+          { id: 6, name: "Candy", link: encodeURIComponent("Candy") },
         ],
       },
       {
         title: "Beverages",
         subcategories: [
-          { id: 7, name: "Soda", link: "/soda" },
-          { id: 8, name: "Juice", link: "/juice" },
+          { id: 7, name: "Soda", link: encodeURIComponent("Soda") },
+          { id: 8, name: "Juice", link: encodeURIComponent("Juice") },
         ],
       },
     ],
@@ -64,16 +64,16 @@ export const categories = [
           {
             id: 9,
             name: "All-Purpose Cleaners",
-            link: "/all-purpose-cleaners",
+            link: encodeURIComponent("All-Purpose Cleaners"),
           },
-          { id: 10, name: "Glass Cleaners", link: "/glass-cleaners" },
+          { id: 10, name: "Glass Cleaners", link: encodeURIComponent("Glass Cleaners") },
         ],
       },
       {
         title: "Laundry Supplies",
         subcategories: [
-          { id: 11, name: "Detergents", link: "/detergents" },
-          { id: 12, name: "Fabric Softener", link: "/fabric-softener" },
+          { id: 11, name: "Detergents", link: encodeURIComponent("Detergents") },
+          { id: 12, name: "Fabric Softener", link: encodeURIComponent("Fabric Softener") },
         ],
       },
     ],
@@ -85,15 +85,15 @@ export const categories = [
       {
         title: "Makeup",
         subcategories: [
-          { id: 13, name: "Lipstick", link: "/lipstick" },
-          { id: 14, name: "Foundation", link: "/foundation" },
+          { id: 13, name: "Lipstick", link: encodeURIComponent("Lipstick") },
+          { id: 14, name: "Foundation", link: encodeURIComponent("Foundation") },
         ],
       },
       {
         title: "Skincare",
         subcategories: [
-          { id: 15, name: "Moisturizers", link: "/moisturizers" },
-          { id: 16, name: "Sunscreen", link: "/sunscreen" },
+          { id: 15, name: "Moisturizers", link: encodeURIComponent("Moisturizers") },
+          { id: 16, name: "Sunscreen", link: encodeURIComponent("Sunscreen") },
         ],
       },
     ],
@@ -105,15 +105,15 @@ export const categories = [
       {
         title: "Supplements",
         subcategories: [
-          { id: 17, name: "Vitamins", link: "/vitamins" },
-          { id: 18, name: "Protein Powder", link: "/protein-powder" },
+          { id: 17, name: "Vitamins", link: encodeURIComponent("Vitamins") },
+          { id: 18, name: "Protein Powder", link: encodeURIComponent("Protein Powder") },
         ],
       },
       {
         title: "Fitness Equipment",
         subcategories: [
-          { id: 19, name: "Weights", link: "/weights" },
-          { id: 20, name: "Yoga Mats", link: "/yoga-mats" },
+          { id: 19, name: "Weights", link: encodeURIComponent("Weights") },
+          { id: 20, name: "Yoga Mats", link: encodeURIComponent("Yoga Mats") },
         ],
       },
     ],
@@ -125,15 +125,15 @@ export const categories = [
       {
         title: "Outdoor Toys",
         subcategories: [
-          { id: 21, name: "Bikes", link: "/bikes" },
-          { id: 22, name: "Kites", link: "/kites" },
+          { id: 21, name: "Bikes", link: encodeURIComponent("Bikes") },
+          { id: 22, name: "Kites", link: encodeURIComponent("Kites") },
         ],
       },
       {
         title: "Indoor Toys",
         subcategories: [
-          { id: 23, name: "Board Games", link: "/board-games" },
-          { id: 24, name: "Action Figures", link: "/action-figures" },
+          { id: 23, name: "Board Games", link: encodeURIComponent("Board Games") },
+          { id: 24, name: "Action Figures", link: encodeURIComponent("Action Figures") },
         ],
       },
     ],
@@ -145,20 +145,21 @@ export const categories = [
       {
         title: "Furniture",
         subcategories: [
-          { id: 25, name: "Sofas", link: "/sofas" },
-          { id: 26, name: "Tables", link: "/tables" },
+          { id: 25, name: "Sofas", link: encodeURIComponent("Sofas") },
+          { id: 26, name: "Tables", link: encodeURIComponent("Tables") },
         ],
       },
       {
         title: "Gardening",
         subcategories: [
-          { id: 27, name: "Plants", link: "/plants" },
-          { id: 28, name: "Tools", link: "/tools" },
+          { id: 27, name: "Plants", link: encodeURIComponent("Plants") },
+          { id: 28, name: "Tools", link: encodeURIComponent("Tools") },
         ],
       },
     ],
   },
 ];
+
 
 export const chunkArray = (array, size) => {
   const result = [];

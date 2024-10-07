@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 
 const SearchPage = () => {
+  console.log("SearchPage rendered");
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm");
   const branch = useSelector((state) => state.branch.selectedBranch.id);
@@ -27,23 +28,29 @@ const SearchPage = () => {
 
   // Reset products and current page when searchTerm changes
   useEffect(() => {
-    setCurrentPage(1); // Reset to the first page
-    setProducts([]); // Reset products on new search
+    setCurrentPage(1);
+    setProducts([]);
+    console.log("Search term changed. Resetting products and page.");
   }, [searchTerm]);
 
   // Update products when fetchedProducts changes
   useEffect(() => {
-    if (currentPage === 1) {
-      setProducts(fetchedProducts);
-    } else {
+    if (fetchedProducts) {
       setProducts((prev) => [...prev, ...fetchedProducts]);
+      setIsLoadingMore(false); // Reset loading state after fetching products
     }
-  }, [fetchedProducts, currentPage]);
+    console.log("Fetched products:", fetchedProducts);
+  }, [fetchedProducts]);
 
   // Update hasMore state
   useEffect(() => {
-    setHasMore(metadata.totalDocuments > products.length);
-  }, [metadata.totalDocuments, products.length]);
+    if (metadata?.totalDocuments !== undefined) {
+      setHasMore(metadata.totalDocuments > products.length);
+      console.log("Total documents:", metadata.totalDocuments);
+      console.log("Products length:", products.length);
+      console.log("hasMore:", hasMore);
+    }
+  }, [metadata?.totalDocuments, products.length]);
 
   // Handle sort change
   const handleSortChange = (e) => {
@@ -58,13 +65,14 @@ const SearchPage = () => {
     });
     setCurrentPage(1); // Reset to the first page
     setProducts([]); // Reset products on sort change
+    console.log("Sort changed. Resetting products and page.");
   };
 
   // Handle scroll for loading more products
   const handleScroll = () => {
     const scrollPosition =
       window.innerHeight + document.documentElement.scrollTop;
-    const bottomPosition = document.documentElement.offsetHeight - 550; // Adjust threshold
+    const bottomPosition = document.documentElement.offsetHeight - 800; // Adjust threshold
 
     if (scrollPosition >= bottomPosition && hasMore && !isLoadingMore) {
       loadMoreProducts();
@@ -72,23 +80,20 @@ const SearchPage = () => {
   };
 
   const loadMoreProducts = () => {
-    if (isLoadingMore) return;
+    if (isLoadingMore || !hasMore || metadata?.totalPages === currentPage)
+      return;
     setIsLoadingMore(true);
     setCurrentPage((prev) => prev + 1);
+    console.log("Loading more products...");
   };
 
-  useEffect(() => {
-    if (isLoadingMore) {
-      setIsLoadingMore(false);
-    }
-  }, [currentPage]);
-
+  // Listen to scroll event
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [hasMore]);
+  }, [hasMore, isLoadingMore, currentPage]); // Ensure currentPage is a dependency
 
   // Loading state
   if (isProductsLoading) {
@@ -116,8 +121,8 @@ const SearchPage = () => {
             <h2 className="text-2xl font-semibold text-gray-600">
               Search results for "{searchTerm}"
               <p className="text-gray-600 text-sm">
-                {metadata.totalDocuments} product
-                {metadata.totalDocuments === 1 ? "" : "s"} found
+                {metadata?.totalDocuments} product
+                {metadata?.totalDocuments === 1 ? "" : "s"} found
               </p>
             </h2>
 
@@ -137,7 +142,7 @@ const SearchPage = () => {
               </select>
             </div>
           </div>
-          <div className="flex flex-wrap justify-around gap-2 w-full mb-4">
+          <div className="flex flex-wrap justify-start gap-2 w-full mb-4">
             {products.map((product) => (
               <ProductCard
                 key={product._id}

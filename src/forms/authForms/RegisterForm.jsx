@@ -71,9 +71,11 @@ const RegisterForm = ({ onSave, isLoading }) => {
   return (
     <div className=" h-fit md:max-w-[500px] w-full p-6 md:p-12 md:border rounded-xl bg-white">
       <div className=" flex flex-col gap-3 ">
-        <AspectRatio ratio={16 / 3}>
-          <img src={walmartLogo} alt="" className="w-fit h-fit " />
-        </AspectRatio>
+        <Link to="/">
+          <AspectRatio ratio={16 / 3}>
+            <img src={walmartLogo} alt="" className="w-fit h-fit " />
+          </AspectRatio>
+        </Link>
         <h1 className=" text-3xl">Create new account</h1>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSave)}>
           <h3>Title</h3>

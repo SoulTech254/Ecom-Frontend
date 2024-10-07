@@ -78,16 +78,18 @@ export const mergeLocalCart = createAsyncThunk(
   "cart/mergeLocalCart",
   async ({ axiosPrivate }, { getState, rejectWithValue }) => {
     const user = getState().user.user;
-    console.log(user)
+    console.log("User from store:", user);
 
     if (!user) {
       return rejectWithValue({ error: "User not authenticated" });
     }
 
-    const localCartItems = JSON.parse(localStorage.getItem("cartItems")) 
-    console.log(localCartItems)
-    
-    const cartItemsToMerge = localCartItems.products.map((item) => ({
+    const localCartItems = JSON.parse(localStorage.getItem("cartItems")) || {
+      products: [],
+    };
+    console.log("Local cart items:", localCartItems);
+
+    const cartItemsToMerge = localCartItems.products?.map((item) => ({
       product: item.product._id,
       quantity: item.quantity,
     }));
@@ -116,8 +118,7 @@ export const mergeLocalCart = createAsyncThunk(
       return rejectWithValue({ error: message });
     }
   }
-); 
-
+);
 
 // Async thunk for deleting product from cart
 export const deleteProductFromCart = createAsyncThunk(
@@ -138,6 +139,27 @@ export const deleteProductFromCart = createAsyncThunk(
         { data: { product: productId } }
       );
       return response.data; // Assuming the response contains the updated cart
+    } catch (error) {
+      const message = handleError(error);
+      toast.error(message); // Display the error message
+      return rejectWithValue({ error: message });
+    }
+  }
+);
+
+// Async thunk for fetching the user's cart
+export const fetchCart = createAsyncThunk(
+  "cart/fetchCart",
+  async ({ axiosPrivate }, { getState, rejectWithValue }) => {
+    const user = getState().user.user;
+
+    if (!user) {
+      return rejectWithValue({ error: "User not authenticated" });
+    }
+
+    try {
+      const response = await axiosPrivate.get(`/api/v1/cart/${user.cart}`);
+      return response.data; // Assuming the response contains the cart details
     } catch (error) {
       const message = handleError(error);
       toast.error(message); // Display the error message
@@ -275,6 +297,20 @@ const cartSlice = createSlice({
         localStorage.removeItem("cartItems");
       })
       .addCase(mergeLocalCart.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+      .addCase(fetchCart.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(fetchCart.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.products = action.payload.products;
+        state.savings = action.payload.savings;
+        state.totalQuantity = action.payload.totalQuantity;
+        state.totalAmount = action.payload.totalAmount;
+      })
+      .addCase(fetchCart.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload.error;
       })

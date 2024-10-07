@@ -57,11 +57,12 @@ export const useSearchProducts = (
     ["SearchProducts", query, branchId, sortBy, sortOrder, page, limit],
     searchProductRequest,
     {
-      enabled: !!query && !!branchId,
+      enabled: !!query && !!branchId && page > 0, // Ensure that page is valid
+      keepPreviousData: true, // Keep previous data while fetching new data
     }
   );
 
-  const products = data?.products || []; // Update to match the pagination results
+  const products = data?.products || [];
   const metadata = data?.metadata || {};
 
   const error = queryError

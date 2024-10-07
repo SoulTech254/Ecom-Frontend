@@ -25,9 +25,11 @@ const LoginForm = ({ onSave, isLoading, onButtonClick }) => {
   return (
     <div className="bg-white h-fit w-screen md:max-w-[500px] p-4 md:p-12 md:border rounded-xl">
       <div className=" flex flex-col gap-3 ">
-        <AspectRatio ratio={16 / 3}>
-          <img src={walmartLogo} alt="" className="w-fit h-fit " />
-        </AspectRatio>
+        <Link to="/"> 
+          <AspectRatio ratio={16 / 3}>
+            <img src={walmartLogo} alt="" className="w-fit h-fit " />
+          </AspectRatio>
+        </Link>
         <h1 className=" text-3xl">Login to your account</h1>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSave)}>
           <input

@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { saveUser } from "@/redux/user/userSlice";
-import { mergeLocalCart } from "@/redux/cart/cartSlice";
+import { fetchCart, mergeLocalCart } from "@/redux/cart/cartSlice";
 import StoreBranchModal from "@/components/StoreSelection";
 import { useGetBranches } from "@/api/HomeApi";
 import { setBranch } from "@/redux/branch/branchSlice";
@@ -89,8 +89,15 @@ const LoginPage = () => {
       const { user, accessToken } = await login(data);
       dispatch(saveUser(user));
       dispatch(setAccessToken(accessToken));
-      dispatch(mergeLocalCart({ axiosPrivate }));
-      setShowStoreBranchModal(true); // Show StoreBranchModal after successful login
+      try {
+        const response = await dispatch(
+          mergeLocalCart({ axiosPrivate })
+        ).unwrap();
+        console.log("Merged cart response:", response);
+      } catch (error) {
+        console.error("Error merging local cart:", error.message);
+      }
+      setShowStoreBranchModal(true);
       if (selectedBranch) {
         navigate("/");
       }

@@ -98,7 +98,7 @@ const BrandPage = () => {
         </h2>
       </div>
 
-      <div className="flex flex-wrap justify-around mb-4 gap-2">
+      <div className="flex flex-wrap justify-start mb-4 gap-2">
         {products.map((product) => (
           <ProductCard
             key={product._id}
