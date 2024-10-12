@@ -4,7 +4,7 @@ export function SampleNextArrow(props) {
   const { onClick } = props;
   return (
     <div
-      className="absolute right-1 top-1/3 transform -translate-y-1/2 z-50 cursor-pointer bg-white border p-2 rounded-full shadow-lg"
+      className="absolute right-1 top-1/3 transform -translate-y-1/2 z-50 cursor-pointer bg-white border p-2 rounded-full shadow-lg hidden md:block" // Hide on mobile (below md)
       onClick={onClick}
       style={{ display: "block" }}
     >
@@ -18,7 +18,7 @@ export function SamplePrevArrow(props) {
   const { onClick } = props;
   return (
     <div
-      className="absolute left-1 top-1/3 transform -translate-y-1/2 z-50 cursor-pointer bg-white p-2 rounded-full shadow-lg"
+      className="absolute left-1 top-1/3 transform -translate-y-1/2 z-50 cursor-pointer bg-white p-2 rounded-full shadow-lg hidden md:block" // Hide on mobile (below md)
       onClick={onClick}
       style={{ display: "block" }}
     >

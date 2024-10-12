@@ -1,17 +1,32 @@
+import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
 import ProductCard from "./ProductCard";
 import { SampleNextArrow, SamplePrevArrow } from "./Arrows";
 
 export default function ProductGroup({ products }) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640); // Adjust this breakpoint as necessary
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640); // Set isMobile based on screen width
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  // Settings for react-slick
   const settings = {
     dots: true, // Enable dots for navigation
     infinite: false, // Disable infinite scroll
     speed: 500, // Transition speed
-    slidesToShow: 6, // Number of visible slides on large screens
+    slidesToShow: isMobile ? 2 : 6, // Adjust slides to show based on mobile
     slidesToScroll: 1, // Number of slides to scroll at a time
     centerMode: false, // Disable center mode
-    nextArrow: <SampleNextArrow />,
-    prevArrow: <SamplePrevArrow />,
+    nextArrow: !isMobile ? <SampleNextArrow /> : null, // Hide arrows on mobile
+    prevArrow: !isMobile ? <SamplePrevArrow /> : null, // Hide arrows on mobile
     responsive: [
       {
         breakpoint: 1280, // Large screens (e.g., laptops/desktops)
@@ -46,13 +61,9 @@ export default function ProductGroup({ products }) {
 
   return (
     <div className="w-full">
-      {" "}
-      {/* Removed flex and centered styles */}
       <Slider {...settings} className="w-full">
         {products.map((product, index) => (
           <div key={index} className="pr-2">
-            {" "}
-            {/* Add padding as needed */}
             <ProductCard
               key={product._id}
               discountPrice={product.discountPrice}

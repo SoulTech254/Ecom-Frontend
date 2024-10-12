@@ -1,49 +1,55 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Slider from "react-slick";
 import { SampleNextArrow, SamplePrevArrow } from "./Arrows";
 
 export default function BannerGroup({ banners }) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640); // Adjust this breakpoint as necessary
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640); // Set isMobile based on screen width
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   // Settings for react-slick
   const settings = {
-    infinite: true, // Infinite looping
-    speed: 500, // Transition speed
-    slidesToShow: 5, // Default to 5 banners on large screens
-    slidesToScroll: 1, // Scroll one banner at a time
-    nextArrow: <SampleNextArrow />,
-    prevArrow: <SamplePrevArrow />,
-    pauseOnHover: true, // Pause on hover
+    infinite: true,
+    speed: 500,
+    slidesToShow: isMobile ? 2 : 5,
+    slidesToScroll: 1,
+    nextArrow: !isMobile ? <SampleNextArrow /> : null, // Pass null if isMobile is true
+    prevArrow: !isMobile ? <SamplePrevArrow /> : null, // Pass null if isMobile is true
+    pauseOnHover: true,
     responsive: [
       {
-        breakpoint: 1280, // Large screens (e.g., laptops/desktops)
+        breakpoint: 1280,
         settings: {
           slidesToShow: 5,
           slidesToScroll: 1,
         },
       },
       {
-        breakpoint: 1024, // Medium screens (e.g., tablets)
+        breakpoint: 1024,
         settings: {
           slidesToShow: 3,
           slidesToScroll: 1,
         },
       },
       {
-        breakpoint: 768, // Small screens (e.g., smaller tablets)
+        breakpoint: 768,
         settings: {
           slidesToShow: 3,
           slidesToScroll: 1,
         },
       },
       {
-        breakpoint: 640, // Extra small screens (e.g., mobile devices)
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 1,
-        },
-      },
-      {
-        breakpoint: 570, // Extra small screens (e.g., mobile devices)
+        breakpoint: 640,
         settings: {
           slidesToShow: 2,
           slidesToScroll: 1,
@@ -57,33 +63,31 @@ export default function BannerGroup({ banners }) {
       <Slider {...settings} className="w-full">
         {banners.map((banner, index) => (
           <div key={index} className="relative">
-            {" "}
-            {/* Set relative positioning for the container */}
             <Link to={`/category/${banner.name}`} className="block">
               <div
-                className="w-[180px] md:w-[230px]" // Set width for small and medium screens
+                className="w-[180px] md:w-[230px]"
                 style={{
-                  backgroundImage: `url(${banner.img})`, // Set the background image
-                  backgroundSize: "cover", // Cover the entire div
-                  backgroundPosition: "center", // Center the image
-                  height: "360px", // Fixed height for the banner
-                  borderRadius: "0.5rem", // Rounded corners
-                  margin: "0 auto", // Center the div
-                  position: "relative", // Allow absolute positioning of child elements
+                  backgroundImage: `url(${banner.img})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  height: "360px",
+                  borderRadius: "0.5rem",
+                  margin: "0 auto",
+                  position: "relative",
                 }}
                 alt={`Banner ${index + 1}`}
               >
                 <span
-                  className="font-bold text-left" // Align text to the left
+                  className="font-bold text-left"
                   style={{
-                    position: "absolute", // Position the text absolutely
-                    top: "10px", // Position from the top
-                    left: "10px", // Position from the left
-                    color: "black", // Text color
-                    padding: "5px", // Padding for the text
+                    position: "absolute",
+                    top: "10px",
+                    left: "10px",
+                    color: "black",
+                    padding: "5px",
                   }}
                 >
-                  {banner.name} {/* Display the name */}
+                  {banner.name}
                 </span>
               </div>
             </Link>
