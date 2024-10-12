@@ -105,7 +105,7 @@ const HomePage = () => {
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 3000,
+    autoplaySpeed: 10000,
     pauseOnHover: true,
     arrows: false,
   };
@@ -166,7 +166,7 @@ const HomePage = () => {
             />
             <CircleLink
               src="https://imgs.search.brave.com/z1dlBNAv-DZ_4PhZv_4LSqIdCxaIuhrsx8-OnFfPTVc/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vcGhvdG9z/L2Jyb2tlbi1jaG9j/b2xhdGUtYmFyLXBp/Y3R1cmUtaWQ5NDEx/MDg0NTI_az0yMCZt/PTk0MTEwODQ1MiZz/PTYxMng2MTImdz0w/Jmg9dGpBcVNjZUdL/MVoyM0VMRW9DOV8y/NzBkZXJGclZ6RG1D/WVRub0gyNlZsST0.jpeg"
-              title="Confectionaries"
+              title="Confectionary"
               link="/category/confectionary"
             />
             <CircleLink

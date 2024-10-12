@@ -1,16 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Slider from "react-slick";
+import { SampleNextArrow, SamplePrevArrow } from "./Arrows";
 
 export default function BannerGroup({ banners }) {
   // Settings for react-slick
   const settings = {
     infinite: true, // Infinite looping
     speed: 500, // Transition speed
-    autoplay: true, // Enable autoplay
     slidesToShow: 5, // Default to 5 banners on large screens
     slidesToScroll: 1, // Scroll one banner at a time
-    autoplaySpeed: 3000, // Autoplay every 3 seconds
+    nextArrow: <SampleNextArrow />,
+    prevArrow: <SamplePrevArrow />,
     pauseOnHover: true, // Pause on hover
     responsive: [
       {
