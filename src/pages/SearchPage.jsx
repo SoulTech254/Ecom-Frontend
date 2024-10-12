@@ -99,12 +99,14 @@ const SearchPage = () => {
   if (isProductsLoading) {
     return (
       <div>
-        <div className="flex flex-wrap gap-2 w-full mb-4">
-          {[...Array(10)].map((_, index) => (
-            <SkeletonCard key={index} />
+        <h2 className="text-2xl font-semibold text-gray-600">
+          Search results for "{searchTerm}"
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-0 ">
+          {[...Array(6)].map((_, i) => (
+            <SkeletonCard key={i} className="m-0" />
           ))}
         </div>
-        <PaginationSelector page={1} pages={1} onPageChange={() => {}} />
       </div>
     );
   }
@@ -142,7 +144,7 @@ const SearchPage = () => {
               </select>
             </div>
           </div>
-          <div className="flex flex-wrap justify-start gap-2 w-full mb-4">
+          <div className="flex flex-wrap justify-start w-full mb-4">
             {products.map((product) => (
               <ProductCard
                 key={product._id}
@@ -157,9 +159,9 @@ const SearchPage = () => {
             ))}
           </div>
           {isLoadingMore && (
-            <div className="flex flex-wrap gap-2 w-full mb-4">
-              {[...Array(4)].map((_, index) => (
-                <SkeletonCard key={index} />
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-0 ">
+              {[...Array(6)].map((_, i) => (
+                <SkeletonCard key={i} className="m-0" />
               ))}
             </div>
           )}

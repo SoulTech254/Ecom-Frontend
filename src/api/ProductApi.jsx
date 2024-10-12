@@ -25,18 +25,22 @@ export const handleError = (error) => {
   return "Network error. Please check your internet connection.";
 };
 
-export const useGetProducts = (branchName, brand) => {
+export const useGetProducts = (branchName, brand, pageNumber = 1) => {
   const axiosPrivate = useAxiosPrivate();
+
   const getProductsRequest = async () => {
     try {
       const params = new URLSearchParams();
       params.append("branch", branchName);
+      params.append("page", pageNumber); // Append the page number
 
       if (brand) {
         params.append("brand", brand);
       }
 
-      const response = await axios.get(`/api/v1/products?${params.toString()}`);
+      const response = await axiosPrivate.get(
+        `/api/v1/products?${params.toString()}`
+      );
       return response.data;
     } catch (error) {
       const errorMessage = handleError(error);
@@ -45,18 +49,24 @@ export const useGetProducts = (branchName, brand) => {
     }
   };
 
-  const { data, isLoading: isProductsLoading } = useQuery(
-    ["products", branchName, brand],
+  const {
+    data,
+    isLoading: isProductsLoading,
+    isFetching,
+    error,
+  } = useQuery(
+    ["products", branchName, brand, pageNumber], // Include page number in cache key
     getProductsRequest,
     {
-      enabled: !!branchName,
+      keepPreviousData: true, // Allows keeping previous data while fetching next page
+      enabled: !!branchName, // Only fetch when branchName is available
     }
   );
 
   const products = data?.products || [];
   const metadata = data?.metadata || {};
 
-  return { products, metadata, isProductsLoading };
+  return { products, metadata, isProductsLoading, isFetching, error };
 };
 
 export const useGetBestSellers = (branchId) => {
@@ -71,15 +81,16 @@ export const useGetBestSellers = (branchId) => {
     }
   };
 
-  const {
-    data: bestSellers,
-    isLoading,
-  } = useQuery(["bestSellers", branchId], getBestSellersRequest, {
-    onError: (error) => {
-      const errorMessage = handleError(error);
-      toast.error(errorMessage); // Display toast message
-    },
-  });
+  const { data: bestSellers, isLoading } = useQuery(
+    ["bestSellers", branchId],
+    getBestSellersRequest,
+    {
+      onError: (error) => {
+        const errorMessage = handleError(error);
+        toast.error(errorMessage); // Display toast message
+      },
+    }
+  );
 
   return { bestSellers, isLoading };
 };
@@ -143,10 +154,8 @@ export const useUpdateCart = () => {
     }
   };
 
-  const {
-    mutateAsync: updateCart,
-    isLoading: isCartLoading,
-  } = useMutation(updateCartRequest);
+  const { mutateAsync: updateCart, isLoading: isCartLoading } =
+    useMutation(updateCartRequest);
 
   return { updateCart, isCartLoading };
 };

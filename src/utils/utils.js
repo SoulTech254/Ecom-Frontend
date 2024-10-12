@@ -16,150 +16,221 @@ export const months = {
 export const categories = [
   {
     id: 1,
-    name: "Electronics",
+    name: "Fruits & Vegetables",
     groups: [
       {
-        title: "Mobile Phones",
+        title: "Fruits",
         subcategories: [
-          { id: 1, name: "Smartphones", link: encodeURIComponent("Smartphones") },
-          { id: 2, name: "Accessories", link: encodeURIComponent("Accessories") },
+          {
+            id: 1,
+            name: "Citrus Fruits",
+            link: encodeURIComponent("Citrus Fruits"),
+          },
+          {
+            id: 2,
+            name: "Tropical Fruits",
+            link: encodeURIComponent("Tropical Fruits"),
+          },
+          { id: 3, name: "Berries", link: encodeURIComponent("Berries") },
         ],
       },
       {
-        title: "Computers",
+        title: "Vegetables",
         subcategories: [
-          { id: 3, name: "Laptops", link: encodeURIComponent("Laptops") },
-          { id: 4, name: "Desktops", link: encodeURIComponent("Desktops") },
+          {
+            id: 4,
+            name: "Leafy Greens",
+            link: encodeURIComponent("Leafy Greens"),
+          },
+          {
+            id: 5,
+            name: "Roots & Tubers",
+            link: encodeURIComponent("Roots & Tubers"),
+          },
+          {
+            id: 6,
+            name: "Fruits & Other Vegetables",
+            link: encodeURIComponent("Fruits & Other Vegetables"),
+          },
         ],
       },
     ],
   },
   {
     id: 2,
-    name: "Foods",
+    name: "Meat & Fish",
     groups: [
       {
-        title: "Snacks",
+        title: "Fresh Meat",
         subcategories: [
-          { id: 5, name: "Chips", link: encodeURIComponent("Chips") },
-          { id: 6, name: "Candy", link: encodeURIComponent("Candy") },
+          { id: 7, name: "Red Meat", link: encodeURIComponent("Red Meat") },
+          { id: 8, name: "Poultry", link: encodeURIComponent("Poultry") },
+          {
+            id: 9,
+            name: "Processed Meat",
+            link: encodeURIComponent("Processed Meat"),
+          },
         ],
       },
       {
-        title: "Beverages",
+        title: "Fish",
         subcategories: [
-          { id: 7, name: "Soda", link: encodeURIComponent("Soda") },
-          { id: 8, name: "Juice", link: encodeURIComponent("Juice") },
+          {
+            id: 10,
+            name: "Fresh Water Fish",
+            link: encodeURIComponent("Fresh Water Fish"),
+          },
+          {
+            id: 11,
+            name: "Saltwater Fish",
+            link: encodeURIComponent("Saltwater Fish"),
+          },
+          { id: 12, name: "Seafood", link: encodeURIComponent("Seafood") },
         ],
       },
     ],
   },
   {
     id: 3,
-    name: "Cleaning Supplies",
+    name: "Dairy Products",
     groups: [
       {
-        title: "Household Cleaners",
+        title: "Milk & Cream",
         subcategories: [
           {
-            id: 9,
-            name: "All-Purpose Cleaners",
-            link: encodeURIComponent("All-Purpose Cleaners"),
+            id: 13,
+            name: "Fresh Milk",
+            link: encodeURIComponent("Fresh Milk"),
           },
-          { id: 10, name: "Glass Cleaners", link: encodeURIComponent("Glass Cleaners") },
+          { id: 14, name: "Cream", link: encodeURIComponent("Cream") },
         ],
       },
       {
-        title: "Laundry Supplies",
+        title: "Cheese & Yoghurt",
         subcategories: [
-          { id: 11, name: "Detergents", link: encodeURIComponent("Detergents") },
-          { id: 12, name: "Fabric Softener", link: encodeURIComponent("Fabric Softener") },
+          { id: 15, name: "Yoghurt", link: encodeURIComponent("Yoghurt") },
+          { id: 16, name: "Cheese", link: encodeURIComponent("Cheese") },
         ],
       },
     ],
   },
   {
     id: 4,
-    name: "Beauty",
+    name: "Bakery",
     groups: [
       {
-        title: "Makeup",
+        title: "Breads",
         subcategories: [
-          { id: 13, name: "Lipstick", link: encodeURIComponent("Lipstick") },
-          { id: 14, name: "Foundation", link: encodeURIComponent("Foundation") },
+          { id: 17, name: "Loaves", link: encodeURIComponent("Loaves") },
+          {
+            id: 18,
+            name: "Buns & Rolls",
+            link: encodeURIComponent("Buns & Rolls"),
+          },
         ],
       },
       {
-        title: "Skincare",
+        title: "Pastries",
         subcategories: [
-          { id: 15, name: "Moisturizers", link: encodeURIComponent("Moisturizers") },
-          { id: 16, name: "Sunscreen", link: encodeURIComponent("Sunscreen") },
+          {
+            id: 19,
+            name: "Savory Pastries",
+            link: encodeURIComponent("Savory Pastries"),
+          },
+          {
+            id: 20,
+            name: "Sweet Pastries",
+            link: encodeURIComponent("Sweet Pastries"),
+          },
         ],
       },
     ],
   },
   {
     id: 5,
-    name: "Health and Fitness",
+    name: "Snacks",
     groups: [
       {
-        title: "Supplements",
+        title: "Chips & Crisps",
         subcategories: [
-          { id: 17, name: "Vitamins", link: encodeURIComponent("Vitamins") },
-          { id: 18, name: "Protein Powder", link: encodeURIComponent("Protein Powder") },
+          {
+            id: 21,
+            name: "Potato Chips",
+            link: encodeURIComponent("Potato Chips"),
+          },
+          {
+            id: 22,
+            name: "Vegetable Chips",
+            link: encodeURIComponent("Vegetable Chips"),
+          },
         ],
       },
       {
-        title: "Fitness Equipment",
+        title: "Confectionery",
         subcategories: [
-          { id: 19, name: "Weights", link: encodeURIComponent("Weights") },
-          { id: 20, name: "Yoga Mats", link: encodeURIComponent("Yoga Mats") },
+          {
+            id: 23,
+            name: "Chocolates",
+            link: encodeURIComponent("Chocolates"),
+          },
+          { id: 24, name: "Biscuits", link: encodeURIComponent("Biscuits") },
         ],
       },
     ],
   },
   {
     id: 6,
-    name: "Toys and Outdoors",
+    name: "Beverages",
     groups: [
       {
-        title: "Outdoor Toys",
+        title: "Soft Drinks",
         subcategories: [
-          { id: 21, name: "Bikes", link: encodeURIComponent("Bikes") },
-          { id: 22, name: "Kites", link: encodeURIComponent("Kites") },
+          {
+            id: 25,
+            name: "Carbonated Drinks",
+            link: encodeURIComponent("Carbonated Drinks"),
+          },
+          { id: 26, name: "Juices", link: encodeURIComponent("Juices") },
         ],
       },
       {
-        title: "Indoor Toys",
+        title: "Hot Drinks",
         subcategories: [
-          { id: 23, name: "Board Games", link: encodeURIComponent("Board Games") },
-          { id: 24, name: "Action Figures", link: encodeURIComponent("Action Figures") },
+          { id: 27, name: "Coffee", link: encodeURIComponent("Coffee") },
+          { id: 28, name: "Tea", link: encodeURIComponent("Tea") },
         ],
       },
     ],
   },
   {
     id: 7,
-    name: "Home & Garden",
+    name: "Rice, Pasta & Grains",
     groups: [
       {
-        title: "Furniture",
+        title: "Rice & Pasta",
         subcategories: [
-          { id: 25, name: "Sofas", link: encodeURIComponent("Sofas") },
-          { id: 26, name: "Tables", link: encodeURIComponent("Tables") },
+          { id: 29, name: "Rice", link: encodeURIComponent("Rice") },
+          { id: 30, name: "Pasta", link: encodeURIComponent("Pasta") },
         ],
       },
       {
-        title: "Gardening",
+        title: "Flours",
         subcategories: [
-          { id: 27, name: "Plants", link: encodeURIComponent("Plants") },
-          { id: 28, name: "Tools", link: encodeURIComponent("Tools") },
+          {
+            id: 31,
+            name: "Baking Flours",
+            link: encodeURIComponent("Baking Flours"),
+          },
+          {
+            id: 32,
+            name: "Specialty Flours",
+            link: encodeURIComponent("Specialty Flours"),
+          },
         ],
       },
     ],
   },
 ];
-
 
 export const chunkArray = (array, size) => {
   const result = [];

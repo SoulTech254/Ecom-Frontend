@@ -17,7 +17,7 @@ const ShareButton = ({ url, title }) => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative z-500">
       <button
         onClick={toggleDropdown}
         className="flex items-center p-2 cursor-pointer"
@@ -27,7 +27,7 @@ const ShareButton = ({ url, title }) => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg p-2 w-48">
+        <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg p-2 w-48 z-50">
           <div className="flex flex-col">
             <FacebookShareButton url={url} quote={title}>
               <div className="flex items-center p-2 hover:bg-gray-100 rounded cursor-pointer">

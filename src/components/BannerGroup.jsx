@@ -1,43 +1,94 @@
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import React from "react";
+import { Link } from "react-router-dom";
+import Slider from "react-slick";
 
 export default function BannerGroup({ banners }) {
+  // Settings for react-slick
+  const settings = {
+    infinite: true, // Infinite looping
+    speed: 500, // Transition speed
+    autoplay: true, // Enable autoplay
+    slidesToShow: 5, // Default to 5 banners on large screens
+    slidesToScroll: 1, // Scroll one banner at a time
+    autoplaySpeed: 3000, // Autoplay every 3 seconds
+    pauseOnHover: true, // Pause on hover
+    responsive: [
+      {
+        breakpoint: 1280, // Large screens (e.g., laptops/desktops)
+        settings: {
+          slidesToShow: 5,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 1024, // Medium screens (e.g., tablets)
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 768, // Small screens (e.g., smaller tablets)
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 640, // Extra small screens (e.g., mobile devices)
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 570, // Extra small screens (e.g., mobile devices)
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+        },
+      },
+    ],
+  };
+
   return (
-    <div className="relative flex flex-col justify-center items-center">
-      <div className="relative w-full">
-        <Carousel
-          opts={{
-            align: "end",
-          }}
-          className="w-full"
-        >
-          <CarouselContent>
-            {banners.map((banner, index) => (
-              <CarouselItem
-                key={index}
-                className="w-full md:basis-1/3 lg:basis-1/4"
+    <div className="relative flex flex-col justify-center items-center w-full overflow-visible">
+      <Slider {...settings} className="w-full">
+        {banners.map((banner, index) => (
+          <div key={index} className="relative">
+            {" "}
+            {/* Set relative positioning for the container */}
+            <Link to={`/category/${banner.name}`} className="block">
+              <div
+                className="w-[180px] md:w-[230px]" // Set width for small and medium screens
+                style={{
+                  backgroundImage: `url(${banner.img})`, // Set the background image
+                  backgroundSize: "cover", // Cover the entire div
+                  backgroundPosition: "center", // Center the image
+                  height: "360px", // Fixed height for the banner
+                  borderRadius: "0.5rem", // Rounded corners
+                  margin: "0 auto", // Center the div
+                  position: "relative", // Allow absolute positioning of child elements
+                }}
+                alt={`Banner ${index + 1}`}
               >
-                <img
-                  src={banner}
-                  alt="Banner"
-                  className="w-300px] h-auto object-cover rounded-md"
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          {banners.length > 4 && (
-            <div className="">
-              <CarouselPrevious className="absolute left-0 top-1/2 transform -translate-y-1/2" />
-              <CarouselNext className="absolute right-0 top-1/2 transform -translate-y-1/2" />
-            </div>
-          )}
-        </Carousel>
-      </div>
+                <span
+                  className="font-bold text-left" // Align text to the left
+                  style={{
+                    position: "absolute", // Position the text absolutely
+                    top: "10px", // Position from the top
+                    left: "10px", // Position from the left
+                    color: "black", // Text color
+                    padding: "5px", // Padding for the text
+                  }}
+                >
+                  {banner.name} {/* Display the name */}
+                </span>
+              </div>
+            </Link>
+          </div>
+        ))}
+      </Slider>
     </div>
   );
 }

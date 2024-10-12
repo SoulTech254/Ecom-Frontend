@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import SkeletonProductPage from "@/components/skeletons/SkeletonProductPage";
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import StoreSelection from "@/components/StoreSelection";
-import { useGetBranches } from "@/api/HomeApi";
+import { useGetBranches, useGetCategoryProducts } from "@/api/HomeApi";
 import { setBranch } from "@/redux/branch/branchSlice";
 import ProductGroup from "@/components/ProductGroup";
 
@@ -40,22 +40,31 @@ const ProductPage = () => {
     navigate(`/products/${id}`);
   };
 
-  // Always call hooks
+  // Fetching products based on selected branch
   const { products, isProductsLoading } = useGetProducts(
     selectedBranch ? selectedBranch.id : null
   );
+
+  // Fetching the specific product
   const { product, isProductLoading } = useGetAProduct(
     id,
     selectedBranch ? selectedBranch.id : null
   );
+
+  // Fetching related products from the same category
+  const { products: relatedProducts, isLoadingRelatedProducts } =
+    useGetCategoryProducts(product?.category?.name, selectedBranch?.id);
+
+  console.log(relatedProducts)
+
   const axiosPrivate = useAxiosPrivate();
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const cart = useSelector((state) => state.cart);
-  const user = useSelector((state) => state.user.user); // Add user selector
+  const user = useSelector((state) => state.user.user);
 
   // Handle loading states
-  if (isLoadingBranches || isProductLoading) {
+  if (isLoadingBranches || isProductLoading || isLoadingRelatedProducts) {
     return <SkeletonProductPage />;
   }
 
@@ -81,8 +90,9 @@ const ProductPage = () => {
         { name: "Home", path: "/" },
         ...category.path.map((cat) => ({
           name: cat.name,
-          path: `/category/${cat._id}`,
+          path: `/category/${cat.name}`,
         })),
+        { name: category.name, path: `/category/${category.name}` },
         { name: productName, path: "#" },
       ]
     : [];
@@ -265,14 +275,17 @@ const ProductPage = () => {
       </div>
 
       {description && (
-        <p className="mt-4 text-gray-700 text-sm md:text-base">{description}</p>
+        <p className="mt-4 text-gray-600 text-sm md:text-base">{description}</p>
       )}
 
-      {/* Best Sellers Carousel */}
-      <div className="mt-8">
-        <h2 className="text-lg md:text-xl lg:text-2xl mb-4">Best Sellers</h2>
-        <ProductGroup products={products} />
-      </div>
+      {/* Related Products Section */}
+      <h3 className="mt-8 text-lg md:text-xl font-semibold">
+        Related Products
+      </h3>
+      <ProductGroup
+        products={relatedProducts}
+        isLoading={isLoadingRelatedProducts}
+      />
     </div>
   );
 };

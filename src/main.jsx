@@ -8,6 +8,8 @@ import { QueryClientProvider, QueryClient } from "react-query";
 import { Provider } from "react-redux";
 import { persistor, store } from "./redux/store.js";
 import { PersistGate } from "redux-persist/integration/react";
+import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick-theme.css";
 
 const queryClient = new QueryClient();
 

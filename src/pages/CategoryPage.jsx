@@ -16,6 +16,7 @@ const CategoryPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [allProducts, setAllProducts] = useState([]); // Store all loaded products
 
   const {
     products,
@@ -28,25 +29,37 @@ const CategoryPage = () => {
     sortBy,
     sortOrder,
     currentPage,
+    10, // limit per page
     searchParams.get("searchQuery") || ""
   );
 
   const { subcategories, isSubcategoriesLoading } =
     useGetSubcategories(categoryId);
 
+  // When new products are fetched, merge them into the current list
   useEffect(() => {
-    if (metadata.totalDocuments > products.length) {
+    if (currentPage === 1) {
+      setAllProducts(products);
+    } else {
+      setAllProducts((prev) => [...prev, ...products]);
+    }
+  }, [products, currentPage]);
+
+  // Update hasMore based on metadata
+  useEffect(() => {
+    if (metadata.totalDocuments > allProducts.length) {
       setHasMore(true);
     } else {
       setHasMore(false);
     }
-  }, [metadata.totalDocuments, products.length]);
+  }, [metadata.totalDocuments, allProducts.length]);
 
+  // Infinite scroll listener
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition =
         window.innerHeight + document.documentElement.scrollTop;
-      const bottomPosition = document.documentElement.offsetHeight - 200; // Adjust threshold
+      const bottomPosition = document.documentElement.offsetHeight - 800;
 
       if (scrollPosition >= bottomPosition && hasMore && !isLoadingMore) {
         loadMoreProducts();
@@ -60,7 +73,7 @@ const CategoryPage = () => {
   }, [hasMore, isLoadingMore]);
 
   const loadMoreProducts = () => {
-    if (isLoadingMore) return;
+    if (isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
     setCurrentPage((prev) => prev + 1);
   };
@@ -74,14 +87,15 @@ const CategoryPage = () => {
   };
 
   useEffect(() => {
-    if (!isLoadingMore) return;
-    setIsLoadingMore(false);
-  }, [currentPage]);
+    if (isLoadingMore) {
+      setIsLoadingMore(false);
+    }
+  }, [products]);
 
   return (
     <div className="mt-4">
       {isSubcategoriesLoading ? (
-        <div className="flex flex-wrap justify-around mb-4 gap-4">
+        <div className="flex flex-wrap justify-between mb-4 gap-4">
           {[...Array(4)].map((_, index) => (
             <div
               key={index}
@@ -111,10 +125,10 @@ const CategoryPage = () => {
         )
       )}
 
-      {isProductsLoading ? (
-        <div className="flex flex-wrap mb-4 gap-4">
-          {[...Array(5)].map((_, index) => (
-            <SkeletonCard key={index} />
+      {isProductsLoading && currentPage === 1 ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-0 ">
+          {[...Array(6)].map((_, i) => (
+            <SkeletonCard key={i} className="m-0" />
           ))}
         </div>
       ) : productsError ? (
@@ -148,8 +162,8 @@ const CategoryPage = () => {
             </div>
           </div>
 
-          <div className="flex flex-wrap justify-start mb-4 gap-2 mx-auto">
-            {products.map((product) => (
+          <div className="flex flex-wrap justify-start mb-4  mx-auto">
+            {allProducts.map((product) => (
               <ProductCard
                 key={product._id}
                 discountPrice={product.discountPrice}
@@ -164,9 +178,9 @@ const CategoryPage = () => {
           </div>
 
           {isLoadingMore && (
-            <div className="flex flex-wrap justify-around gap-2">
-              {[...Array(4)].map((_, index) => (
-                <SkeletonCard key={index} />
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-0 ">
+              {[...Array(6)].map((_, i) => (
+                <SkeletonCard key={i} className="m-0" />
               ))}
             </div>
           )}

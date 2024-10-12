@@ -24,7 +24,6 @@ const ProductCard = ({
   const { selectedBranch } = useSelector((state) => state.branch);
 
   const cart = useSelector((state) => state.cart);
-  console.log(cart);
   const existingCartItem = cart.products.find(
     (item) => item.product._id === id
   );
@@ -86,13 +85,17 @@ const ProductCard = ({
     }
   };
 
+  // Helper function to truncate name if it exceeds 30 characters
+  const truncateName = (str, maxLength) =>
+    str.length > maxLength ? `${str.slice(0, maxLength)}...` : str;
+
   // Calculate discount percentage
   const discountPercentage = discountPrice
     ? ((price - discountPrice) / price) * 100
     : 0;
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden flex flex-col justify-between w-[175px] sm:w-[117px] md:w-[192px] lg:w-[200px] h-[280px] sm:h-[310px] md:h-[370px] p-2">
+    <div className="bg-white rounded-xl border border-1 overflow-hidden flex flex-col justify-between w-[175px] md:w-[192px] lg:w-[200px] h-[290px] sm:h-[310px] md:h-[370px] p-2">
       <div className="flex-1 flex flex-col">
         <Link
           to={`/products/${id}`}
@@ -107,7 +110,7 @@ const ProductCard = ({
           </div>
           <div className="py-1 mt-2 font-bold">
             <p className="text-black text-sm sm:text-md md:text-lg line-clamp-2">
-              {name}
+              {truncateName(name, 38)}
             </p>
           </div>
           <div className="py-1 flex items-start justify-start">
