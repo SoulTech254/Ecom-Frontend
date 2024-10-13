@@ -147,7 +147,7 @@ const BrandPage = () => {
         </h2>
       </div>
 
-      <div className="flex flex-wrap justify-start mb-4">
+      <div className="flex flex-wrap sm:justify-start mb-4 justify-center">
         {productList.map((product) => (
           <ProductCard
             key={product._id}
