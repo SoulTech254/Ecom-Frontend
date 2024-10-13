@@ -1,18 +1,28 @@
 import ProductCard from "@/components/ProductCard";
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useGetProducts } from "@/api/ProductApi"; // Ensure pagination is supported in this hook
+import { useGetBranches } from "@/api/AuthApi";
 import SkeletonCard from "@/components/skeletons/SkeletonCard";
+import Popup from "@/components/Popup"; // Import the Popup component
+import StoreSelection from "@/components/StoreSelection"; // Import the StoreSelection component
+import { setBranch } from "@/redux/branch/branchSlice";
 
 const BrandPage = () => {
   const { brand } = useParams(); // Get brand from the route parameters
-  const branch = useSelector((state) => state.branch.selectedBranch.id);
+  const branch = useSelector((state) => state.branch?.selectedBranch?.id);
+  const dispatch = useDispatch();
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [branches, setBranches] = useState([]);
+  const { branches: fetchedBranches, isLoadingBranches } = useGetBranches();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [productList, setProductList] = useState([]);
+  const [isPopupVisible, setIsPopupVisible] = useState(false); // Control popup visibility
 
   // Fetch products with pagination
   const { products, metadata, isProductsLoading, isFetching } = useGetProducts(
@@ -74,6 +84,29 @@ const BrandPage = () => {
     setCurrentPage((prev) => prev + 1); // Increment page number
   };
 
+  // Handle branch selection
+  const handleSelectBranch = (branch) => {
+    dispatch(setBranch(branch));
+    setIsPopupVisible(false);
+  };
+
+  useEffect(() => {
+    if (!isLoadingBranches) {
+      setBranches(fetchedBranches);
+    }
+  }, [fetchedBranches, isLoadingBranches]);
+
+  // Show popup if no branch is selected
+  useEffect(() => {
+    if (!branch) {
+      setIsPopupVisible(true);
+    }
+  }, [branch]);
+
+  const closePopup = () => {
+    setIsPopupVisible(false);
+  };
+
   // Loading state for the first page
   if (isProductsLoading && currentPage === 1) {
     return (
@@ -93,6 +126,14 @@ const BrandPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen mt-4">
+      {/* Store Selection Popup */}
+      <Popup isVisible={isPopupVisible} onClose={closePopup}>
+        <StoreSelection
+          branches={branches}
+          onSelectBranch={handleSelectBranch}
+        />
+      </Popup>
+
       <h2 className="text-2xl md:text-3xl font-semibold text-gray-600 mb-4">
         <span className="capitalize">{brand}</span> Products
       </h2>

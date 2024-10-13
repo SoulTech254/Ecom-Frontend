@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useSelector } from "react-redux";
+import { useEffect } from "react";
 
 const StoreSelection = ({ branches, onSelectBranch }) => {
   const [open, setOpen] = React.useState(false);
@@ -26,6 +27,11 @@ const StoreSelection = ({ branches, onSelectBranch }) => {
     initialSelectedBranch || null
   );
 
+  useEffect(() => {
+    if (initialSelectedBranch) {
+      setSelectedBranch(initialSelectedBranch);
+    }
+  }, [initialSelectedBranch]);
   const handleSelect = (branch) => {
     setSelectedBranch(branch);
     onSelectBranch(branch); // Notify parent component

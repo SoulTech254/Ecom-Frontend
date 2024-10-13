@@ -20,6 +20,7 @@ import StoreSelection from "@/components/StoreSelection";
 import { useGetBranches, useGetCategoryProducts } from "@/api/HomeApi";
 import { setBranch } from "@/redux/branch/branchSlice";
 import ProductGroup from "@/components/ProductGroup";
+import Popup from "@/components/Popup";
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -28,6 +29,7 @@ const ProductPage = () => {
   const { selectedBranch } = useSelector((state) => state.branch);
   const { branches: fetchedBranches, isLoadingBranches } = useGetBranches();
   const [branches, setBranches] = useState([]);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
 
   useEffect(() => {
     if (!isLoadingBranches) {
@@ -36,8 +38,9 @@ const ProductPage = () => {
   }, [fetchedBranches, isLoadingBranches]);
 
   const handleBranchSelection = (branch) => {
+    console.log(branch);
     dispatch(setBranch(branch));
-    navigate(`/products/${id}`);
+    setIsPopupVisible(false);
   };
 
   // Fetching products based on selected branch
@@ -50,18 +53,21 @@ const ProductPage = () => {
     id,
     selectedBranch ? selectedBranch.id : null
   );
-
   // Fetching related products from the same category
   const { products: relatedProducts, isLoadingRelatedProducts } =
     useGetCategoryProducts(product?.category?.name, selectedBranch?.id);
-
-  console.log(relatedProducts)
 
   const axiosPrivate = useAxiosPrivate();
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const cart = useSelector((state) => state.cart);
   const user = useSelector((state) => state.user.user);
+
+  useEffect(() => {
+    if (!selectedBranch) {
+      setIsPopupVisible(true); // Show popup if no branch is selected
+    }
+  }, [selectedBranch]);
 
   // Handle loading states
   if (isLoadingBranches || isProductLoading || isLoadingRelatedProducts) {
@@ -81,6 +87,7 @@ const ProductPage = () => {
     description,
     images,
     size,
+    measurementUnit,
     discountPrice,
     stockLevel,
   } = product;
@@ -159,20 +166,19 @@ const ProductPage = () => {
     }
   };
 
-  // If no branch is selected, return StoreSelection component
-  if (!selectedBranch) {
-    return (
-      <div className="flex items-center justify-center w-full p-24 bg-white shadow-md">
+  return (
+    <div className="md:p-8 lg:p-4">
+      {/* Show Store Selection Popup */}
+      <Popup
+        isVisible={isPopupVisible}
+        onClose={() => setIsPopupVisible(false)}
+      >
         <StoreSelection
           branches={branches}
           onSelectBranch={handleBranchSelection}
         />
-      </div>
-    );
-  }
+      </Popup>
 
-  return (
-    <div className="md:p-8 lg:p-4">
       {/* Breadcrumbs */}
       <div className="py-4">
         {breadcrumbs.length > 0 && (
@@ -182,9 +188,9 @@ const ProductPage = () => {
                 <li key={index} className="flex items-center">
                   {index < breadcrumbs.length - 1 ? (
                     <>
-                      <a href={crumb.path} className="hover:underline">
+                      <Link to={crumb.path} className="hover:text-primary">
                         {crumb.name}
-                      </a>
+                      </Link>
                       <span className="mx-2">/</span>
                     </>
                   ) : (
@@ -234,7 +240,9 @@ const ProductPage = () => {
           >
             More From <span className="text-primary">{brand}</span>
           </Link>
-          <p className="text-sm md:text-base">Size: {size}</p>
+          <p className="text-sm md:text-base">
+            Size: {size} {measurementUnit}{" "}
+          </p>
 
           <QuantityDropdown
             stockLevel={stockLevel}
@@ -274,18 +282,20 @@ const ProductPage = () => {
         </div>
       </div>
 
-      {description && (
-        <p className="mt-4 text-gray-600 text-sm md:text-base">{description}</p>
-      )}
+      {description && <p className="mt-4 text-gray-600">{description}</p>}
 
-      {/* Related Products Section */}
-      <h3 className="mt-8 text-lg md:text-xl font-semibold">
-        Related Products
-      </h3>
-      <ProductGroup
-        products={relatedProducts}
-        isLoading={isLoadingRelatedProducts}
-      />
+      <div className="mt-12">
+        <h2 className="font-bold text-xl ">You May Also Like</h2>
+        {/* Similar Products */}
+        {relatedProducts.length > 0 && (
+          <div className="">
+            <ProductGroup
+              isLoding={isLoadingRelatedProducts}
+              products={relatedProducts}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -2,14 +2,21 @@ import { useGetCategoryProducts, useGetSubcategories } from "@/api/HomeApi";
 import CircleLink from "@/components/CircleLink";
 import ProductCard from "@/components/ProductCard";
 import SkeletonCard from "@/components/skeletons/SkeletonCard";
+import Popup from "@/components/Popup"; // Import the Popup component
+import StoreSelection from "@/components/StoreSelection"; // Import the StoreSelection component
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { setBranch } from "@/redux/branch/branchSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams, useSearchParams } from "react-router-dom";
+import { useGetBranches } from "@/api/AuthApi";
 
 const CategoryPage = () => {
   const { categoryId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const branch = useSelector((state) => state.branch.selectedBranch.id);
+  const branch = useSelector((state) => state.branch?.selectedBranch?.id);
+  const [branches, setBranches] = useState([]);
+  const { branches: fetchedBranches, isLoadingBranches } = useGetBranches();
+  const dispatch = useDispatch()
 
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState(-1);
@@ -17,6 +24,7 @@ const CategoryPage = () => {
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [allProducts, setAllProducts] = useState([]); // Store all loaded products
+  const [isPopupVisible, setIsPopupVisible] = useState(false); // Control popup visibility
 
   const {
     products,
@@ -35,6 +43,12 @@ const CategoryPage = () => {
 
   const { subcategories, isSubcategoriesLoading } =
     useGetSubcategories(categoryId);
+
+  useEffect(() => {
+    if (!isLoadingBranches) {
+      setBranches(fetchedBranches);
+    }
+  }, [fetchedBranches, isLoadingBranches]);
 
   // When new products are fetched, merge them into the current list
   useEffect(() => {
@@ -86,14 +100,36 @@ const CategoryPage = () => {
     setCurrentPage(1);
   };
 
+  const handleSelectBranch = (branch) => {
+    console.log(branch);
+    dispatch(setBranch(branch));
+    setIsPopupVisible(false);
+  };
+
   useEffect(() => {
     if (isLoadingMore) {
       setIsLoadingMore(false);
     }
   }, [products]);
 
+  // Show popup if no branch is selected
+  useEffect(() => {
+    if (!branch) {
+      setIsPopupVisible(true);
+    }
+  }, [branch]);
+
+  const closePopup = () => {
+    setIsPopupVisible(false);
+  };
+
   return (
     <div className="mt-4">
+      {/* Store Selection Popup */}
+      <Popup isVisible={isPopupVisible} onClose={closePopup}>
+        <StoreSelection branches={branches} onSelectBranch={handleSelectBranch} /> {/* Render StoreSelection inside the popup */}
+      </Popup>
+
       {isSubcategoriesLoading ? (
         <div className="flex flex-wrap justify-between mb-4 gap-4">
           {[...Array(4)].map((_, index) => (
