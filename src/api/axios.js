@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASEURL = "http://localhost:3000"; // Added '//' after 'http:'
+const BASEURL = "https://ecom-backend-qdwv.onrender.com";
 
 export default axios.create({
   baseURL: BASEURL,
