@@ -51,23 +51,50 @@ const CategoryPage = () => {
     }
   }, [fetchedBranches, isLoadingBranches]);
 
-  // When new products are fetched, merge them into the current list
   useEffect(() => {
-    if (currentPage === 1) {
-      setAllProducts(products);
-    } else {
-      setAllProducts((prev) => [...prev, ...products]);
-    }
-  }, [products, currentPage]);
+    const handleScroll = () => {
+      const scrollPosition =
+        window.innerHeight + document.documentElement.scrollTop;
+      const bottomPosition = document.documentElement.offsetHeight - 800;
 
-  // Update hasMore based on metadata
+      if (
+        scrollPosition >= bottomPosition &&
+        hasMore &&
+        !isLoadingMore &&
+        products.length > 0 // Check if there are products before loading more
+      ) {
+        loadMoreProducts();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [hasMore, isLoadingMore, products.length]);
+
+  // Infinite scroll listener
   useEffect(() => {
-    if (metadata.totalDocuments > allProducts.length) {
-      setHasMore(true);
-    } else {
-      setHasMore(false);
-    }
-  }, [metadata.totalDocuments, allProducts.length]);
+    const handleScroll = () => {
+      const scrollPosition =
+        window.innerHeight + document.documentElement.scrollTop;
+      const bottomPosition = document.documentElement.offsetHeight - 800;
+
+      if (
+        scrollPosition >= bottomPosition &&
+        hasMore &&
+        !isLoadingMore &&
+        products.length > 0
+      ) {
+        loadMoreProducts();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [hasMore, isLoadingMore, products.length]);
 
   // Infinite scroll listener
   useEffect(() => {
@@ -88,7 +115,7 @@ const CategoryPage = () => {
   }, [hasMore, isLoadingMore]);
 
   const loadMoreProducts = () => {
-    if (isLoadingMore || !hasMore) return;
+    if (isLoadingMore || !hasMore || products.length === 0) return; // Check if no products
     setIsLoadingMore(true);
     setCurrentPage((prev) => prev + 1);
   };

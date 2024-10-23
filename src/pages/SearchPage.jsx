@@ -75,7 +75,13 @@ const SearchPage = () => {
       window.innerHeight + document.documentElement.scrollTop;
     const bottomPosition = document.documentElement.offsetHeight - 800; // Adjust threshold
 
-    if (scrollPosition >= bottomPosition && hasMore && !isLoadingMore) {
+    // Check if there are products before attempting to load more
+    if (
+      scrollPosition >= bottomPosition &&
+      hasMore &&
+      !isLoadingMore &&
+      products.length > 0
+    ) {
       loadMoreProducts();
     }
   };
@@ -94,7 +100,7 @@ const SearchPage = () => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [hasMore, isLoadingMore, currentPage]);
+  }, [hasMore, isLoadingMore, currentPage, products.length]); // Add products.length to dependencies
 
   // Loading state
   if (isProductsLoading) {
@@ -119,9 +125,7 @@ const SearchPage = () => {
         <h2 className="text-2xl text-center md:text-3xl font-semibold text-gray-600 mb-4">
           No products found for "{searchTerm}"
         </h2>
-        <p>Please Try A Different Search</p>
         <NoProductsFoundIllustration />
-
       </div>
     );
   }
