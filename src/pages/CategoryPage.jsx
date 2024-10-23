@@ -51,17 +51,43 @@ const CategoryPage = () => {
     }
   }, [fetchedBranches, isLoadingBranches]);
 
+  // When new products are fetched, merge them into the current list
+  useEffect(() => {
+    if (currentPage === 1) {
+      setAllProducts(products);
+    } else {
+      setAllProducts((prev) => [...prev, ...products]);
+    }
+  }, [products, currentPage]);
+
+  // Update hasMore based on metadata
+  useEffect(() => {
+    if (currentPage === 1 && products.length === 0) {
+      setHasMore(false);
+    } else if (
+      metadata?.totalDocuments &&
+      metadata.totalDocuments > allProducts.length
+    ) {
+      setHasMore(true);
+    } else {
+      setHasMore(false);
+    }
+  }, [metadata.totalDocuments, allProducts.length]);
+
+  // Infinite scroll listener
+  // Infinite scroll listener
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition =
         window.innerHeight + document.documentElement.scrollTop;
       const bottomPosition = document.documentElement.offsetHeight - 800;
 
+      // Add condition to stop loading if there are no products
       if (
         scrollPosition >= bottomPosition &&
         hasMore &&
         !isLoadingMore &&
-        products.length > 0 // Check if there are products before loading more
+        allProducts.length > 0
       ) {
         loadMoreProducts();
       }
@@ -71,51 +97,10 @@ const CategoryPage = () => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [hasMore, isLoadingMore, products.length]);
-
-  // Infinite scroll listener
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition =
-        window.innerHeight + document.documentElement.scrollTop;
-      const bottomPosition = document.documentElement.offsetHeight - 800;
-
-      if (
-        scrollPosition >= bottomPosition &&
-        hasMore &&
-        !isLoadingMore &&
-        products.length > 0
-      ) {
-        loadMoreProducts();
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [hasMore, isLoadingMore, products.length]);
-
-  // Infinite scroll listener
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition =
-        window.innerHeight + document.documentElement.scrollTop;
-      const bottomPosition = document.documentElement.offsetHeight - 800;
-
-      if (scrollPosition >= bottomPosition && hasMore && !isLoadingMore) {
-        loadMoreProducts();
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [hasMore, isLoadingMore]);
+  }, [hasMore, isLoadingMore, allProducts.length]);
 
   const loadMoreProducts = () => {
-    if (isLoadingMore || !hasMore || products.length === 0) return; // Check if no products
+    if (isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
     setCurrentPage((prev) => prev + 1);
   };
