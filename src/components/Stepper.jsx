@@ -15,9 +15,9 @@ const Stepper = ({ heading, steps, activeStep, doneSteps, to }) => {
           >
             <Link to={to[index]} className="flex items-center">
               <span
-                className={`flex items-center justify-center w-4 h-4 sm:w-6 sm:h-6 me-2 text-xs border border-gray-500 rounded-full shrink-0 dark:border-gray-400 ${
+                className={`flex items-center justify-center w-4 h-4 sm:w-6 sm:h-6 me-2 text-xs  border-gray-500 rounded-full shrink-0 dark:border-gray-400 ${
                   doneSteps && doneSteps.includes(index)
-                    ? "bg-primary text-white font-bold"
+                    ? "bg-secondary text-white font-bold"
                     : activeStep === index
                     ? "bg-transparent"
                     : "bg-gray-200" // Background color for not active step
@@ -25,14 +25,14 @@ const Stepper = ({ heading, steps, activeStep, doneSteps, to }) => {
               >
                 {/* Displaying tick icon if the step is marked as done */}
                 {doneSteps && doneSteps.includes(index) ? (
-                  <Check size={14} color="#000000" strokeWidth={3} />
+                  <Check size={14} color="#fff" strokeWidth={4} />
                 ) : (
                   index + 1
                 )}
               </span>
               <span
                 className={`${ 
-                  doneSteps && doneSteps.includes(index) ? "text-secondary" : ""
+                  doneSteps && doneSteps.includes(index) ? "text-primary" : ""
                 }`}
               >
                 {/* Conditionally rendering the step label */}

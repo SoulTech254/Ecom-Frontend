@@ -16,7 +16,7 @@ const CategoryPage = () => {
   const branch = useSelector((state) => state.branch?.selectedBranch?.id);
   const [branches, setBranches] = useState([]);
   const { branches: fetchedBranches, isLoadingBranches } = useGetBranches();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState(-1);
@@ -119,6 +119,16 @@ const CategoryPage = () => {
     }
   }, [branch]);
 
+  useEffect(() => {
+    // Reset state when the category changes
+    setCurrentPage(1); // Reset to first page
+    setAllProducts([]); // Clear the current products
+    setHasMore(true); // Reset the hasMore flag
+
+    // Fetch new products for the new category
+    // This will be triggered automatically by the `useGetCategoryProducts` hook
+  }, [categoryId, branch, sortBy, sortOrder]);
+
   const closePopup = () => {
     setIsPopupVisible(false);
   };
@@ -127,7 +137,11 @@ const CategoryPage = () => {
     <div className="mt-4">
       {/* Store Selection Popup */}
       <Popup isVisible={isPopupVisible} onClose={closePopup}>
-        <StoreSelection branches={branches} onSelectBranch={handleSelectBranch} /> {/* Render StoreSelection inside the popup */}
+        <StoreSelection
+          branches={branches}
+          onSelectBranch={handleSelectBranch}
+        />{" "}
+        {/* Render StoreSelection inside the popup */}
       </Popup>
 
       {isSubcategoriesLoading ? (

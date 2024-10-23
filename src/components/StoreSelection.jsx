@@ -48,7 +48,7 @@ const StoreSelection = ({ branches, onSelectBranch }) => {
           className="w-[130px] hover:text-primary justify-between border-none hover:bg-white p-0"
         >
           {selectedBranch ? selectedBranch.label : "Select Branch"}
-          <ChevronDownIcon className="ml-2" />
+          <ChevronDownIcon className="ml-1" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0 bg-white shadow-lg rounded">

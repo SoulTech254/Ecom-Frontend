@@ -30,7 +30,9 @@ const ProductPage = () => {
   const { branches: fetchedBranches, isLoadingBranches } = useGetBranches();
   const [branches, setBranches] = useState([]);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-
+  const {products:pro} = useSelector((state)=>state.cart)
+  const productQuantity = pro.filter((item) => item.product._id === id)[0]?.quantity || 0;
+  // Fetch branches
   useEffect(() => {
     if (!isLoadingBranches) {
       setBranches(fetchedBranches);
@@ -138,6 +140,8 @@ const ProductPage = () => {
                 axiosPrivate,
               })
             ).unwrap();
+
+            toast.success("Product added to cart.");
           } else {
             // For non-logged-in users, handle local cart
             dispatch(
@@ -158,7 +162,7 @@ const ProductPage = () => {
         }
       } else {
         toast.error(
-          "Cannot add more than available stock or have negative quantity."
+          "Cannot add more than available stock level. Please select a lower quantity."
         );
       }
     } else {
@@ -245,6 +249,7 @@ const ProductPage = () => {
           </p>
 
           <QuantityDropdown
+            productQuantity={productQuantity}
             stockLevel={stockLevel}
             price={discountPrice}
             onQuantityChange={handleQuantityChange}

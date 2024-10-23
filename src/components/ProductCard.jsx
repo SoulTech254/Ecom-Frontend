@@ -159,7 +159,7 @@ const ProductCard = ({
             onClick={() => handleAddToCart(1)}
             className="flex gap-1 items-center justify-center bg-primary text-white font-bold bg-opacity-70 px-2 py-1 rounded-sm hover:bg-opacity-60 active:scale-95"
           >
-            <ShoppingBagIcon size={20} />
+            <ShoppingBagIcon size={18} />
             <p className="text-xs sm:text-sm">Cart</p>
           </button>
         )}

@@ -38,7 +38,6 @@ const Navbar = () => {
 
   const handleSelectBranch = (branch) => {
     dispatch(setBranch(branch));
-    setSelectedBranch(branch);
   };
 
   const handleSignOut = async () => {
@@ -60,7 +59,7 @@ const Navbar = () => {
   const handleSheetClose = () => setIsSheetOpen(false);
 
   return (
-    <div className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 box-border h-fit mb-3 z-10">
+    <div className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 box-border h-fit mb-3 z-50">
       <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 gap-3">
           {/* Logo */}
@@ -85,7 +84,7 @@ const Navbar = () => {
                 <p>Loading...</p>
               ) : (
                 <>
-                  <StoreIcon color="#DAA520" size={20} />
+                  <StoreIcon color="#2B5311" size={20} />
                   <StoreSelection
                     selectedBranch={selectedBranch}
                     branches={branches}
@@ -101,7 +100,7 @@ const Navbar = () => {
                 <>
                   <Popover>
                     <PopoverTrigger className="flex hover:text-[#DAA520] items-center gap-1">
-                      <CircleUserRound color="#DAA520" size="20" />
+                      <CircleUserRound color="#2B5311" size="20" />
                       <p className="text-sm">Hello {user.fName}</p>
                     </PopoverTrigger>
                     <PopoverContent className="w-[150px] p-2 flex flex-col">
@@ -120,7 +119,7 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <LogInIcon color="#DAA520" size="20" />
+                  <LogInIcon color="#2B5311" size="20" />
                   <Link to="/sign-in" className="text-sm hover:text-primary">
                     Login & Register
                   </Link>
@@ -146,7 +145,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Categories */}
-      <div className="relative flex justify-center gap-12 text-secondary font-bold box-border hidden md:flex">
+      <div className="relative flex justify-center gap-12 text-primary font-bold box-border hidden md:flex">
         {categories.map((category) => (
           <span
             key={category.id}

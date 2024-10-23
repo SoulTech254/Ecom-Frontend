@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 const QuantityDropdown = ({
+  productQuantity,
   stockLevel,
   price,
   onQuantityChange,
@@ -41,6 +42,11 @@ const QuantityDropdown = ({
         value={quantity}
         onChange={handleChange}
       >
+        {/* Always display productQuantity as the first option */}
+        <option className="text-center" value={productQuantity}>
+          {productQuantity}
+        </option>
+        {/* Generate other options */}
         {options.map((option) => (
           <option className="text-center" key={option} value={option}>
             {option}
@@ -51,10 +57,8 @@ const QuantityDropdown = ({
         Subtotal for {quantity} item{quantity > 1 ? "s" : ""}:{" "}
         <span className="font-semibold">KES {Math.round(totalPrice)} </span>
         {quantityChanged && (
-        <span className="text-gray-500 text-sm">
-          (Not added to cart yet)
-        </span>
-      )}
+          <span className="text-gray-500 text-sm">(Not added to cart yet)</span>
+        )}
       </span>
     </div>
   );

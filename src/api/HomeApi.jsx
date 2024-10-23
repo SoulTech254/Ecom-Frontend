@@ -123,6 +123,8 @@ export const useGetCategoryProducts = (
     fetchCategoryProducts,
     {
       enabled: !!categoryId && !!branchId,
+      cacheTime: 0, // Disable cache
+      staleTime: 0,
     }
   );
 
