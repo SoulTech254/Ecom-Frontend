@@ -5,6 +5,7 @@ import SkeletonCard from "@/components/skeletons/SkeletonCard";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
+import NoProductsFoundIllustration from "@/components/NoProductsFoundIllustration"; // Import the No Products Found illustration
 
 const SearchPage = () => {
   console.log("SearchPage rendered");
@@ -93,7 +94,7 @@ const SearchPage = () => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [hasMore, isLoadingMore, currentPage]); // Ensure currentPage is a dependency
+  }, [hasMore, isLoadingMore, currentPage]);
 
   // Loading state
   if (isProductsLoading) {
@@ -102,7 +103,7 @@ const SearchPage = () => {
         <h2 className="text-2xl font-semibold text-gray-600">
           Search results for "{searchTerm}"
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-0 ">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-0">
           {[...Array(6)].map((_, i) => (
             <SkeletonCard key={i} className="m-0" />
           ))}
@@ -111,61 +112,67 @@ const SearchPage = () => {
     );
   }
 
+  // Check for errors or no products found
+  if (!products || products.length === 0) {
+    return (
+      <div>
+        <h2 className="text-2xl text-center md:text-3xl font-semibold text-gray-600 mb-4">
+          No products found for "{searchTerm}"
+        </h2>
+        <p>Please Try A Different Search</p>
+        <NoProductsFoundIllustration />
+
+      </div>
+    );
+  }
+
   return (
     <div>
-      {productsError ? (
-        <div className="text-red-500 text-center mt-4">
-          No products found. Try another search term.
-        </div>
-      ) : (
-        <>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-            <h2 className="text-2xl font-semibold text-gray-600">
-              Search results for "{searchTerm}"
-              <p className="text-gray-600 text-sm">
-                {metadata?.totalDocuments} product
-                {metadata?.totalDocuments === 1 ? "" : "s"} found
-              </p>
-            </h2>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+        <h2 className="text-2xl font-semibold text-gray-600">
+          Search results for "{searchTerm}"
+          <p className="text-gray-600 text-sm">
+            {metadata?.totalDocuments} product
+            {metadata?.totalDocuments === 1 ? "" : "s"} found
+          </p>
+        </h2>
 
-            <div>
-              <label htmlFor="sort" className="mr-2">
-                Sort by:
-              </label>
-              <select
-                id="sort"
-                value={`${sortBy},${sortOrder}`}
-                onChange={handleSortChange}
-                className="border border-gray-300 rounded px-2 py-1 focus:outline-none"
-              >
-                <option value="createdAt,-1">Relevance</option>
-                <option value="discountPrice,1">Price: Low to High</option>
-                <option value="discountPrice,-1">Price: High to Low</option>
-              </select>
-            </div>
-          </div>
-          <div className="flex flex-wrap sm:justify-start sm:gap-0 gap-2 mb-4 justify-between">
-            {products.map((product) => (
-              <ProductCard
-                key={product._id}
-                discountPrice={product.discountPrice}
-                price={product.price}
-                brand={product.brand}
-                img={product.images[0]}
-                name={product.productName}
-                id={product._id}
-                stockLevel={product.stockLevel}
-              />
-            ))}
-          </div>
-          {isLoadingMore && (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-0 ">
-              {[...Array(6)].map((_, i) => (
-                <SkeletonCard key={i} className="m-0" />
-              ))}
-            </div>
-          )}
-        </>
+        <div>
+          <label htmlFor="sort" className="mr-2">
+            Sort by:
+          </label>
+          <select
+            id="sort"
+            value={`${sortBy},${sortOrder}`}
+            onChange={handleSortChange}
+            className="border border-gray-300 rounded px-2 py-1 focus:outline-none"
+          >
+            <option value="createdAt,-1">Relevance</option>
+            <option value="discountPrice,1">Price: Low to High</option>
+            <option value="discountPrice,-1">Price: High to Low</option>
+          </select>
+        </div>
+      </div>
+      <div className="flex flex-wrap sm:justify-start sm:gap-0 gap-2 mb-4 justify-between">
+        {products.map((product) => (
+          <ProductCard
+            key={product._id}
+            discountPrice={product.discountPrice}
+            price={product.price}
+            brand={product.brand}
+            img={product.images[0]}
+            name={product.productName}
+            id={product._id}
+            stockLevel={product.stockLevel}
+          />
+        ))}
+      </div>
+      {isLoadingMore && (
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-0">
+          {[...Array(6)].map((_, i) => (
+            <SkeletonCard key={i} className="m-0" />
+          ))}
+        </div>
       )}
     </div>
   );

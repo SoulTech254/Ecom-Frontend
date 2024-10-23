@@ -1,6 +1,6 @@
 import ProductCard from "@/components/ProductCard";
 import { useState, useEffect } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useGetProducts } from "@/api/ProductApi"; // Ensure pagination is supported in this hook
 import { useGetBranches } from "@/api/AuthApi";
@@ -8,6 +8,7 @@ import SkeletonCard from "@/components/skeletons/SkeletonCard";
 import Popup from "@/components/Popup"; // Import the Popup component
 import StoreSelection from "@/components/StoreSelection"; // Import the StoreSelection component
 import { setBranch } from "@/redux/branch/branchSlice";
+import NoProductsFoundIllustration from "@/components/NoProductsFoundIllustration";
 
 const BrandPage = () => {
   const { brand } = useParams(); // Get brand from the route parameters
@@ -121,6 +122,18 @@ const BrandPage = () => {
           ))}
         </div>
       </div>
+    );
+  }
+
+  // Render message if no products match the brand
+  if (productList.length === 0) {
+    return (
+      <>
+        <h2 className="text-2xl text-center md:text-3xl font-semibold text-gray-600 mb-4">
+          <span className="capitalize">"{brand}"</span> Products
+        </h2>
+        <NoProductsFoundIllustration />
+      </>
     );
   }
 

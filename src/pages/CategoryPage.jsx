@@ -9,6 +9,7 @@ import { setBranch } from "@/redux/branch/branchSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useGetBranches } from "@/api/AuthApi";
+import NoProductsFoundIllustration from "@/components/NoProductsFoundIllustration";
 
 const CategoryPage = () => {
   const { categoryId } = useParams();
@@ -183,7 +184,9 @@ const CategoryPage = () => {
         </div>
       ) : productsError ? (
         <div className="text-red-500 text-center mt-4">
-          No categories found. Try another criteria.
+          <div>
+            <NoProductsFoundIllustration />
+          </div>
         </div>
       ) : (
         <>
