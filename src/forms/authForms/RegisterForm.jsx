@@ -242,7 +242,7 @@ const RegisterForm = ({ onSave, isLoading }) => {
               name="toReceiveOffers"
             />
             <span className="ml-2">
-              I would like to receive news and offers from Quickmart
+              I would like to receive news and offers from Chandarana Foodplus
             </span>
           </div>
           <div className="flex gap-2">

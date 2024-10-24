@@ -21,10 +21,6 @@ const CategoryPage = () => {
 
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState(-1);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [allProducts, setAllProducts] = useState([]); // Store all loaded products
   const [isPopupVisible, setIsPopupVisible] = useState(false); // Control popup visibility
 
   const {
@@ -32,12 +28,14 @@ const CategoryPage = () => {
     metadata,
     isProductsLoading,
     error: productsError,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
   } = useGetCategoryProducts(
     categoryId,
     branch,
     sortBy,
     sortOrder,
-    currentPage,
     10, // limit per page
     searchParams.get("searchQuery") || ""
   );
@@ -51,30 +49,6 @@ const CategoryPage = () => {
     }
   }, [fetchedBranches, isLoadingBranches]);
 
-  // When new products are fetched, merge them into the current list
-  useEffect(() => {
-    if (currentPage === 1) {
-      setAllProducts(products);
-    } else {
-      setAllProducts((prev) => [...prev, ...products]);
-    }
-  }, [products, currentPage]);
-
-  // Update hasMore based on metadata
-  useEffect(() => {
-    if (currentPage === 1 && products.length === 0) {
-      setHasMore(false);
-    } else if (
-      metadata?.totalDocuments &&
-      metadata.totalDocuments > allProducts.length
-    ) {
-      setHasMore(true);
-    } else {
-      setHasMore(false);
-    }
-  }, [metadata.totalDocuments, allProducts.length]);
-
-  // Infinite scroll listener
   // Infinite scroll listener
   useEffect(() => {
     const handleScroll = () => {
@@ -82,14 +56,12 @@ const CategoryPage = () => {
         window.innerHeight + document.documentElement.scrollTop;
       const bottomPosition = document.documentElement.offsetHeight - 800;
 
-      // Add condition to stop loading if there are no products
       if (
         scrollPosition >= bottomPosition &&
-        hasMore &&
-        !isLoadingMore &&
-        allProducts.length > 0
+        hasNextPage &&
+        !isFetchingNextPage
       ) {
-        loadMoreProducts();
+        fetchNextPage(); // Fetch next page of products
       }
     };
 
@@ -97,33 +69,19 @@ const CategoryPage = () => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [hasMore, isLoadingMore, allProducts.length]);
-
-  const loadMoreProducts = () => {
-    if (isLoadingMore || !hasMore) return;
-    setIsLoadingMore(true);
-    setCurrentPage((prev) => prev + 1);
-  };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleSortChange = (e) => {
     const [sortField, order] = e.target.value.split(",");
     setSortBy(sortField);
     setSortOrder(Number(order));
-    setSearchParams({ sortBy: sortField, sortOrder: order, page: 1 });
-    setCurrentPage(1);
+    setSearchParams({ sortBy: sortField, sortOrder: order });
   };
 
   const handleSelectBranch = (branch) => {
-    console.log(branch);
     dispatch(setBranch(branch));
     setIsPopupVisible(false);
   };
-
-  useEffect(() => {
-    if (isLoadingMore) {
-      setIsLoadingMore(false);
-    }
-  }, [products]);
 
   // Show popup if no branch is selected
   useEffect(() => {
@@ -131,16 +89,6 @@ const CategoryPage = () => {
       setIsPopupVisible(true);
     }
   }, [branch]);
-
-  useEffect(() => {
-    // Reset state when the category changes
-    setCurrentPage(1); // Reset to first page
-    setAllProducts([]); // Clear the current products
-    setHasMore(true); // Reset the hasMore flag
-
-    // Fetch new products for the new category
-    // This will be triggered automatically by the `useGetCategoryProducts` hook
-  }, [categoryId, branch, sortBy, sortOrder]);
 
   const closePopup = () => {
     setIsPopupVisible(false);
@@ -153,8 +101,7 @@ const CategoryPage = () => {
         <StoreSelection
           branches={branches}
           onSelectBranch={handleSelectBranch}
-        />{" "}
-        {/* Render StoreSelection inside the popup */}
+        />
       </Popup>
 
       {isSubcategoriesLoading ? (
@@ -188,7 +135,7 @@ const CategoryPage = () => {
         )
       )}
 
-      {isProductsLoading && currentPage === 1 ? (
+      {isProductsLoading && !products.length ? (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-0 ">
           {[...Array(6)].map((_, i) => (
             <SkeletonCard key={i} className="m-0" />
@@ -196,9 +143,7 @@ const CategoryPage = () => {
         </div>
       ) : productsError ? (
         <div className="text-red-500 text-center mt-4">
-          <div>
-            <NoProductsFoundIllustration />
-          </div>
+          <NoProductsFoundIllustration />
         </div>
       ) : (
         <>
@@ -210,7 +155,7 @@ const CategoryPage = () => {
               </p>
             </h2>
 
-            <div>
+            <div className="text-xs">
               <label htmlFor="sort" className="mr-2">
                 Sort by:
               </label>
@@ -228,7 +173,7 @@ const CategoryPage = () => {
           </div>
 
           <div className="flex flex-wrap sm:justify-start sm:gap-0 gap-2 mb-4 justify-between">
-            {allProducts.map((product) => (
+            {products.map((product) => (
               <ProductCard
                 key={product._id}
                 discountPrice={product.discountPrice}
@@ -242,7 +187,7 @@ const CategoryPage = () => {
             ))}
           </div>
 
-          {isLoadingMore && (
+          {isFetchingNextPage && (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-0 ">
               {[...Array(6)].map((_, i) => (
                 <SkeletonCard key={i} className="m-0" />

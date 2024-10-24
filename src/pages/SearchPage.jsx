@@ -1,72 +1,41 @@
 import { useSearchProducts } from "@/api/HomeApi";
-import PaginationSelector from "@/components/PaginationSelector";
 import ProductCard from "@/components/ProductCard";
 import SkeletonCard from "@/components/skeletons/SkeletonCard";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
-import NoProductsFoundIllustration from "@/components/NoProductsFoundIllustration"; // Import the No Products Found illustration
+import NoProductsFoundIllustration from "@/components/NoProductsFoundIllustration";
 
 const SearchPage = () => {
   console.log("SearchPage rendered");
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("searchTerm");
   const branch = useSelector((state) => state.branch.selectedBranch.id);
 
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState(-1);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [products, setProducts] = useState([]);
 
   const {
     products: fetchedProducts,
     metadata,
     isProductsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     error: productsError,
-  } = useSearchProducts(searchTerm, branch, sortBy, sortOrder, currentPage);
-
-  // Reset products and current page when searchTerm changes
-  useEffect(() => {
-    setCurrentPage(1);
-    setProducts([]);
-    console.log("Search term changed. Resetting products and page.");
-  }, [searchTerm]);
-
-  // Update products when fetchedProducts changes
-  useEffect(() => {
-    if (fetchedProducts) {
-      setProducts((prev) => [...prev, ...fetchedProducts]);
-      setIsLoadingMore(false); // Reset loading state after fetching products
-    }
-    console.log("Fetched products:", fetchedProducts);
-  }, [fetchedProducts]);
-
-  // Update hasMore state
-  useEffect(() => {
-    if (metadata?.totalDocuments !== undefined) {
-      setHasMore(metadata.totalDocuments > products.length);
-      console.log("Total documents:", metadata.totalDocuments);
-      console.log("Products length:", products.length);
-      console.log("hasMore:", hasMore);
-    }
-  }, [metadata?.totalDocuments, products.length]);
+  } = useSearchProducts(searchTerm, branch, sortBy, sortOrder);
 
   // Handle sort change
   const handleSortChange = (e) => {
     const [sortField, order] = e.target.value.split(",");
     setSortBy(sortField);
     setSortOrder(Number(order));
+    // Resetting search params for sorting
     setSearchParams({
       searchTerm,
       sortBy: sortField,
       sortOrder: order,
-      page: 1,
     });
-    setCurrentPage(1); // Reset to the first page
-    setProducts([]); // Reset products on sort change
-    console.log("Sort changed. Resetting products and page.");
   };
 
   // Handle scroll for loading more products
@@ -75,23 +44,14 @@ const SearchPage = () => {
       window.innerHeight + document.documentElement.scrollTop;
     const bottomPosition = document.documentElement.offsetHeight - 800; // Adjust threshold
 
-    // Check if there are products before attempting to load more
     if (
       scrollPosition >= bottomPosition &&
-      hasMore &&
-      !isLoadingMore &&
-      products.length > 0
+      hasNextPage &&
+      !isFetchingNextPage
     ) {
-      loadMoreProducts();
+      fetchNextPage();
+      console.log("Loading more products...");
     }
-  };
-
-  const loadMoreProducts = () => {
-    if (isLoadingMore || !hasMore || metadata?.totalPages === currentPage)
-      return;
-    setIsLoadingMore(true);
-    setCurrentPage((prev) => prev + 1);
-    console.log("Loading more products...");
   };
 
   // Listen to scroll event
@@ -100,10 +60,10 @@ const SearchPage = () => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [hasMore, isLoadingMore, currentPage, products.length]); // Add products.length to dependencies
+  }, [hasNextPage, isFetchingNextPage]); // Depend on fetching states
 
   // Loading state
-  if (isProductsLoading) {
+  if (isProductsLoading && fetchedProducts.length === 0) {
     return (
       <div>
         <h2 className="text-2xl font-semibold text-gray-600">
@@ -119,7 +79,7 @@ const SearchPage = () => {
   }
 
   // Check for errors or no products found
-  if (!products || products.length === 0) {
+  if (productsError || (fetchedProducts.length === 0 && !isProductsLoading)) {
     return (
       <div>
         <h2 className="text-2xl text-center md:text-3xl font-semibold text-gray-600 mb-4">
@@ -132,8 +92,8 @@ const SearchPage = () => {
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-        <h2 className="text-2xl font-semibold text-gray-600">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between  mb-4">
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-600 ">
           Search results for "{searchTerm}"
           <p className="text-gray-600 text-sm">
             {metadata?.totalDocuments} product
@@ -141,7 +101,7 @@ const SearchPage = () => {
           </p>
         </h2>
 
-        <div>
+        <div className="text-sm absolute right-0  top-20 md:relative md:top-0">
           <label htmlFor="sort" className="mr-2">
             Sort by:
           </label>
@@ -149,7 +109,7 @@ const SearchPage = () => {
             id="sort"
             value={`${sortBy},${sortOrder}`}
             onChange={handleSortChange}
-            className="border border-gray-300 rounded px-2 py-1 focus:outline-none"
+            className="border border-gray-300 rounded px-1 py-1 focus:outline-none"
           >
             <option value="createdAt,-1">Relevance</option>
             <option value="discountPrice,1">Price: Low to High</option>
@@ -157,8 +117,9 @@ const SearchPage = () => {
           </select>
         </div>
       </div>
+
       <div className="flex flex-wrap sm:justify-start sm:gap-0 gap-2 mb-4 justify-between">
-        {products.map((product) => (
+        {fetchedProducts.map((product) => (
           <ProductCard
             key={product._id}
             discountPrice={product.discountPrice}
@@ -171,7 +132,8 @@ const SearchPage = () => {
           />
         ))}
       </div>
-      {isLoadingMore && (
+
+      {isFetchingNextPage && (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-0">
           {[...Array(6)].map((_, i) => (
             <SkeletonCard key={i} className="m-0" />

@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useInfiniteQuery, useQuery } from "react-query";
 import axios from "./axios"; // Adjust the import path as necessary
 import { toast } from "sonner";
 
@@ -26,21 +26,20 @@ export const useSearchProducts = (
   branchId,
   sortBy = "createdAt",
   sortOrder = -1,
-  page = 1,
   limit = 10
 ) => {
-  const searchProductRequest = async () => {
+  const searchProductRequest = async ({ pageParam = 1 }) => {
     const searchParams = new URLSearchParams({
       query,
       branchId,
       sortBy,
       sortOrder,
-      page,
+      page: pageParam, // Use pageParam for pagination
       limit,
     });
 
     console.log(
-      `Fetching products with query: ${query}, branchId: ${branchId}, sortBy: ${sortBy}, sortOrder: ${sortOrder}, page: ${page}, limit: ${limit}`
+      `Fetching products with query: ${query}, branchId: ${branchId}, sortBy: ${sortBy}, sortOrder: ${sortOrder}, page: ${pageParam}, limit: ${limit}`
     );
 
     const response = await axios.get(
@@ -51,25 +50,35 @@ export const useSearchProducts = (
 
   const {
     data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading: isProductsLoading,
     error: queryError,
-  } = useQuery(
-    ["SearchProducts", query, branchId, sortBy, sortOrder, page, limit],
+  } = useInfiniteQuery(
+    ["SearchProducts", query, branchId, sortBy, sortOrder, limit],
     searchProductRequest,
     {
-      enabled: !!query && !!branchId && page > 0, // Ensure that page is valid
-      keepPreviousData: true, // Keep previous data while fetching new data
+      getNextPageParam: (lastPage, allPages) => {
+        const totalPages = Math.ceil(lastPage.metadata.totalDocuments / limit);
+        const nextPage = allPages.length + 1;
+        return nextPage <= totalPages ? nextPage : undefined;
+      },
+      enabled: !!query && !!branchId, // Ensure that both query and branchId are valid
     }
   );
 
-  const products = data?.products || [];
-  const metadata = data?.metadata || {};
+  const products = data?.pages.flatMap((page) => page.products) || [];
+  const metadata = data?.pages[0]?.metadata || {};
 
-  const error = queryError
-    ? queryError.response?.data || "An error occurred"
-    : null;
-
-  return { products, metadata, isProductsLoading, error };
+  return {
+    products,
+    metadata,
+    isProductsLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  };
 };
 
 export const useGetCategoryProducts = (
@@ -77,16 +86,15 @@ export const useGetCategoryProducts = (
   branchId,
   sortBy = "createdAt",
   sortOrder = -1,
-  page = 1,
   limit = 10,
   searchQuery = ""
 ) => {
-  const fetchCategoryProducts = async () => {
+  const fetchCategoryProducts = async ({ pageParam = 1 }) => {
     const searchParams = new URLSearchParams({
       branch: branchId,
       sortBy,
       sortOrder,
-      page,
+      page: pageParam, // Use pageParam for pagination
       limit,
       category: categoryId,
     });
@@ -94,10 +102,6 @@ export const useGetCategoryProducts = (
     if (searchQuery) {
       searchParams.append("query", searchQuery);
     }
-
-    console.log(
-      `Fetching products for category: ${categoryId}, branchId: ${branchId}, sortBy: ${sortBy}, sortOrder: ${sortOrder}, page: ${page}, limit: ${limit}, searchQuery: ${searchQuery}`
-    );
 
     const response = await axios.get(
       `/api/v1/category?${searchParams.toString()}`
@@ -107,37 +111,49 @@ export const useGetCategoryProducts = (
 
   const {
     data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading: isProductsLoading,
     error: queryError,
-  } = useQuery(
+  } = useInfiniteQuery(
     [
       "CategoryProducts",
       categoryId,
       branchId,
       sortBy,
       sortOrder,
-      page,
       limit,
       searchQuery,
     ],
     fetchCategoryProducts,
     {
+      getNextPageParam: (lastPage, allPages) => {
+        const totalPages = Math.ceil(lastPage.metadata.totalDocuments / limit);
+        const nextPage = allPages.length + 1;
+        return nextPage <= totalPages ? nextPage : undefined;
+      },
       enabled: !!categoryId && !!branchId,
-      cacheTime: 0, // Disable cache
-      staleTime: 0,
     }
   );
 
-  const products = data?.products || [];
-  const metadata = data?.metadata || {};
+  const products = data?.pages.flatMap((page) => page.products) || [];
+  const metadata = data?.pages[0]?.metadata || {};
 
-  // Handle the error and provide a more useful error message
   const error = queryError
     ? queryError.response?.data ||
       "An error occurred while fetching category products."
     : null;
 
-  return { products, metadata, isProductsLoading, error };
+  return {
+    products,
+    metadata,
+    isProductsLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    error,
+  };
 };
 
 export const useGetSubcategories = (categoryId) => {

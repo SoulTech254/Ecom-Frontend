@@ -1,5 +1,5 @@
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
-import { useMutation, useQuery } from "react-query";
+import { useInfiniteQuery, useMutation, useQuery } from "react-query";
 import axios from "./axios";
 import { toast } from "sonner"; // Import the toast library
 
@@ -25,14 +25,14 @@ export const handleError = (error) => {
   return "Network error. Please check your internet connection.";
 };
 
-export const useGetProducts = (branchName, brand, pageNumber = 1) => {
+export const useGetProducts = (branchName, brand) => {
   const axiosPrivate = useAxiosPrivate();
 
-  const getProductsRequest = async () => {
+  const getProductsRequest = async ({ pageParam = 1 }) => {
     try {
       const params = new URLSearchParams();
       params.append("branch", branchName);
-      params.append("page", pageNumber); // Append the page number
+      params.append("page", pageParam); // Use pageParam for pagination
 
       if (brand) {
         params.append("brand", brand);
@@ -51,22 +51,39 @@ export const useGetProducts = (branchName, brand, pageNumber = 1) => {
 
   const {
     data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading: isProductsLoading,
-    isFetching,
     error,
-  } = useQuery(
-    ["products", branchName, brand, pageNumber], // Include page number in cache key
+  } = useInfiniteQuery(
+    ["products", branchName, brand], // Include branchName and brand in cache key
     getProductsRequest,
     {
-      keepPreviousData: true, // Allows keeping previous data while fetching next page
+      getNextPageParam: (lastPage, allPages) => {
+        const totalPages = Math.ceil(
+          lastPage.metadata.totalDocuments / lastPage.metadata.limit
+        );
+        const nextPage = allPages.length + 1; // Determine next page number
+        return nextPage <= totalPages ? nextPage : undefined; // Return next page if it exists
+      },
       enabled: !!branchName, // Only fetch when branchName is available
+      keepPreviousData: true, // Keep previous data while fetching new data
     }
   );
 
-  const products = data?.products || [];
-  const metadata = data?.metadata || {};
+  const products = data?.pages.flatMap((page) => page.products) || []; // Flatten products from all pages
+  const metadata = data?.pages[0]?.metadata || {}; // Access metadata from the first page
 
-  return { products, metadata, isProductsLoading, isFetching, error };
+  return {
+    products,
+    metadata,
+    isProductsLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    error,
+  };
 };
 
 export const useGetBestSellers = (branchId) => {
