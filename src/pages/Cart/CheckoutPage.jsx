@@ -40,11 +40,15 @@ const CheckoutPage = () => {
     const hasAddress = deliveryInfo.address;
     const hasDeliverySlot = deliveryInfo.deliverySlot;
 
-    if (deliveryMethod === "pickup") {
+    if (deliveryMethod === "pick-up") {
       // If method is pickup, no need for address and delivery slot
       if (Object.keys(paymentInfo).length === 0) {
         navigate("/payment");
         toast.error("Fill in Payment Details First");
+      }
+      if (!hasDeliverySlot) {
+        navigate("/address");
+        toast.error("Fill in Delivery Details First");
       }
     } else {
       // For other methods, check for address and delivery slot
@@ -292,9 +296,6 @@ const CheckoutPage = () => {
             <h3 className="font-semibold text-lg mb-2">Order Summary</h3>
             <p className="text-gray-700">
               Total Quantity: {orderSummary.totalQuantity}
-            </p>
-            <p className="text-gray-700">
-              Original Amount: Ksh {orderSummary.originalAmount}
             </p>
             <p className="text-gray-700">
               Savings: Ksh {orderSummary.totalSavings}

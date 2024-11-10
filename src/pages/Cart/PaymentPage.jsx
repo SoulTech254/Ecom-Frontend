@@ -35,14 +35,15 @@ const PaymentPage = () => {
     }
 
     const deliveryMethod = deliveryInfo.method;
+    console.log(deliveryMethod);
     const hasAddress = deliveryInfo.address;
     const hasDeliverySlot = deliveryInfo.deliverySlot;
+    console.log(hasDeliverySlot);
 
-    if (deliveryMethod === "pickup") {
-      // If method is pickup, no need for address and delivery slot
-      if (Object.keys(paymentInfo).length === 0) {
-        navigate("/payment");
-        toast.error("Fill in Payment Details First");
+    if (deliveryMethod == "pick-up") {
+      if (!hasDeliverySlot) {
+        navigate("/address");
+        toast.error("Fill in Delivery Details First");
       }
     } else {
       // For other methods, check for address and delivery slot

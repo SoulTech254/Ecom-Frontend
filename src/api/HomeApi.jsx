@@ -2,14 +2,22 @@ import { useInfiniteQuery, useQuery } from "react-query";
 import axios from "./axios"; // Adjust the import path as necessary
 import { toast } from "sonner";
 
+// Generic error handler function
+const handleError = (error) => {
+  if (!error.response) {
+    return "Network error. Please check your internet connection.";
+  }
+  return error.response.data?.message || "An unexpected error occurred";
+};
+
 export const useGetBranches = () => {
   const getBranchesRequest = async () => {
     try {
       const response = await axios.get("/api/v1/branch/");
       return response.data;
     } catch (error) {
-      console.log(error.message);
-      throw new Error(error);
+      toast.error(handleError(error)); // Show error message
+      throw new Error(handleError(error));
     }
   };
 
@@ -42,10 +50,15 @@ export const useSearchProducts = (
       `Fetching products with query: ${query}, branchId: ${branchId}, sortBy: ${sortBy}, sortOrder: ${sortOrder}, page: ${pageParam}, limit: ${limit}`
     );
 
-    const response = await axios.get(
-      `/api/v1/search?${searchParams.toString()}`
-    );
-    return response.data;
+    try {
+      const response = await axios.get(
+        `/api/v1/search?${searchParams.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      toast.error(handleError(error)); // Show error message
+      throw new Error(handleError(error));
+    }
   };
 
   const {
@@ -70,6 +83,10 @@ export const useSearchProducts = (
 
   const products = data?.pages.flatMap((page) => page.products) || [];
   const metadata = data?.pages[0]?.metadata || {};
+
+  if (queryError) {
+    toast.error(handleError(queryError)); // Show error message
+  }
 
   return {
     products,
@@ -103,10 +120,15 @@ export const useGetCategoryProducts = (
       searchParams.append("query", searchQuery);
     }
 
-    const response = await axios.get(
-      `/api/v1/category?${searchParams.toString()}`
-    );
-    return response.data;
+    try {
+      const response = await axios.get(
+        `/api/v1/category?${searchParams.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      toast.error(handleError(error)); // Show error message
+      throw new Error(handleError(error));
+    }
   };
 
   const {
@@ -145,6 +167,10 @@ export const useGetCategoryProducts = (
       "An error occurred while fetching category products."
     : null;
 
+  if (queryError) {
+    toast.error(handleError(queryError)); // Show error message
+  }
+
   return {
     products,
     metadata,
@@ -164,6 +190,7 @@ export const useGetSubcategories = (categoryId) => {
       });
       return response.data;
     } catch (error) {
+      toast.error(handleError(error)); // Show error message
       console.error(error);
     }
   };

@@ -44,6 +44,7 @@ const AddressPage = () => {
   const [selectedSlot, setSelectedSlot] = useState(
     deliveryInfo.deliverySlot || null
   );
+  console.log(selectedSlot);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
@@ -99,6 +100,7 @@ const AddressPage = () => {
   };
 
   const handleSelectSlot = (slot) => {
+    console.log("Delivery Slot", slot);
     setSelectedSlot(slot);
   };
 

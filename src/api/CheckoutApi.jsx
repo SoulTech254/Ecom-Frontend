@@ -2,47 +2,28 @@ import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { useMutation, useQuery } from "react-query";
 import { toast } from "sonner";
 
+// Generic error handler function
 const handleError = (error) => {
-  if (error.response) {
-    const statusCode = error.response.status;
-    const message = error.response.data?.message || "An error occurred";
-
-    switch (statusCode) {
-      case 400:
-        return "Please check your input and try again.";
-      case 401:
-        return "You are not authorized. Please log in.";
-      case 403:
-        return "FORBIDDEN. You don't have permission to perform this action.";
-      case 404:
-        return "Order not found.";
-      case 500:
-      default:
-        return "Something went wrong on our end. Please try again later.";
-    }
+  if (!error.response) {
+    return "Network error. Please check your internet connection.";
   }
-  return "Network error. Please check your internet connection.";
+
+  // Handle server response errors and return specific message
+  return error.response.data?.message || "An unexpected error occurred";
 };
 
 export const useGetOrderSummary = () => {
   const axiosPrivate = useAxiosPrivate();
 
   const getOrderSummary = async (data) => {
-    try {
-      const response = await axiosPrivate.post(
-        `/api/v1/checkout/initiate`,
-        data
-      );
-      return response.data;
-    } catch (error) {
-      throw new Error(handleError(error));
-    }
+    const response = await axiosPrivate.post(`/api/v1/checkout/initiate`, data);
+    return response.data;
   };
 
   const { mutateAsync: getOrderSummaryData, isLoading: isLoadingOrderSummary } =
     useMutation(getOrderSummary, {
       onError: (error) => {
-        toast.error(handleError(error));
+        toast.error(handleError(error)); // Direct error message
       },
     });
 
@@ -53,18 +34,14 @@ export const usePlaceOrder = () => {
   const axiosPrivate = useAxiosPrivate();
 
   const placeOrderRequest = async (data) => {
-    try {
-      const response = await axiosPrivate.post(`/api/v1/payment/mpesa`, data);
-      return response.data;
-    } catch (error) {
-      throw new Error(handleError(error));
-    }
+    const response = await axiosPrivate.post(`/api/v1/payment/mpesa`, data);
+    return response.data;
   };
 
   const { mutateAsync: placeOrder, isLoading: isLoadingPlaceOrder } =
     useMutation(placeOrderRequest, {
       onError: (error) => {
-        toast.error(handleError(error));
+        toast.error(handleError(error)); // Direct error message
       },
     });
 
@@ -75,14 +52,10 @@ export const useCheckOrder = (orderId) => {
   const axiosPrivate = useAxiosPrivate();
 
   const checkOrderRequest = async () => {
-    try {
-      const response = await axiosPrivate.get(
-        `/api/v1/checkout/payment/mpesa/processing/${orderId}`
-      );
-      return response.data;
-    } catch (error) {
-      throw new Error(handleError(error));
-    }
+    const response = await axiosPrivate.get(
+      `/api/v1/checkout/payment/mpesa/processing/${orderId}`
+    );
+    return response.data;
   };
 
   const {
@@ -96,7 +69,7 @@ export const useCheckOrder = (orderId) => {
   });
 
   if (error) {
-    toast.error(handleError(error));
+    toast.error(handleError(error)); // Direct error message
   }
 
   return { orderStatus, isLoadingOrderStatus, refetch };

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASEURL = "https://ecom-backend-qdwv.onrender.com";
+const BASEURL = "https://ecom-frontend-7ymd.onrender.com"; 
 
 export default axios.create({
   baseURL: BASEURL,

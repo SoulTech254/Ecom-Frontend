@@ -21,21 +21,17 @@ const saveCartToLocalStorage = (products) => {
 
 // Error handling function
 const handleError = (error) => {
-  if (error.response) {
-    const statusCode = error.response.status;
-    switch (statusCode) {
-      case 400:
-        return "Invalid request. Please check your input.";
-      case 401:
-        return "Session has expired. Please login again.";
-      case 404:
-        return "Requested resource not found.";
-      case 500:
-      default:
-        return "Something went wrong on our end. Please try again later.";
-    }
+  // Check if error is a network error
+  if (!error.response) {
+    return "Network error. Please check your internet connection.";
   }
-  return "Network error. Please check your internet connection.";
+
+  // Handle server response errors
+  if (error.response && error.response.data) {
+    return error.response.data.message || "An unexpected error occurred";
+  }
+
+  return "An unexpected error occurred";
 };
 
 // Async thunk for adding product to cart (authenticated users)

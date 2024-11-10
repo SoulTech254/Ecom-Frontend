@@ -3,28 +3,15 @@ import { useInfiniteQuery, useMutation, useQuery } from "react-query";
 import axios from "./axios";
 import { toast } from "sonner"; // Import the toast library
 
+// Centralized error handling function for consistent error messages
 export const handleError = (error) => {
-  if (error.response) {
-    const statusCode = error.response.status;
-    const message = error.response.data?.message || "An error occurred";
-
-    switch (statusCode) {
-      case 400:
-        return "Invalid request. Please check your input.";
-      case 401:
-        return "Session has Expired. Please Login Again.";
-      case 403:
-        return "FORBIDDEN. You don't have permission to perform this action.";
-      case 404:
-        return "Requested resource not found.";
-      case 500:
-      default:
-        return "Something went wrong on our end. Please try again later.";
-    }
+  if (error.response && error.response.data) {
+    return error.response.data.message || "An error occurred"; // Extract error message from the response
   }
-  return "Network error. Please check your internet connection.";
+  return "Network error. Please check your internet connection."; // Return a generic message for network issues
 };
 
+// Fetch all products with pagination and optional brand filtering
 export const useGetProducts = (branchName, brand) => {
   const axiosPrivate = useAxiosPrivate();
 
@@ -44,8 +31,8 @@ export const useGetProducts = (branchName, brand) => {
       return response.data;
     } catch (error) {
       const errorMessage = handleError(error);
-      toast.error(errorMessage); // Display toast message
-      throw new Error(errorMessage);
+      toast.error(errorMessage); // Display toast message for error
+      throw new Error(errorMessage); // Rethrow the error with the message
     }
   };
 
@@ -86,6 +73,7 @@ export const useGetProducts = (branchName, brand) => {
   };
 };
 
+// Fetch best sellers for a specific branch
 export const useGetBestSellers = (branchId) => {
   const getBestSellersRequest = async () => {
     try {
@@ -93,8 +81,8 @@ export const useGetBestSellers = (branchId) => {
       return response.data;
     } catch (error) {
       const errorMessage = handleError(error);
-      toast.error(errorMessage); // Display toast message
-      throw new Error(errorMessage);
+      toast.error(errorMessage); // Display toast message for error
+      throw new Error(errorMessage); // Rethrow the error with the message
     }
   };
 
@@ -104,7 +92,7 @@ export const useGetBestSellers = (branchId) => {
     {
       onError: (error) => {
         const errorMessage = handleError(error);
-        toast.error(errorMessage); // Display toast message
+        toast.error(errorMessage); // Display toast message for error
       },
     }
   );
@@ -112,6 +100,7 @@ export const useGetBestSellers = (branchId) => {
   return { bestSellers, isLoading };
 };
 
+// Fetch details of a single product
 export const useGetAProduct = (id, branchName) => {
   const getProductRequest = async () => {
     try {
@@ -121,8 +110,8 @@ export const useGetAProduct = (id, branchName) => {
       return response.data;
     } catch (error) {
       const errorMessage = handleError(error);
-      toast.error(errorMessage); // Display toast message
-      throw new Error(errorMessage);
+      toast.error(errorMessage); // Display toast message for error
+      throw new Error(errorMessage); // Rethrow the error with the message
     }
   };
 
@@ -134,6 +123,7 @@ export const useGetAProduct = (id, branchName) => {
   return { product, isProductLoading };
 };
 
+// Fetch user's cart information
 export const useGetCart = (id) => {
   const axiosPrivate = useAxiosPrivate();
   const getCartRequest = async () => {
@@ -142,8 +132,8 @@ export const useGetCart = (id) => {
       return response.data;
     } catch (error) {
       const errorMessage = handleError(error);
-      toast.error(errorMessage); // Display toast message
-      throw new Error(errorMessage);
+      toast.error(errorMessage); // Display toast message for error
+      throw new Error(errorMessage); // Rethrow the error with the message
     }
   };
 
@@ -155,6 +145,7 @@ export const useGetCart = (id) => {
   return { cart, isCartLoading };
 };
 
+// Update product quantity in the user's cart
 export const useUpdateCart = () => {
   const axiosPrivate = useAxiosPrivate();
   const updateCartRequest = async (id, productId, quantity) => {
@@ -166,8 +157,8 @@ export const useUpdateCart = () => {
       return response.data;
     } catch (error) {
       const errorMessage = handleError(error);
-      toast.error(errorMessage); // Display toast message
-      throw new Error(errorMessage);
+      toast.error(errorMessage); // Display toast message for error
+      throw new Error(errorMessage); // Rethrow the error with the message
     }
   };
 
@@ -177,6 +168,7 @@ export const useUpdateCart = () => {
   return { updateCart, isCartLoading };
 };
 
+// Remove a product from the user's cart
 export const useDeleteCartProduct = () => {
   const axiosPrivate = useAxiosPrivate();
   const deleteProductRequest = async (id, productId) => {
@@ -187,8 +179,8 @@ export const useDeleteCartProduct = () => {
       return response.data;
     } catch (error) {
       const errorMessage = handleError(error);
-      toast.error(errorMessage); // Display toast message
-      throw new Error(errorMessage);
+      toast.error(errorMessage); // Display toast message for error
+      throw new Error(errorMessage); // Rethrow the error with the message
     }
   };
 

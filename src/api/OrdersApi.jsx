@@ -1,27 +1,14 @@
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
-import { useMutation, useQuery } from "react-query";
+import { useQuery } from "react-query";
 import { toast } from "sonner";
 
+// Centralized error handling function for consistent error messages
 const handleError = (error) => {
-  if (error.response) {
-    const statusCode = error.response.status;
-    const message = error.response.data?.message || "An error occurred";
-
-    switch (statusCode) {
-      case 400:
-        return "Invalid request. Please check your input.";
-      case 404:
-        return "No orders found for this user.";
-      case 401:
-        return "Session has Expired. Please Login Again.";
-      case 403:
-        return "FORBIDDEN. You don't have permission to perform this action.";
-      case 500:
-      default:
-        return "Something went wrong on our end. Please try again later.";
-    }
+  if (error.response && error.response.data) {
+    // If there is a response from the server
+    return error.response.data.message || "An error occurred";
   }
-  return "Network error. Please check your internet connection.";
+  return "Network error. Please check your internet connection."; // Generic message if no response
 };
 
 export const useGetOrders = (userId, method) => {
@@ -32,11 +19,11 @@ export const useGetOrders = (userId, method) => {
       const response = await axiosPrivate.get(`/api/v1/orders/user/orders`, {
         params: { userId, method },
       });
-      return response.data;
+      return response.data; // Return data from response directly
     } catch (error) {
-      const errorMessage = handleError(error);
-      toast.error(errorMessage); // Display toast with the error message
-      throw new Error(errorMessage);
+      const errorMessage = handleError(error); // Extract error message
+      toast.error(errorMessage); // Display error message as a toast
+      throw new Error(errorMessage); // Rethrow the error with the message
     }
   };
 

@@ -30,8 +30,9 @@ const ProductPage = () => {
   const { branches: fetchedBranches, isLoadingBranches } = useGetBranches();
   const [branches, setBranches] = useState([]);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-  const {products:pro} = useSelector((state)=>state.cart)
-  const productQuantity = pro.filter((item) => item.product._id === id)[0]?.quantity || 0;
+  const { products: pro } = useSelector((state) => state.cart);
+  const productQuantity =
+    pro.filter((item) => item.product._id === id)[0]?.quantity || 0;
   // Fetch branches
   useEffect(() => {
     if (!isLoadingBranches) {
@@ -102,7 +103,6 @@ const ProductPage = () => {
           path: `/category/${cat.name}`,
         })),
         { name: category.name, path: `/category/${category.name}` },
-        { name: productName, path: "#" },
       ]
     : [];
 
@@ -184,10 +184,10 @@ const ProductPage = () => {
       </Popup>
 
       {/* Breadcrumbs */}
-      <div className="py-4">
+      <div className="py-2">
         {breadcrumbs.length > 0 && (
           <nav aria-label="breadcrumb">
-            <ol className="flex flex-wrap space-x-2 text-sm md:text-base text-gray-500">
+            <ol className="flex flex-wrap space-x-0.5 text-sm md:text-sm text-gray-500">
               {breadcrumbs.map((crumb, index) => (
                 <li key={index} className="flex items-center">
                   {index < breadcrumbs.length - 1 ? (
@@ -195,7 +195,7 @@ const ProductPage = () => {
                       <Link to={crumb.path} className="hover:text-primary">
                         {crumb.name}
                       </Link>
-                      <span className="mx-2">/</span>
+                      <span className="mx-0.5">/</span>
                     </>
                   ) : (
                     <span className="text-primary">{crumb.name}</span>

@@ -4,7 +4,7 @@ import { Instagram, Facebook, X, Youtube } from "lucide-react";
 
 export default function Footer() {
   return (
-    <div className="bg-primary w-full md:p-8 p-4 flex flex-col justify-start md:flex-row md:gap-24 gap-4 mt-32 text-white">
+    <div className="bg-primary w-full md:p-8 p-4 flex flex-col justify-start md:flex-row md:gap-24 gap-4 mt-4 text-white">
       <div className="w-full md:w-1/5 flex flex-col text-white">
         <img src={walmartLogo} alt="Walmart Logo" className="w-fit h-fit" />
         <h3 className="text-sm capitalize">stay in touch with us</h3>

@@ -3,21 +3,28 @@ import { toast } from "sonner";
 import axios from "./axios"; // Adjust the import path as necessary
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 
+// Generic error handler function
+const handleError = (error) => {
+  // Check if error is a network error
+  if (!error.response) {
+    return "Network error. Please check your internet connection.";
+  }
+
+  // Handle server response errors
+  if (error.response && error.response.data) {
+    return error.response.data.message || "An unexpected error occurred";
+  }
+
+  return "An unexpected error occurred";
+};
+
 export const useLogin = () => {
   const loginRequest = async (credentials) => {
     try {
-      const response = await axios.post(
-        "/api/v1/auth/sign-in",
-        credentials
-      );
+      const response = await axios.post("/api/v1/auth/sign-in", credentials);
       return response.data; // Directly return the data
     } catch (error) {
-      // Rethrow the error with the relevant information
-      if (error.response && error.response.data) {
-        throw new Error(error.response.data.message);
-      } else {
-        throw new Error("An unexpected error occurred");
-      }
+      throw new Error(handleError(error));
     }
   };
 
@@ -45,12 +52,7 @@ export const useVerifyRegisteredUser = () => {
       );
       return response.data; // Directly return the data
     } catch (error) {
-      // Rethrow the error with the relevant information
-      if (error.response && error.response.data) {
-        throw new Error(error.response.data.message);
-      } else {
-        throw new Error("An unexpected error occurred");
-      }
+      throw new Error(handleError(error));
     }
   };
 
@@ -66,6 +68,7 @@ export const useVerifyRegisteredUser = () => {
 
   return { verifyRegisteredEmail, isVerifying };
 };
+
 export const useVerification = () => {
   const verificationRequest = async (credentials) => {
     try {
@@ -76,12 +79,7 @@ export const useVerification = () => {
       );
       return response.data; // Directly return the data
     } catch (error) {
-      // Rethrow the error with the relevant information
-      if (error.response && error.response.data) {
-        throw new Error(error.response.data.message);
-      } else {
-        throw new Error("An unexpected error occurred");
-      }
+      throw new Error(handleError(error));
     }
   };
 
@@ -109,12 +107,7 @@ export const useCheckEmail = () => {
       );
       return response.data; // Directly return the data
     } catch (error) {
-      // Rethrow the error with the relevant information
-      if (error.response && error.response.data) {
-        throw new Error(error.response.data.message);
-      } else {
-        throw new Error("An unexpected error occurred");
-      }
+      throw new Error(handleError(error));
     }
   };
 
@@ -135,11 +128,15 @@ export const useCheckEmail = () => {
 
 export const useUpdatePassword = () => {
   const updatePasswordRequest = async (userFormData) => {
-    const response = await axios.put(
-      `/api/v1/auth/update-password`,
-      userFormData
-    );
-    return response.data;
+    try {
+      const response = await axios.put(
+        "/api/v1/auth/update-password",
+        userFormData
+      );
+      return response.data; // Directly return the data
+    } catch (error) {
+      throw new Error(handleError(error));
+    }
   };
 
   const { mutateAsync: updatePassword, isLoading: isUpdatingPassword } =
@@ -161,11 +158,7 @@ export const useResendOtp = () => {
       const response = await axios.post("/api/v1/auth/resend-otp", phoneNumber);
       return response.data; // Directly return the data
     } catch (error) {
-      if (error.response && error.response.data) {
-        throw new Error(error.response.data.message);
-      } else {
-        throw new Error("An unexpected error occurred");
-      }
+      throw new Error(handleError(error));
     }
   };
 
@@ -187,27 +180,25 @@ export const useResendOtp = () => {
 export const useLogOut = () => {
   const axiosPrivate = useAxiosPrivate();
   const logoutRequest = async () => {
-    console.log("Logging out...");
-    const response = await axiosPrivate.post(
-      `/api/v1/auth/logout`,
-      {},
-      {
-        withCredentials: true,
-      }
-    );
-    console.log("Logout response:", response.data);
-    return response.data;
+    try {
+      const response = await axiosPrivate.post(
+        "/api/v1/auth/logout",
+        {},
+        { withCredentials: true }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(handleError(error));
+    }
   };
 
   const { mutateAsync: logOut, isLoading: isLoggingOut } = useMutation(
     logoutRequest,
     {
       onSuccess: () => {
-        console.log("Logout successful");
         toast.success("Logout Successful");
       },
       onError: (error) => {
-        console.log("Logout error:", error);
         toast.error(error.message);
       },
     }
@@ -219,8 +210,12 @@ export const useLogOut = () => {
 // Example of using Axios with useQuery
 export const useGetBranches = () => {
   const getBranchesRequest = async () => {
-    const response = await axios.get(`/api/v1/branch/`);
-    return response.data;
+    try {
+      const response = await axios.get("/api/v1/branch/");
+      return response.data;
+    } catch (error) {
+      throw new Error(handleError(error));
+    }
   };
 
   const { data: branches, isLoading: isLoadingBranches } = useQuery(
@@ -230,5 +225,3 @@ export const useGetBranches = () => {
 
   return { branches, isLoadingBranches };
 };
-
-// Add additional hooks as needed...
