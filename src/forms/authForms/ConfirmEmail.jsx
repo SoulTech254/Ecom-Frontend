@@ -24,7 +24,7 @@ const ConfirmEmailForm = ({ onSave, isLoading, onButtonClick }) => {
         </button>
       </div>
       <div className="flex flex-col gap-3">
-        <img src={walmartLogo} alt="" className="w-fit h-fit" />
+        <img src={walmartLogo} alt="" className="w-28" />
         <h1 className="text-3xl">Forgot Password</h1>
         <p>Enter your email address to reset your password</p>
 

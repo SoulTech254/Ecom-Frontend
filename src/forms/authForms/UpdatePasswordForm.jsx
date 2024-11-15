@@ -38,7 +38,7 @@ const UpdatePasswordForm = ({ onSave, isLoading, onButtonClick }) => {
         </button>
       </div>
       <div className="flex flex-col gap-3">
-        <img src={walmartLogo} alt="" className="w-fit h-fit " />
+        <img src={walmartLogo} alt="" className="w-28   h-fit " />
         <h1 className="text-3xl">Update Password</h1>
         <form
           className="flex flex-col gap-4 mt-2"

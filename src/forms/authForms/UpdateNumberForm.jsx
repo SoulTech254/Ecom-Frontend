@@ -33,7 +33,7 @@ const ChangeEmailForm = ({
         </button>
       </div>
       <div className="flex flex-col gap-3">
-        <img src={walmartLogo} alt="" className="w-fit h-fit " />
+        <img src={walmartLogo} alt="" className="w-28 h-fit " />
         <h1 className="text-3xl">Change Email</h1>
         <p>Update your Email</p>
         <form

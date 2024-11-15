@@ -27,7 +27,7 @@ const LoginForm = ({ onSave, isLoading, onButtonClick }) => {
       <div className=" flex flex-col gap-3 ">
         <Link to="/"> 
           <AspectRatio ratio={16 / 3} className="flex items-center justify-center">
-            <img src={walmartLogo} alt="" className="w-fit h-fit " />
+            <img src={walmartLogo} alt="" className="w-28 h-fit " />
           </AspectRatio>
         </Link>
         <h1 className=" text-3xl">Login to your account</h1>

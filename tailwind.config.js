@@ -37,7 +37,7 @@ module.exports = {
       },
       colors: {
         primary: "#2B5311",
-        secondary: "#DCD087",
+        secondary: "#D66D2995",
         background: "#d8d9d8",
       },
       fontFamily: {

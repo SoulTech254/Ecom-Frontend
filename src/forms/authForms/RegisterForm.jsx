@@ -73,7 +73,7 @@ const RegisterForm = ({ onSave, isLoading }) => {
       <div className=" flex flex-col gap-3 ">
         <Link to="/">
           <AspectRatio ratio={16 / 3} className="flex items-center justify-center">
-            <img src={walmartLogo} alt="" className="w-fit h-fit " />
+            <img src={walmartLogo} alt="" className="w-28 h-fit " />
           </AspectRatio>
         </Link>
         <h1 className=" text-3xl">Create new account</h1>
@@ -242,7 +242,7 @@ const RegisterForm = ({ onSave, isLoading }) => {
               name="toReceiveOffers"
             />
             <span className="ml-2">
-              I would like to receive news and offers from Chandarana Foodplus
+              I would like to receive news and offers from Jachar Green Investments
             </span>
           </div>
           <div className="flex gap-2">

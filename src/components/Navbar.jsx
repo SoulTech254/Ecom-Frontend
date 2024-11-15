@@ -65,7 +65,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex-shrink-0">
             <img
-              className="w-20 sm:w-24 md:w-32 lg:w-40 xl:w-48 h-auto"
+              className="w-16 h-auto"
               src={Logo}
               alt="quickmart Logo"
             />
