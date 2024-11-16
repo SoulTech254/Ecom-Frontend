@@ -20,7 +20,7 @@ const RootApp = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsAppReady(true);
-    }, 2000); // Set the delay in milliseconds (e.g., 2000 = 2 seconds)
+    }, 3000); // Set the delay in milliseconds (e.g., 2000 = 2 seconds)
 
     return () => clearTimeout(timer); // Cleanup the timer on component unmount
   }, []);
